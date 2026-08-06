@@ -51,6 +51,17 @@ export type CreateAulaResponse =
       data: { errors: Record<string, string> };
     };
 
+export type UpdateAulaResponse =
+  | { status: typeof HTTP_CODES_ENUM.OK; data: Aula }
+  | {
+      status: typeof HTTP_CODES_ENUM.CONFLICT;
+      data: { message: string; errors?: Record<string, string> };
+    }
+  | {
+      status: typeof HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY;
+      data: { errors: Record<string, string> };
+    };
+
 export function useGetAulasService() {
   const fetchBase = useFetch();
 
@@ -92,6 +103,56 @@ export function useCreateAulaService() {
         (response) =>
           wrapperFetchJsonResponse(response) as Promise<CreateAulaResponse>
       );
+    },
+    [fetchBase]
+  );
+}
+
+export function useGetAulaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/aulas/${id}`, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Aula>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useUpdateAulaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      id: string,
+      data: Partial<CreateAulaRequest>,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/aulas/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(
+        (response) =>
+          wrapperFetchJsonResponse(response) as Promise<UpdateAulaResponse>
+      );
+    },
+    [fetchBase]
+  );
+}
+
+export function useDeleteAulaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/aulas/${id}`, {
+        method: "DELETE",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<void>);
     },
     [fetchBase]
   );

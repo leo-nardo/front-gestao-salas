@@ -11,6 +11,27 @@ export type Turma = {
   curso: { id: string; nome: string };
 };
 
+export type CreateTurmaRequest = {
+  curso: { id: string };
+  codigo: string;
+  periodo: string;
+};
+
+export function useCreateTurmaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: CreateTurmaRequest, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/turmas`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Turma>);
+    },
+    [fetchBase]
+  );
+}
+
 export function useGetTurmasService() {
   const fetchBase = useFetch();
 

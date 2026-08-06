@@ -58,3 +58,36 @@ export function useCreateEquipamentoService() {
     [fetchBase]
   );
 }
+
+export function useGetEquipamentoService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/equipamentos/${id}`, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Equipamento>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useUpdateEquipamentoService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      id: string,
+      data: Partial<CreateEquipamentoRequest>,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/equipamentos/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Equipamento>);
+    },
+    [fetchBase]
+  );
+}
