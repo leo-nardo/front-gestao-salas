@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
+import Edit from "lucide-react/dist/esm/icons/edit";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Package from "lucide-react/dist/esm/icons/package";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
@@ -45,30 +46,44 @@ export default function PageContent() {
             {equipamentos.map((eq) => (
               <div
                 key={eq.id}
-                className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm"
+                className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="bg-[#e7edf8] p-2 rounded-lg text-[#3a4a99]">
-                    <Package className="w-5 h-5" />
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="bg-[#e7edf8] p-2 rounded-lg text-[#3a4a99]">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-[#6f767b] border-[#dddbd3]"
+                    >
+                      {eq.tipo}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="text-[#6f767b] border-[#dddbd3]"
-                  >
-                    {eq.tipo}
-                  </Badge>
+                  <h3 className="text-lg font-semibold text-[#1c1f21] mb-1">
+                    {eq.nome}
+                  </h3>
+                  <p className="text-sm text-[#6f767b] mb-4">
+                    {eq.unidade?.nome}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-[#1c1f21] mb-1">
-                  {eq.nome}
-                </h3>
-                <p className="text-sm text-[#6f767b] mb-4">
-                  {eq.unidade?.nome}
-                </p>
-                <div className="flex items-center justify-between pt-4 border-t border-[#f0efea]">
-                  <span className="text-sm text-[#6f767b]">Disponível</span>
-                  <span className="font-ibm-plex-mono font-semibold text-[#1c1f21]">
-                    {eq.quantidadeDisponivel} / {eq.quantidadeTotal}
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between pt-4 border-t border-[#f0efea] mb-4">
+                    <span className="text-sm text-[#6f767b]">Disponível</span>
+                    <span className="font-ibm-plex-mono font-semibold text-[#1c1f21]">
+                      {eq.quantidadeDisponivel} / {eq.quantidadeTotal}
+                    </span>
+                  </div>
+                  <Link href={`/admin/equipamentos/${eq.id}/editar`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-8 border-[#dddbd3] text-[#1c1f21]"
+                    >
+                      <Edit className="w-3.5 h-3.5 mr-1" />
+                      Editar
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ))}

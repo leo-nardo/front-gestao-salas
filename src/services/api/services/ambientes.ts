@@ -3,6 +3,7 @@ import useFetch from "../use-fetch";
 import { API_URL } from "../config";
 import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
 import { Unidade } from "./unidades";
+import { RequestConfigType } from "./types/request-config";
 
 export type Ambiente = {
   id: string;
@@ -49,6 +50,20 @@ export function useGetAmbientesService() {
       );
     },
     [fetch]
+  );
+}
+
+export function useGetAmbienteService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/ambientes/${id}`, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Ambiente>);
+    },
+    [fetchBase]
   );
 }
 

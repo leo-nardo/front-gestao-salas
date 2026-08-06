@@ -2,6 +2,7 @@ import Edit from "lucide-react/dist/esm/icons/edit";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Users from "lucide-react/dist/esm/icons/users";
+import Link from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Ambiente } from "@/services/api/services/ambientes";
@@ -97,14 +98,19 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
       )}
 
       <div className="flex items-center gap-2 pt-4 border-t border-[#f0efea] mt-auto">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 h-9 border-[#dddbd3] text-[#1c1f21]"
+        <Link
+          href={`/admin/ambientes/${ambiente.id}/editar`}
+          className="flex-1"
         >
-          <Edit className="w-3.5 h-3.5 mr-2" />
-          Editar
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-9 border-[#dddbd3] text-[#1c1f21]"
+          >
+            <Edit className="w-3.5 h-3.5 mr-2" />
+            Editar
+          </Button>
+        </Link>
         <Button
           variant="outline"
           size="sm"

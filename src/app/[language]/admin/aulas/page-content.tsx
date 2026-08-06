@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "@/components/link";
 import Search from "lucide-react/dist/esm/icons/search";
 import Plus from "lucide-react/dist/esm/icons/plus";
+import Edit from "lucide-react/dist/esm/icons/edit";
 import { useGetAulasService, Aula } from "@/services/api/services/aulas";
 import { useGetCursosService } from "@/services/api/services/cursos";
 import { useQuery } from "@tanstack/react-query";
@@ -141,13 +142,16 @@ export default function AulasPageContent() {
               <TableHead className="font-semibold text-[#1c1f21]">
                 Status
               </TableHead>
+              <TableHead className="font-semibold text-[#1c1f21]">
+                Ações
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center py-8 text-[#6f767b]"
                 >
                   Carregando aulas...
@@ -156,7 +160,7 @@ export default function AulasPageContent() {
             ) : filteredAulas.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center py-8 text-[#6f767b]"
                 >
                   Nenhuma aula encontrada.
@@ -198,6 +202,18 @@ export default function AulasPageContent() {
                     </TableCell>
                     <TableCell>
                       <StatusBadge status="confirmada" />
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/admin/aulas/${aula.id}/editar`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-[#1a4f8a] hover:text-[#123c6e] px-2"
+                        >
+                          <Edit className="w-3.5 h-3.5 mr-1" />
+                          Editar
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 );
