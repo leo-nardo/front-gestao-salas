@@ -26,3 +26,23 @@ export function useGetDisciplinasService() {
     [fetchBase]
   );
 }
+
+export type CreateDisciplinaRequest = {
+  nome: string;
+  curso: { id: string };
+};
+
+export function useCreateDisciplinaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: CreateDisciplinaRequest, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/disciplinas`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Disciplina>);
+    },
+    [fetchBase]
+  );
+}

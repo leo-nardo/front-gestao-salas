@@ -8,8 +8,8 @@ import { useRouter, useParams } from "next/navigation";
 import { useAuthLoginService } from "@/services/api/services/auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import useAuthTokens from "@/services/auth/use-auth-tokens";
-import { RoleEnum } from "@/services/api/types/role";
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
+import { getRoleRedirectPath } from "@/services/auth/role-redirect";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,19 +24,6 @@ const schema = yup.object().shape({
   email: yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
   password: yup.string().required("Senha é obrigatória"),
 });
-
-function getRoleRedirectPath(roleId: number, language: string): string {
-  switch (roleId) {
-    case RoleEnum.ADMIN:
-      return `/${language}/admin`;
-    case RoleEnum.ALUNO:
-      return `/${language}/aluno/grade`;
-    case RoleEnum.PROFESSOR:
-      return `/${language}/professor`;
-    default:
-      return `/${language}`;
-  }
-}
 
 function LoginPageContent() {
   const router = useRouter();

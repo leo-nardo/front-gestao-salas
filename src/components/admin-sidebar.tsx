@@ -5,16 +5,12 @@ import { usePathname } from "next/navigation";
 import useAuth from "@/services/auth/use-auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
 import DoorOpen from "lucide-react/dist/esm/icons/door-open";
 import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import Users from "lucide-react/dist/esm/icons/users";
-import Upload from "lucide-react/dist/esm/icons/upload";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
+import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,12 +26,6 @@ const navGroups = [
         icon: LayoutDashboard,
         color: "bg-blue-400",
         exact: true,
-      },
-      {
-        name: "Ensalamento",
-        href: "/admin/ensalamento",
-        icon: CalendarDays,
-        color: "bg-indigo-400",
       },
       {
         name: "Ambientes",
@@ -62,50 +52,16 @@ const navGroups = [
         color: "bg-purple-400",
       },
       {
-        name: "Importar planilha",
-        href: "/admin/importar",
-        icon: Upload,
-        color: "bg-slate-400",
-      },
-    ],
-  },
-  {
-    title: "OPERAÇÃO",
-    items: [
-      {
-        name: "Limpeza",
-        href: "/admin/limpeza",
-        icon: Sparkles,
-        color: "bg-sky-400",
+        name: "Reservas",
+        href: "/admin/reservas",
+        icon: CalendarClock,
+        color: "bg-indigo-400",
       },
       {
-        name: "Auxiliar de sala",
-        href: "/admin/auxiliar",
-        icon: Briefcase,
+        name: "Solicitações de troca",
+        href: "/admin/solicitacoes",
+        icon: ArrowLeftRight,
         color: "bg-orange-400",
-      },
-      {
-        name: "Técnico de laboratório",
-        href: "/admin/tecnico",
-        icon: FlaskConical,
-        color: "bg-fuchsia-400",
-      },
-    ],
-  },
-  {
-    title: "USUÁRIOS",
-    items: [
-      {
-        name: "Professor",
-        href: "/admin/professor",
-        icon: GraduationCap,
-        color: "bg-teal-400",
-      },
-      {
-        name: "Aluno",
-        href: "/admin/aluno",
-        icon: Users,
-        color: "bg-cyan-400",
       },
     ],
   },
