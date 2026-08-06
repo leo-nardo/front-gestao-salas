@@ -14,10 +14,9 @@ import { useGetCursosService } from "@/services/api/services/cursos";
 import { useGetDisciplinasService } from "@/services/api/services/disciplinas";
 import { useGetTurmasService } from "@/services/api/services/turmas";
 import { useGetAmbientesService } from "@/services/api/services/ambientes";
-import {
-  useCreateAulaService,
-  useCheckConflictService,
-} from "@/services/api/services/aulas";
+import { useGetUsersService } from "@/services/api/services/users";
+import { RoleEnum } from "@/services/api/types/role";
+import { useCreateAulaService, DiaSemana } from "@/services/api/services/aulas";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +36,7 @@ const schema = yup.object().shape({
   disciplinaId: yup.string().required("Disciplina é obrigatória"),
   professorId: yup.string().required("Professor é obrigatório"),
   turmaId: yup.string().required("Turma é obrigatória"),
-  diaSemana: yup.number().required("Dia da semana é obrigatório"),
+  diaSemana: yup.string().required("Dia da semana é obrigatório"),
   horarioInicio: yup.string().required("Horário de início é obrigatório"),
   horarioFim: yup.string().required("Horário de fim é obrigatório"),
   ambienteId: yup.string().required("Ambiente é obrigatório"),
@@ -52,12 +51,12 @@ const timeOptions = Array.from({ length: 31 }, (_, i) => {
 });
 
 const diasDaSemana = [
-  { value: 1, label: "Segunda-feira" },
-  { value: 2, label: "Terça-feira" },
-  { value: 3, label: "Quarta-feira" },
-  { value: 4, label: "Quinta-feira" },
-  { value: 5, label: "Sexta-feira" },
-  { value: 6, label: "Sábado" },
+  { value: "Segunda", label: "Segunda-feira" },
+  { value: "Terça", label: "Terça-feira" },
+  { value: "Quarta", label: "Quarta-feira" },
+  { value: "Quinta", label: "Quinta-feira" },
+  { value: "Sexta", label: "Sexta-feira" },
+  { value: "Sábado", label: "Sábado" },
 ];
 
 export default function NovaAulaPageContent() {
@@ -82,7 +81,7 @@ export default function NovaAulaPageContent() {
   const getDisciplinas = useGetDisciplinasService();
   const getTurmas = useGetTurmasService();
   const getAmbientes = useGetAmbientesService();
-  const checkConflict = useCheckConflictService();
+  const getUsers = useGetUsersService();
   const createAula = useCreateAulaService();
 
   const { data: cursosRes } = useQuery({
@@ -92,22 +91,24 @@ export default function NovaAulaPageContent() {
   const cursos = cursosRes?.status === HTTP_CODES_ENUM.OK ? cursosRes.data : [];
 
   const { data: disciplinasRes } = useQuery({
-    queryKey: ["disciplinas", watchAllFields.cursoId],
-    queryFn: () => getDisciplinas(watchAllFields.cursoId),
-    enabled: !!watchAllFields.cursoId,
+    queryKey: ["disciplinas"],
+    queryFn: () => getDisciplinas(),
   });
-  const disciplinas =
+  const allDisciplinas =
     disciplinasRes?.status === HTTP_CODES_ENUM.OK
       ? disciplinasRes.data.data
       : [];
+  const disciplinas = allDisciplinas.filter(
+    (d) => d.curso.id === watchAllFields.cursoId
+  );
 
   const { data: turmasRes } = useQuery({
-    queryKey: ["turmas", watchAllFields.disciplinaId],
-    queryFn: () => getTurmas(watchAllFields.disciplinaId),
-    enabled: !!watchAllFields.disciplinaId,
+    queryKey: ["turmas"],
+    queryFn: () => getTurmas(),
   });
-  const turmas =
+  const allTurmas =
     turmasRes?.status === HTTP_CODES_ENUM.OK ? turmasRes.data.data : [];
+  const turmas = allTurmas.filter((t) => t.curso.id === watchAllFields.cursoId);
 
   const { data: ambientesRes } = useQuery({
     queryKey: ["ambientes"],
@@ -117,87 +118,58 @@ export default function NovaAulaPageContent() {
   const ambientes =
     ambientesRes?.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : [];
 
-  // TODO: Replace with real API call for professors
-  const professores = [
-    { id: "1", nome: "Fábio B. Chaves" },
-    { id: "2", nome: "Ana Ribeiro" },
-    { id: "3", nome: "Carlos Mendes" },
-    { id: "4", nome: "Patrícia Lima" },
-  ];
+  const { data: professoresRes } = useQuery({
+    queryKey: ["professores"],
+    queryFn: () =>
+      getUsers({
+        page: 1,
+        limit: 50,
+        filters: { roles: [{ id: RoleEnum.PROFESSOR }] },
+      }),
+  });
+  const professores =
+    professoresRes?.status === HTTP_CODES_ENUM.OK
+      ? professoresRes.data.data
+      : [];
 
-  // Check for conflicts when required fields are filled
+  // A conflitagem real acontece no submit (backend retorna 409). Aqui só
+  // resetamos o aviso quando os campos relevantes mudam.
   useEffect(() => {
-    const checkAvailability = async () => {
-      const { ambienteId, diaSemana, horarioInicio, horarioFim } =
-        watchAllFields;
-
-      if (ambienteId && diaSemana && horarioInicio && horarioFim) {
-        setConflictStatus("checking");
-        try {
-          // TODO: Ensure the real API endpoint matches this
-          const res = await checkConflict({
-            disciplinaId: watchAllFields.disciplinaId || "temp",
-            professorId: watchAllFields.professorId || "temp",
-            turmaId: watchAllFields.turmaId || "temp",
-            ambienteId,
-            diaSemana,
-            horarioInicio,
-            horarioFim,
-          });
-
-          if (
-            (res.status === HTTP_CODES_ENUM.OK ||
-              res.status === HTTP_CODES_ENUM.CREATED) &&
-            res.data.conflict
-          ) {
-            setConflictStatus("conflict");
-            setConflictMessage(
-              res.data.message || "Conflito detectado neste horário e ambiente"
-            );
-          } else {
-            setConflictStatus("available");
-          }
-        } catch (error) {
-          // API likely not ready yet, just show available or a network error toast
-          console.error("Conflict check failed:", error);
-          // For demo purposes, we will assume available if API is missing
-          setConflictStatus("available");
-          toast.info(
-            "Endpoint de conflito indisponível, assumindo disponível."
-          );
-        }
-      } else {
-        setConflictStatus(null);
-      }
-    };
-
-    const timer = setTimeout(checkAvailability, 500);
-    return () => clearTimeout(timer);
+    setConflictStatus(null);
   }, [
     watchAllFields.ambienteId,
     watchAllFields.diaSemana,
     watchAllFields.horarioInicio,
     watchAllFields.horarioFim,
-    checkConflict,
-    watchAllFields.disciplinaId,
-    watchAllFields.professorId,
-    watchAllFields.turmaId,
   ]);
 
   const createMutation = useMutation({
-    mutationFn: (data: FormData) => createAula(data),
-    onSuccess: () => {
+    mutationFn: (data: FormData) =>
+      createAula({
+        turma: { id: data.turmaId },
+        disciplina: { id: data.disciplinaId },
+        professor: { id: data.professorId },
+        ambiente: { id: data.ambienteId },
+        diaSemana: data.diaSemana as DiaSemana,
+        horarioInicio: data.horarioInicio,
+        horarioFim: data.horarioFim,
+      }),
+    onSuccess: (res) => {
+      if (res.status === HTTP_CODES_ENUM.CONFLICT) {
+        setConflictStatus("conflict");
+        setConflictMessage(res.data.message);
+        toast.error(res.data.message);
+        return;
+      }
+      if (res.status !== HTTP_CODES_ENUM.CREATED) {
+        toast.error("Erro ao criar a aula. Tente novamente.");
+        return;
+      }
       toast.success("Aula criada com sucesso!");
       router.push(`/${language}/admin/aulas`);
     },
-    onError: (error: any) => {
-      if (error.status === 409) {
-        setConflictStatus("conflict");
-        setConflictMessage("Conflito detectado ao tentar salvar.");
-        toast.error("Não foi possível criar a aula devido a um conflito.");
-      } else {
-        toast.error("Erro ao criar a aula. Tente novamente.");
-      }
+    onError: () => {
+      toast.error("Erro ao criar a aula. Tente novamente.");
     },
   });
 
@@ -287,18 +259,14 @@ export default function NovaAulaPageContent() {
                 name="professorId"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!watchAllFields.disciplinaId}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
                       <SelectValue placeholder="Selecione o professor" />
                     </SelectTrigger>
                     <SelectContent>
                       {professores.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.nome}
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {p.firstName} {p.lastName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -321,7 +289,7 @@ export default function NovaAulaPageContent() {
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
-                    disabled={!watchAllFields.disciplinaId}
+                    disabled={!watchAllFields.cursoId}
                   >
                     <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
                       <SelectValue placeholder="Selecione a turma" />
@@ -353,16 +321,13 @@ export default function NovaAulaPageContent() {
                 name="diaSemana"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    value={field.value?.toString()}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
                       <SelectValue placeholder="Selecione o dia" />
                     </SelectTrigger>
                     <SelectContent>
                       {diasDaSemana.map((d) => (
-                        <SelectItem key={d.value} value={d.value.toString()}>
+                        <SelectItem key={d.value} value={d.value}>
                           {d.label}
                         </SelectItem>
                       ))}
@@ -444,9 +409,9 @@ export default function NovaAulaPageContent() {
                       <SelectValue placeholder="Selecione o ambiente" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ambientes.map((a: any) => (
+                      {ambientes.map((a) => (
                         <SelectItem key={a.id} value={a.id}>
-                          {a.nome} {a.bloco ? `- Bloco ${a.bloco}` : ""}
+                          {a.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>

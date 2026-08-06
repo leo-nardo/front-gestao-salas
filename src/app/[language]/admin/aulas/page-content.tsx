@@ -38,17 +38,6 @@ const courseColors: Record<
   "Eng. de Software": { text: "#5b53a6", bg: "#ecebf7", border: "#5b53a6" },
 };
 
-const diasSemana = [
-  "",
-  "Segunda",
-  "Terça",
-  "Quarta",
-  "Quinta",
-  "Sexta",
-  "Sábado",
-  "Domingo",
-];
-
 export default function AulasPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cursoFilter, setCursoFilter] = useState<string>("all");
@@ -199,19 +188,16 @@ export default function AulasPageContent() {
                       {aula.professor.firstName} {aula.professor.lastName}
                     </TableCell>
                     <TableCell>
-                      <div>{diasSemana[aula.diaSemana]}</div>
+                      <div>{aula.diaSemana}</div>
                       <div className="font-ibm-plex-mono text-sm text-[#6f767b]">
                         {aula.horarioInicio} - {aula.horarioFim}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>{aula.ambiente.nome}</div>
-                      <div className="text-xs text-[#6f767b]">
-                        {aula.ambiente.bloco} • {aula.ambiente.andar}
-                      </div>
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={aula.status} />
+                      <StatusBadge status="confirmada" />
                     </TableCell>
                   </TableRow>
                 );

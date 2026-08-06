@@ -1,14 +1,12 @@
 import React from "react";
-import { Aula } from "@/services/api/services/aulas";
+import { Aula, DiaSemana } from "@/services/api/services/aulas";
 
-const diasSemana = [
-  "",
+const diasSemana: DiaSemana[] = [
   "Segunda",
   "Terça",
   "Quarta",
   "Quinta",
   "Sexta",
-  "Sábado",
 ];
 
 const courseColors: Record<
@@ -28,7 +26,7 @@ type WeekScheduleGridProps = {
 
 export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 7); // 7:00 to 22:00
-  const days = [1, 2, 3, 4, 5]; // Mon to Fri
+  const days = diasSemana; // Segunda a Sexta
 
   const parseTime = (timeStr: string) => {
     const [h, m] = timeStr.split(":").map(Number);
@@ -46,7 +44,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
             key={day}
             className="p-3 text-center border-r last:border-r-0 border-[#e6e5e0] text-sm font-semibold text-[#1c1f21]"
           >
-            {diasSemana[day]}
+            {day}
           </div>
         ))}
       </div>
@@ -82,7 +80,8 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
           const duration = end - start;
           const top = (start - 7) * 60;
           const height = duration * 60;
-          const left = 16.666 + (aula.diaSemana - 1) * 16.666;
+          const dayIndex = days.indexOf(aula.diaSemana);
+          const left = 16.666 + dayIndex * 16.666;
           const courseColor = courseColors[aula.disciplina.curso.nome] || {
             text: "#1c1f21",
             bg: "#f0efea",

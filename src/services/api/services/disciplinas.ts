@@ -7,18 +7,15 @@ import { RequestConfigType } from "./types/request-config";
 export type Disciplina = {
   id: string;
   nome: string;
-  codigo: string;
-  cursoId: string;
+  curso: { id: string; nome: string };
 };
 
 export function useGetDisciplinasService() {
   const fetchBase = useFetch();
 
   return useCallback(
-    (cursoId?: string, requestConfig?: RequestConfigType) => {
-      const url = cursoId
-        ? `${API_URL}/v1/disciplinas?cursoId=${cursoId}`
-        : `${API_URL}/v1/disciplinas`;
+    (requestConfig?: RequestConfigType) => {
+      const url = `${API_URL}/disciplinas`;
       return fetchBase(url, {
         method: "GET",
         ...requestConfig,

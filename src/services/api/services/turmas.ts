@@ -7,17 +7,16 @@ import { RequestConfigType } from "./types/request-config";
 export type Turma = {
   id: string;
   codigo: string;
-  disciplinaId: string;
+  periodo: string;
+  curso: { id: string; nome: string };
 };
 
 export function useGetTurmasService() {
   const fetchBase = useFetch();
 
   return useCallback(
-    (disciplinaId?: string, requestConfig?: RequestConfigType) => {
-      const url = disciplinaId
-        ? `${API_URL}/v1/turmas?disciplinaId=${disciplinaId}`
-        : `${API_URL}/v1/turmas`;
+    (requestConfig?: RequestConfigType) => {
+      const url = `${API_URL}/v1/turmas`;
       return fetchBase(url, {
         method: "GET",
         ...requestConfig,
