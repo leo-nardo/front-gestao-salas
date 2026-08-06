@@ -77,14 +77,6 @@ export default function EditAulaPageContent({
   >(null);
   const [conflictMessage, setConflictMessage] = useState<string>("");
 
-  const { control, handleSubmit, reset } = useForm<FormData>({
-    resolver: yupResolver(schema) as never,
-    mode: "onChange",
-  });
-
-  const { errors, isValid } = useFormState({ control });
-  const watchAllFields = useWatch({ control });
-
   const getAula = useGetAulaService();
   const getCursos = useGetCursosService();
   const getDisciplinas = useGetDisciplinasService();
@@ -98,13 +90,20 @@ export default function EditAulaPageContent({
     queryFn: () => getAula(id),
   });
 
-  const { data: cursosRes } = useQuery({
+  const { control, handleSubmit, reset, trigger } = useForm<FormData>({
+    resolver: yupResolver(schema) as never,
+  });
+
+  const { errors, isValid } = useFormState({ control });
+  const watchAllFields = useWatch({ control });
+
+  const { data: cursosRes, isLoading: isCursosLoading } = useQuery({
     queryKey: ["cursos"],
     queryFn: () => getCursos(),
   });
   const cursos = cursosRes?.status === HTTP_CODES_ENUM.OK ? cursosRes.data : [];
 
-  const { data: disciplinasRes } = useQuery({
+  const { data: disciplinasRes, isLoading: isDisciplinasLoading } = useQuery({
     queryKey: ["disciplinas"],
     queryFn: () => getDisciplinas(),
   });
@@ -116,7 +115,7 @@ export default function EditAulaPageContent({
     (d) => d.curso.id === watchAllFields.cursoId
   );
 
-  const { data: turmasRes } = useQuery({
+  const { data: turmasRes, isLoading: isTurmasLoading } = useQuery({
     queryKey: ["turmas"],
     queryFn: () => getTurmas(),
   });
@@ -124,14 +123,14 @@ export default function EditAulaPageContent({
     turmasRes?.status === HTTP_CODES_ENUM.OK ? turmasRes.data.data : [];
   const turmas = allTurmas.filter((t) => t.curso.id === watchAllFields.cursoId);
 
-  const { data: ambientesRes } = useQuery({
+  const { data: ambientesRes, isLoading: isAmbientesLoading } = useQuery({
     queryKey: ["ambientes"],
     queryFn: () => getAmbientes(),
   });
   const ambientes =
     ambientesRes?.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : [];
 
-  const { data: professoresRes } = useQuery({
+  const { data: professoresRes, isLoading: isProfessoresLoading } = useQuery({
     queryKey: ["professores"],
     queryFn: () =>
       getUsers({
@@ -145,6 +144,14 @@ export default function EditAulaPageContent({
       ? professoresRes.data.data
       : [];
 
+  const isLoading =
+    isAulaLoading ||
+    isCursosLoading ||
+    isDisciplinasLoading ||
+    isTurmasLoading ||
+    isAmbientesLoading ||
+    isProfessoresLoading;
+
   useEffect(() => {
     if (aulaRes?.status === HTTP_CODES_ENUM.OK && aulaRes.data) {
       const aula = aulaRes.data;
@@ -153,13 +160,14 @@ export default function EditAulaPageContent({
         disciplinaId: aula.disciplina?.id || "",
         professorId: String(aula.professor?.id || ""),
         turmaId: aula.turma?.id || "",
-        diaSemana: aula.diaSemana || "",
+        diaSemana: (aula.diaSemana || "") as DiaSemana,
         horarioInicio: aula.horarioInicio || "",
         horarioFim: aula.horarioFim || "",
         ambienteId: aula.ambiente?.id || "",
       });
+      trigger();
     }
-  }, [aulaRes, reset]);
+  }, [aulaRes, reset, trigger]);
 
   useEffect(() => {
     setConflictStatus(null);
@@ -204,7 +212,7 @@ export default function EditAulaPageContent({
     updateMutation.mutate(data);
   };
 
-  if (isAulaLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
@@ -389,7 +397,10 @@ export default function EditAulaPageContent({
                         <SelectValue placeholder="00:00" />
                       </SelectTrigger>
                       <SelectContent>
-                        {timeOptions.map((time) => (
+                        {(field.value && !timeOptions.includes(field.value)
+                          ? [field.value, ...timeOptions]
+                          : timeOptions
+                        ).map((time) => (
                           <SelectItem key={time} value={time}>
                             {time}
                           </SelectItem>
@@ -416,7 +427,10 @@ export default function EditAulaPageContent({
                         <SelectValue placeholder="00:00" />
                       </SelectTrigger>
                       <SelectContent>
-                        {timeOptions.map((time) => (
+                        {(field.value && !timeOptions.includes(field.value)
+                          ? [field.value, ...timeOptions]
+                          : timeOptions
+                        ).map((time) => (
                           <SelectItem key={time} value={time}>
                             {time}
                           </SelectItem>
