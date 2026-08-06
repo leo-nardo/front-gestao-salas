@@ -8,6 +8,7 @@ import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import DoorOpen from "lucide-react/dist/esm/icons/door-open";
 import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Layers from "lucide-react/dist/esm/icons/layers";
 import Users from "lucide-react/dist/esm/icons/users";
 import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
@@ -46,10 +47,22 @@ const navGroups = [
         color: "bg-rose-400",
       },
       {
+        name: "Turmas",
+        href: "/admin/turmas",
+        icon: Layers,
+        color: "bg-cyan-400",
+      },
+      {
         name: "Aulas",
         href: "/admin/aulas",
         icon: Users,
         color: "bg-purple-400",
+      },
+      {
+        name: "Usuários",
+        href: "/admin/usuarios",
+        icon: Users,
+        color: "bg-teal-400",
       },
       {
         name: "Reservas",

@@ -71,6 +71,7 @@ export type UserPostRequest = Pick<
   "email" | "firstName" | "lastName" | "photo" | "role"
 > & {
   password: string;
+  status?: { id: number };
 };
 
 export type UserPostResponse = User;
