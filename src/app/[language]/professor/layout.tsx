@@ -2,12 +2,14 @@
 
 import { ReactNode } from "react";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
+import CalendarPlus from "lucide-react/dist/esm/icons/calendar-plus";
 import { RoleSidebar } from "@/components/role-sidebar";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { RoleEnum } from "@/services/api/types/role";
 
 const navItems = [
   { title: "Minhas Aulas", href: "/professor/aulas", icon: Calendar },
+  { title: "Minhas Reservas", href: "/professor/reservas", icon: CalendarPlus },
 ];
 
 function ProfessorLayout({ children }: { children: ReactNode }) {
