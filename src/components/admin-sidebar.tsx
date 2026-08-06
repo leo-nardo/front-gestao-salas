@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import useAuth from "@/services/auth/use-auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
 import DoorOpen from "lucide-react/dist/esm/icons/door-open";
 import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
@@ -27,6 +28,12 @@ const navGroups = [
         icon: LayoutDashboard,
         color: "bg-blue-400",
         exact: true,
+      },
+      {
+        name: "Ensalamento",
+        href: "/admin/ensalamento",
+        icon: LayoutGrid,
+        color: "bg-sky-400",
       },
       {
         name: "Ambientes",

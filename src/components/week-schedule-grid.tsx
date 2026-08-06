@@ -92,6 +92,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
             <div
               key={aula.id}
               className="absolute p-2 overflow-hidden rounded-md border-l-4"
+              title={`${aula.disciplina.nome} (${aula.disciplina.curso.nome}) - ${aula.ambiente.nome}${aula.turma?.codigo ? ` - Turma ${aula.turma.codigo}` : ""} (${aula.horarioInicio} - ${aula.horarioFim})`}
               style={{
                 top: `${top}px`,
                 height: `${height}px`,
@@ -109,6 +110,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
               </div>
               <div className="text-[10px] text-[#6f767b] truncate">
                 {aula.ambiente.nome}
+                {aula.turma?.codigo ? ` • ${aula.turma.codigo}` : ""}
               </div>
               <div className="text-[10px] font-ibm-plex-mono text-[#8a9095] mt-1">
                 {aula.horarioInicio} - {aula.horarioFim}

@@ -62,12 +62,24 @@ export type UpdateAulaResponse =
       data: { errors: Record<string, string> };
     };
 
+export type AulasRequest = {
+  page?: number;
+  limit?: number;
+};
+
 export function useGetAulasService() {
   const fetchBase = useFetch();
 
   return useCallback(
-    (requestConfig?: RequestConfigType) => {
-      return fetchBase(`${API_URL}/v1/aulas`, {
+    (params?: AulasRequest, requestConfig?: RequestConfigType) => {
+      const url = new URL(`${API_URL}/v1/aulas`);
+      if (params?.page !== undefined) {
+        url.searchParams.append("page", params.page.toString());
+      }
+      if (params?.limit !== undefined) {
+        url.searchParams.append("limit", params.limit.toString());
+      }
+      return fetchBase(url.toString(), {
         method: "GET",
         ...requestConfig,
       }).then(wrapperFetchJsonResponse<{ data: Aula[]; hasNextPage: boolean }>);
