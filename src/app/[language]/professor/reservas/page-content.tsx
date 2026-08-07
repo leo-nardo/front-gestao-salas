@@ -15,8 +15,8 @@ export default function PageContent() {
   const { user } = useAuth();
   const getReservas = useGetReservasService();
   const { data: res, isLoading } = useQuery({
-    queryKey: ["reservas"],
-    queryFn: () => getReservas(),
+    queryKey: ["reservas", { limit: 500 }],
+    queryFn: () => getReservas({ limit: 500 }),
   });
 
   const allReservas = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];

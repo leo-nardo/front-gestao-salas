@@ -14,8 +14,8 @@ import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 export default function PageContent() {
   const getReservas = useGetReservasService();
   const { data: res, isLoading } = useQuery({
-    queryKey: ["reservas"],
-    queryFn: () => getReservas(),
+    queryKey: ["reservas", { limit: 500 }],
+    queryFn: () => getReservas({ limit: 500 }),
   });
   const reservas = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];
 

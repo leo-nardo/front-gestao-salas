@@ -42,12 +42,24 @@ export type CreateReservaResponse =
       data: { errors: Record<string, string> };
     };
 
+export type ReservasRequest = {
+  page?: number;
+  limit?: number;
+};
+
 export function useGetReservasService() {
   const fetchBase = useFetch();
 
   return useCallback(
-    (requestConfig?: RequestConfigType) => {
-      return fetchBase(`${API_URL}/v1/reservas`, {
+    (params?: ReservasRequest, requestConfig?: RequestConfigType) => {
+      const url = new URL(`${API_URL}/v1/reservas`);
+      if (params?.page !== undefined) {
+        url.searchParams.append("page", params.page.toString());
+      }
+      if (params?.limit !== undefined) {
+        url.searchParams.append("limit", params.limit.toString());
+      }
+      return fetchBase(url.toString(), {
         method: "GET",
         ...requestConfig,
       }).then(
