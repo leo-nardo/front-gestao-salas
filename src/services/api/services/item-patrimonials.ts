@@ -77,3 +77,24 @@ export function useReportarDefeitoService() {
     [fetchBase]
   );
 }
+
+export function useUpdateItemPatrimonialService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      data: { id: string; estado?: string; descricaoDefeito?: string | null },
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/item-patrimoniais/${data.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          estado: data.estado,
+          descricaoDefeito: data.descricaoDefeito,
+        }),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<ItemPatrimonial>);
+    },
+    [fetchBase]
+  );
+}

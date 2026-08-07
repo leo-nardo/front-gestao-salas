@@ -2,12 +2,14 @@
 
 import { ReactNode } from "react";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
 import { RoleSidebar } from "@/components/role-sidebar";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { RoleEnum } from "@/services/api/types/role";
 
 const navItems = [
   { title: "Ambientes", href: "/limpeza/ambientes", icon: Sparkles },
+  { title: "Agenda", href: "/limpeza/agenda", icon: CalendarDays },
 ];
 
 function LimpezaLayout({ children }: { children: ReactNode }) {
