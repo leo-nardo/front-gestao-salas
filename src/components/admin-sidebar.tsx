@@ -162,7 +162,10 @@ export function AdminSidebar() {
 
       {/* Footer / User Profile */}
       <div className="p-4 border-t border-[#1e3461] mt-auto">
-        <div className="flex items-center gap-3 mb-4">
+        <Link
+          href="/profile"
+          className="flex items-center gap-3 mb-4 rounded-md p-1 -m-1 hover:bg-[#1e3461]/50 transition-colors"
+        >
           <Avatar className="h-10 w-10 border border-[#1e3461]">
             <AvatarImage src="" alt={user?.firstName || "Usuário"} />
             <AvatarFallback className="bg-[#1e3461] text-white">
@@ -177,7 +180,7 @@ export function AdminSidebar() {
               {user?.role?.name || "Administrador"}
             </p>
           </div>
-        </div>
+        </Link>
         <Button
           variant="ghost"
           className="w-full justify-start text-[#cad6e8] hover:text-white hover:bg-[#1e3461] h-9 px-2"

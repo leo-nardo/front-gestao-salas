@@ -59,7 +59,10 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
       </div>
 
       <div className="mt-auto p-4">
-        <div className="bg-[#10203d] rounded-xl p-4 flex items-center gap-3 mb-4">
+        <Link
+          href="/profile"
+          className="bg-[#10203d] rounded-xl p-4 flex items-center gap-3 mb-4 hover:bg-[#152a4d] transition-colors"
+        >
           <div className="w-10 h-10 rounded-full bg-[#1e3a68] flex items-center justify-center text-white font-bold shrink-0">
             {user?.firstName?.[0]}
             {user?.lastName?.[0]}
@@ -70,7 +73,7 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
             </p>
             <p className="text-xs text-[#89a8d6] truncate">{user?.email}</p>
           </div>
-        </div>
+        </Link>
 
         <button
           onClick={logOut}
