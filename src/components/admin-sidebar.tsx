@@ -12,85 +12,53 @@ import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Layers from "lucide-react/dist/esm/icons/layers";
 import Users from "lucide-react/dist/esm/icons/users";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
 import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const navGroups = [
   {
-    title: "COORDENAÇÃO",
+    title: "Visão geral",
     items: [
-      {
-        name: "Dashboard",
-        href: "/admin",
-        icon: LayoutDashboard,
-        color: "bg-blue-400",
-        exact: true,
-      },
-      {
-        name: "Ensalamento",
-        href: "/admin/ensalamento",
-        icon: LayoutGrid,
-        color: "bg-sky-400",
-      },
-      {
-        name: "Ambientes",
-        href: "/admin/ambientes",
-        icon: DoorOpen,
-        color: "bg-emerald-400",
-      },
-      {
-        name: "Patrimônio",
-        href: "/admin/patrimonio",
-        icon: ClipboardList,
-        color: "bg-lime-400",
-      },
-      {
-        name: "Equipamentos",
-        href: "/admin/equipamentos",
-        icon: MonitorPlay,
-        color: "bg-amber-400",
-      },
-      {
-        name: "Disciplinas",
-        href: "/admin/disciplinas",
-        icon: BookOpen,
-        color: "bg-rose-400",
-      },
-      {
-        name: "Turmas",
-        href: "/admin/turmas",
-        icon: Layers,
-        color: "bg-cyan-400",
-      },
-      {
-        name: "Aulas",
-        href: "/admin/aulas",
-        icon: Users,
-        color: "bg-purple-400",
-      },
-      {
-        name: "Usuários",
-        href: "/admin/usuarios",
-        icon: Users,
-        color: "bg-teal-400",
-      },
-      {
-        name: "Reservas",
-        href: "/admin/reservas",
-        icon: CalendarClock,
-        color: "bg-indigo-400",
-      },
+      { name: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
+      { name: "Ensalamento", href: "/admin/ensalamento", icon: LayoutGrid },
+    ],
+  },
+  {
+    title: "Espaços e recursos",
+    items: [
+      { name: "Ambientes", href: "/admin/ambientes", icon: DoorOpen },
+      { name: "Patrimônio", href: "/admin/patrimonio", icon: ClipboardList },
+      { name: "Equipamentos", href: "/admin/equipamentos", icon: MonitorPlay },
+    ],
+  },
+  {
+    title: "Acadêmico",
+    items: [
+      { name: "Disciplinas", href: "/admin/disciplinas", icon: BookOpen },
+      { name: "Turmas", href: "/admin/turmas", icon: Layers },
+      { name: "Aulas", href: "/admin/aulas", icon: GraduationCap },
+    ],
+  },
+  {
+    title: "Operação",
+    items: [
+      { name: "Reservas", href: "/admin/reservas", icon: CalendarClock },
       {
         name: "Solicitações de troca",
         href: "/admin/solicitacoes",
         icon: ArrowLeftRight,
-        color: "bg-orange-400",
       },
     ],
+  },
+  {
+    title: "Administração",
+    items: [{ name: "Usuários", href: "/admin/usuarios", icon: Users }],
   },
 ];
 
@@ -137,26 +105,35 @@ export function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-3 space-y-6 scrollbar-thin scrollbar-thumb-[#1e3461]">
-        {navGroups.map((group) => (
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 space-y-5 scrollbar-thin scrollbar-thumb-[#1e3461]">
+        {navGroups.map((group, groupIndex) => (
           <div key={group.title}>
-            <h3 className="px-3 mb-2 text-xs font-semibold text-[#6a7ea0] font-mono tracking-wider">
+            {groupIndex > 0 && (
+              <div className="h-px bg-[#1e3461]/70 mx-3 mb-5" />
+            )}
+            <h3 className="px-3 mb-2 text-xs font-semibold text-[#6a7ea0] uppercase tracking-wider">
               {group.title}
             </h3>
-            <ul className="space-y-1">
+            <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive = checkIsActive(item.href, item.exact);
                 return (
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm ${
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm",
                         isActive
                           ? "bg-[#1e3461] text-white font-medium"
-                          : "hover:bg-[#1e3461]/50 hover:text-white"
-                      }`}
+                          : "text-[#adbdd8] hover:bg-[#1e3461]/50 hover:text-white"
+                      )}
                     >
-                      <div className={`w-2 h-2 rounded-full ${item.color}`} />
+                      <item.icon
+                        className={cn(
+                          "w-[18px] h-[18px] shrink-0",
+                          isActive ? "text-white" : "text-[#6a86b8]"
+                        )}
+                      />
                       <span className="truncate">{item.name}</span>
                     </Link>
                   </li>
