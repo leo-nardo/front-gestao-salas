@@ -94,8 +94,8 @@ export function AmbientePatrimonioSection({
   const { errors } = useFormState({ control });
 
   const { data: itensRes, isLoading } = useQuery({
-    queryKey: ["item-patrimoniais", "ambiente", ambienteId],
-    queryFn: () => getItens(),
+    queryKey: ["item-patrimoniais", "ambiente", ambienteId, { limit: 500 }],
+    queryFn: () => getItens({ limit: 500 }),
   });
 
   const itens =
@@ -303,9 +303,9 @@ export function AmbientePatrimonioSection({
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome *</Label>
+                <Label htmlFor="patrimonio-nome">Nome *</Label>
                 <Input
-                  id="nome"
+                  id="patrimonio-nome"
                   placeholder="Ex: Mesa de professor"
                   {...register("nome")}
                 />
@@ -316,9 +316,9 @@ export function AmbientePatrimonioSection({
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tipo">Tipo *</Label>
+                <Label htmlFor="patrimonio-tipo">Tipo *</Label>
                 <Input
-                  id="tipo"
+                  id="patrimonio-tipo"
                   placeholder="Ex: Mobília"
                   {...register("tipo")}
                 />
@@ -329,9 +329,11 @@ export function AmbientePatrimonioSection({
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="numeroPatrimonio">Número de patrimônio</Label>
+                <Label htmlFor="patrimonio-numeroPatrimonio">
+                  Número de patrimônio
+                </Label>
                 <Input
-                  id="numeroPatrimonio"
+                  id="patrimonio-numeroPatrimonio"
                   placeholder="Ex: 123456"
                   {...register("numeroPatrimonio")}
                 />

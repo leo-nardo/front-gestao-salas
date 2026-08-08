@@ -64,8 +64,8 @@ export default function PageContent() {
   const deleteItem = useDeleteItemPatrimonialService();
 
   const { data: itensRes, isLoading: isLoadingItens } = useQuery({
-    queryKey: ["item-patrimoniais"],
-    queryFn: () => getItens(),
+    queryKey: ["item-patrimoniais", { limit: 500 }],
+    queryFn: () => getItens({ limit: 500 }),
   });
 
   const { data: ambientesRes } = useQuery({

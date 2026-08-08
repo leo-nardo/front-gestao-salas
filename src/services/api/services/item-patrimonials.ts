@@ -29,8 +29,12 @@ export function useGetItemPatrimonialsService() {
   const fetchBase = useFetch();
 
   return useCallback(
-    (requestConfig?: RequestConfigType) => {
-      return fetchBase(`${API_URL}/v1/item-patrimoniais`, {
+    (params?: { limit?: number }, requestConfig?: RequestConfigType) => {
+      const url = new URL(`${API_URL}/v1/item-patrimoniais`);
+      if (params?.limit !== undefined) {
+        url.searchParams.append("limit", params.limit.toString());
+      }
+      return fetchBase(url.toString(), {
         method: "GET",
         ...requestConfig,
       }).then(

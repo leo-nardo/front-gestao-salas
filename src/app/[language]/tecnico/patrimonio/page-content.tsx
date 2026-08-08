@@ -40,8 +40,8 @@ export default function PageContent() {
   const [filtro, setFiltro] = useState("Todos");
 
   const { data: res, isLoading } = useQuery({
-    queryKey: ["item-patrimoniais"],
-    queryFn: () => getItens(),
+    queryKey: ["item-patrimoniais", { limit: 500 }],
+    queryFn: () => getItens({ limit: 500 }),
   });
   const itens = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];
   const filteredItens = itens.filter((item) =>
