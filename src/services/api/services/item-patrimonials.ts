@@ -7,6 +7,7 @@ import { RequestConfigType } from "./types/request-config";
 export type ItemPatrimonial = {
   id: string;
   nome: string;
+  tipo: string;
   ambiente: { id: string; nome: string };
   numeroPatrimonio?: string | null;
   estado: "funcionando" | "com_defeito" | "em_manutencao";
@@ -17,6 +18,7 @@ export type ItemPatrimonial = {
 
 export type CreateItemPatrimonialRequest = {
   nome: string;
+  tipo: string;
   ambiente: { id: string };
   numeroPatrimonio?: string;
   estado?: string;
@@ -83,17 +85,61 @@ export function useUpdateItemPatrimonialService() {
 
   return useCallback(
     (
-      data: { id: string; estado?: string; descricaoDefeito?: string | null },
+      data: {
+        id: string;
+        nome?: string;
+        tipo?: string;
+        ambiente?: { id: string };
+        numeroPatrimonio?: string | null;
+        estado?: string;
+        descricaoDefeito?: string | null;
+      },
       requestConfig?: RequestConfigType
     ) => {
+      // Create a payload with only the defined fields
+      const payload: any = {};
+      if (data.nome !== undefined) payload.nome = data.nome;
+      if (data.tipo !== undefined) payload.tipo = data.tipo;
+      if (data.ambiente !== undefined) payload.ambiente = data.ambiente;
+      if (data.numeroPatrimonio !== undefined)
+        payload.numeroPatrimonio = data.numeroPatrimonio;
+      if (data.estado !== undefined) payload.estado = data.estado;
+      if (data.descricaoDefeito !== undefined)
+        payload.descricaoDefeito = data.descricaoDefeito;
+
       return fetchBase(`${API_URL}/v1/item-patrimoniais/${data.id}`, {
         method: "PATCH",
-        body: JSON.stringify({
-          estado: data.estado,
-          descricaoDefeito: data.descricaoDefeito,
-        }),
+        body: JSON.stringify(payload),
         ...requestConfig,
       }).then(wrapperFetchJsonResponse<ItemPatrimonial>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useGetItemPatrimonialService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: { id: string }, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/item-patrimoniais/${data.id}`, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<ItemPatrimonial>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useDeleteItemPatrimonialService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: { id: string }, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/item-patrimoniais/${data.id}`, {
+        method: "DELETE",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<undefined>);
     },
     [fetchBase]
   );

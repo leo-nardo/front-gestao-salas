@@ -9,6 +9,7 @@ import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
 import DoorOpen from "lucide-react/dist/esm/icons/door-open";
 import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Layers from "lucide-react/dist/esm/icons/layers";
 import Users from "lucide-react/dist/esm/icons/users";
 import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
@@ -40,6 +41,12 @@ const navGroups = [
         href: "/admin/ambientes",
         icon: DoorOpen,
         color: "bg-emerald-400",
+      },
+      {
+        name: "Patrimônio",
+        href: "/admin/patrimonio",
+        icon: ClipboardList,
+        color: "bg-lime-400",
       },
       {
         name: "Equipamentos",
