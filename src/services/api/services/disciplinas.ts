@@ -46,3 +46,37 @@ export function useCreateDisciplinaService() {
     [fetchBase]
   );
 }
+
+export function useGetDisciplinaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      const url = `${API_URL}/disciplinas/${id}`;
+      return fetchBase(url, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Disciplina>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useUpdateDisciplinaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      id: string,
+      data: Partial<CreateDisciplinaRequest>,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/disciplinas/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Disciplina>);
+    },
+    [fetchBase]
+  );
+}

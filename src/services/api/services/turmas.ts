@@ -48,3 +48,37 @@ export function useGetTurmasService() {
     [fetchBase]
   );
 }
+
+export function useGetTurmaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      const url = `${API_URL}/v1/turmas/${id}`;
+      return fetchBase(url, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Turma>);
+    },
+    [fetchBase]
+  );
+}
+
+export function useUpdateTurmaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      id: string,
+      data: Partial<CreateTurmaRequest>,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/turmas/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<Turma>);
+    },
+    [fetchBase]
+  );
+}

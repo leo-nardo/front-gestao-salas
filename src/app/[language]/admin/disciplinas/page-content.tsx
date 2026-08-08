@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import Edit from "lucide-react/dist/esm/icons/edit";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,9 @@ export default function PageContent() {
                   <TableHead className="font-semibold text-[#1c1f21]">
                     Curso
                   </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Ações
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -77,6 +81,18 @@ export default function PageContent() {
                     </TableCell>
                     <TableCell className="text-[#6f767b]">
                       {d.curso.nome}
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/admin/disciplinas/${d.id}/editar`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-[#1a4f8a] hover:text-[#123c6e] px-2"
+                        >
+                          <Edit className="w-3.5 h-3.5 mr-1" />
+                          Editar
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
