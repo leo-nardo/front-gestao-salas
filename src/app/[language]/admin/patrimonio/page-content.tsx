@@ -61,8 +61,8 @@ export default function PageContent() {
   });
 
   const { data: ambientesRes } = useQuery({
-    queryKey: ["ambientes"],
-    queryFn: () => getAmbientes(),
+    queryKey: ["ambientes", { limit: "500" }],
+    queryFn: () => getAmbientes({ limit: "500" }),
   });
 
   const itens =

@@ -58,7 +58,7 @@ export default function PageContent({ id }: { id: string }) {
   useEffect(() => {
     let isMounted = true;
 
-    Promise.all([getAmbientes(), getItem({ id })])
+    Promise.all([getAmbientes({ limit: "500" }), getItem({ id })])
       .then(([ambientesRes, itemRes]) => {
         if (!isMounted) return;
 

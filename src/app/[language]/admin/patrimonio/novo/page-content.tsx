@@ -60,7 +60,7 @@ export default function PageContent() {
   useEffect(() => {
     let isMounted = true;
 
-    getAmbientes()
+    getAmbientes({ limit: "500" })
       .then((res) => {
         if (!isMounted) return;
         if (res.status === HTTP_CODES_ENUM.OK) {

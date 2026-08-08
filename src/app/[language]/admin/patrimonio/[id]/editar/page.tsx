@@ -6,5 +6,5 @@ type Props = {
 
 export default async function Page(props: Props) {
   const params = await props.params;
-  return <PageContent id={params.id} language={params.language} />;
+  return <PageContent id={params.id} />;
 }

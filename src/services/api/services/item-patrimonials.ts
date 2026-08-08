@@ -96,18 +96,9 @@ export function useUpdateItemPatrimonialService() {
       },
       requestConfig?: RequestConfigType
     ) => {
-      // Create a payload with only the defined fields
-      const payload: any = {};
-      if (data.nome !== undefined) payload.nome = data.nome;
-      if (data.tipo !== undefined) payload.tipo = data.tipo;
-      if (data.ambiente !== undefined) payload.ambiente = data.ambiente;
-      if (data.numeroPatrimonio !== undefined)
-        payload.numeroPatrimonio = data.numeroPatrimonio;
-      if (data.estado !== undefined) payload.estado = data.estado;
-      if (data.descricaoDefeito !== undefined)
-        payload.descricaoDefeito = data.descricaoDefeito;
+      const { id, ...payload } = data;
 
-      return fetchBase(`${API_URL}/v1/item-patrimoniais/${data.id}`, {
+      return fetchBase(`${API_URL}/v1/item-patrimoniais/${id}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
         ...requestConfig,
