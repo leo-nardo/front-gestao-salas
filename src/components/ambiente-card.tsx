@@ -2,7 +2,6 @@ import Edit from "lucide-react/dist/esm/icons/edit";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Users from "lucide-react/dist/esm/icons/users";
-import Wrench from "lucide-react/dist/esm/icons/wrench";
 import Link from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -110,19 +109,6 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
           >
             <Edit className="w-3.5 h-3.5 mr-1.5" />
             Editar
-          </Button>
-        </Link>
-        <Link
-          href={`/admin/patrimonio?ambiente=${ambiente.id}`}
-          className="flex-1 min-w-[25%]"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full h-9 px-2 border-[#dddbd3] text-[#1c1f21]"
-          >
-            <Wrench className="w-3.5 h-3.5 mr-1.5" />
-            Patrimônio
           </Button>
         </Link>
         <Button
