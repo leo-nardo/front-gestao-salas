@@ -12,6 +12,14 @@ import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import {
   Select,
@@ -133,63 +141,84 @@ export default function PageContent() {
             <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
           </div>
         ) : filteredItens.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItens.map((item) => {
-              const badge = estadoBadge[item.estado] || estadoBadge.funcionando;
-              return (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-[#e7edf8] p-2 rounded-lg text-[#3a4a99]">
-                        <ClipboardList className="w-5 h-5" />
-                      </div>
-                      <Badge
-                        className={`${badge.className} border-transparent`}
-                      >
-                        {badge.label}
-                      </Badge>
-                    </div>
-                    <h3 className="text-lg font-semibold text-[#1c1f21] mb-1">
-                      {item.nome}
-                    </h3>
-                    <p className="text-sm text-[#1c1f21] font-medium mb-1">
-                      {item.tipo}
-                    </p>
-                    <p className="text-sm text-[#6f767b] mb-4">
-                      {item.ambiente.nome}
-                      {item.numeroPatrimonio && ` · ${item.numeroPatrimonio}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 pt-4 border-t border-[#f0efea] mt-4">
-                    <Link
-                      href={`/admin/patrimonio/${item.id}/editar`}
-                      className="flex-1"
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full h-8 border-[#dddbd3] text-[#1c1f21]"
-                      >
-                        <Edit className="w-3.5 h-3.5 mr-1" />
-                        Editar
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteMutation.isPending}
-                      className="h-8 border-[#dddbd3] text-[#a8442f] hover:bg-[#f7e7e2]"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="bg-white rounded-xl border border-[#e6e5e0] overflow-hidden">
+            <Table>
+              <TableHeader className="bg-[#faf9f5]">
+                <TableRow className="border-b-[#f0efea]">
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Nome
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Tipo
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Ambiente
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Nº Patrimônio
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Estado
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#1c1f21]">
+                    Ações
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredItens.map((item) => {
+                  const badge =
+                    estadoBadge[item.estado] || estadoBadge.funcionando;
+                  return (
+                    <TableRow key={item.id} className="border-b-[#f0efea]">
+                      <TableCell className="font-medium text-[#1c1f21]">
+                        {item.nome}
+                      </TableCell>
+                      <TableCell className="text-[#6f767b]">
+                        {item.tipo}
+                      </TableCell>
+                      <TableCell className="text-[#6f767b]">
+                        {item.ambiente.nome}
+                      </TableCell>
+                      <TableCell className="text-[#6f767b]">
+                        {item.numeroPatrimonio || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${badge.className} border-transparent`}
+                        >
+                          {badge.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Link href={`/admin/patrimonio/${item.id}/editar`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-[#1a4f8a] hover:text-[#123c6e] px-2"
+                            >
+                              <Edit className="w-3.5 h-3.5 mr-1" />
+                              Editar
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deleteMutation.isPending}
+                            className="h-8 text-[#a8442f] hover:bg-[#f7e7e2] px-2"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                            Excluir
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="border-2 border-dashed border-[#dddbd3] rounded-xl p-12 flex flex-col items-center justify-center text-center bg-white/50 mt-8">

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AmbientePatrimonioSection } from "@/components/ambiente-patrimonio-section";
 import {
   useGetAmbienteService,
   useUpdateAmbienteService,
@@ -455,6 +456,8 @@ export default function PageContent({
             </form>
           </div>
         )}
+
+        {!loading && <AmbientePatrimonioSection ambienteId={id} />}
       </div>
     </>
   );
