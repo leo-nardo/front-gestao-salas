@@ -101,7 +101,7 @@ export default function PageContent({ id }: { id: string }) {
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
-          role: { id: Number(data.roleId) } as any,
+          role: { id: Number(data.roleId) },
         },
       });
 
