@@ -99,14 +99,19 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
             Editar
           </Button>
         </Link>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 min-w-[25%] h-9 px-2 border-[#dddbd3] text-[#1a4f8a]"
+        <Link
+          href={`/admin/ensalamento?ambiente=${ambiente.id}`}
+          className="flex-1 min-w-[25%]"
         >
-          <Calendar className="w-3.5 h-3.5 mr-1.5" />
-          Agenda
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-9 px-2 border-[#dddbd3] text-[#1a4f8a]"
+          >
+            <Calendar className="w-3.5 h-3.5 mr-1.5" />
+            Agenda
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Plus from "lucide-react/dist/esm/icons/plus";
+import X from "lucide-react/dist/esm/icons/x";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +63,11 @@ import {
 type ViewMode = "mapa" | "grade";
 
 export default function EnsalamentoPageContent() {
+  const searchParams = useSearchParams();
+  const [ambienteFocusId, setAmbienteFocusId] = useState<string | null>(() =>
+    searchParams.get("ambiente")
+  );
+
   const [day, setDay] = useState<DiaSemana>("Segunda");
   const [viewMode, setViewMode] = useState<ViewMode>("mapa");
 
@@ -189,10 +196,32 @@ export default function EnsalamentoPageContent() {
     return map;
   }, [ambientes]);
 
+  const ambienteFocado = useMemo(
+    () =>
+      ambienteFocusId
+        ? (ambientes.find((a) => a.id === ambienteFocusId) ?? null)
+        : null,
+    [ambientes, ambienteFocusId]
+  );
+
+  // Ao chegar com ?ambiente=<id>, alinha o filtro de unidade com a sala focada
+  // assim que os ambientes carregam, pra manter os controles consistentes.
+  useEffect(() => {
+    if (ambienteFocado && ambienteFocado.unidade?.id) {
+      setUnidadeFilter(ambienteFocado.unidade.id);
+    }
+  }, [ambienteFocado]);
+
   const ambientesFiltradas = useMemo(() => {
-    if (unidadeFilter === "all") return ambientes;
-    return ambientes.filter((a) => a.unidade?.id === unidadeFilter);
-  }, [ambientes, unidadeFilter]);
+    const base =
+      unidadeFilter === "all"
+        ? ambientes
+        : ambientes.filter((a) => a.unidade?.id === unidadeFilter);
+    if (ambienteFocusId) {
+      return base.filter((a) => a.id === ambienteFocusId);
+    }
+    return base;
+  }, [ambientes, unidadeFilter, ambienteFocusId]);
 
   const weekDates = useMemo(() => currentWeekDates(), []);
 
@@ -359,6 +388,16 @@ export default function EnsalamentoPageContent() {
                 ))}
               </SelectContent>
             </Select>
+
+            {ambienteFocado && (
+              <button
+                onClick={() => setAmbienteFocusId(null)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e7edf8] border border-[#b1c2e2] text-[#1a4f8a] text-[13px] font-semibold hover:bg-[#dbe6f6] transition-colors"
+              >
+                Sala: {ambienteFocado.nome}
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             <div className="ml-auto flex items-center gap-3">
               <span className="text-[12.5px] text-[#8a9095]">
