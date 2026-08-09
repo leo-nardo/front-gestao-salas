@@ -101,3 +101,52 @@ export function useCreateReservaService() {
     [fetchBase]
   );
 }
+
+export type UpdateReservaRequest = Partial<CreateReservaRequest>;
+
+export type UpdateReservaResponse =
+  | { status: typeof HTTP_CODES_ENUM.OK; data: Reserva }
+  | {
+      status: typeof HTTP_CODES_ENUM.CONFLICT;
+      data: { message: string; errors?: Record<string, string> };
+    }
+  | {
+      status: typeof HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY;
+      data: { errors: Record<string, string> };
+    };
+
+export function useUpdateReservaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      id: string,
+      data: UpdateReservaRequest,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/reservas/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(
+        (response) =>
+          wrapperFetchJsonResponse(response) as Promise<UpdateReservaResponse>
+      );
+    },
+    [fetchBase]
+  );
+}
+
+export function useDeleteReservaService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (id: string, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/reservas/${id}`, {
+        method: "DELETE",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<undefined>);
+    },
+    [fetchBase]
+  );
+}

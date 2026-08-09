@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
-import CalendarX from "lucide-react/dist/esm/icons/calendar-x";
+import Plus from "lucide-react/dist/esm/icons/plus";
 import { AdminHeader } from "@/components/admin-header";
-import { WeekScheduleGrid } from "@/components/week-schedule-grid";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,7 +13,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetAulasService, Aula } from "@/services/api/services/aulas";
+import {
+  useGetAulasService,
+  Aula,
+  DiaSemana,
+} from "@/services/api/services/aulas";
+import {
+  useGetReservasService,
+  Reserva,
+} from "@/services/api/services/reservas";
 import {
   useGetAmbientesService,
   Ambiente,
@@ -25,12 +31,60 @@ import {
   Unidade,
 } from "@/services/api/services/unidades";
 import { useGetCursosService, Curso } from "@/services/api/services/cursos";
+import { useGetUsersService } from "@/services/api/services/users";
+import { RoleEnum } from "@/services/api/types/role";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
+import { MapaView, GroupBy } from "@/components/ensalamento/mapa-view";
+import { GradeView } from "@/components/ensalamento/grade-view";
+import { BlockDetailSheet } from "@/components/ensalamento/block-detail-sheet";
+import { NewBlockSheet } from "@/components/ensalamento/new-block-sheet";
+import {
+  SavedViewsBar,
+  useSavedViews,
+  SavedViewFilters,
+} from "@/components/ensalamento/saved-views";
+import {
+  DIAS_SEMANA,
+  DIA_ABREV,
+  Turno,
+  EnsalamentoBlock,
+  aulaToBlock,
+  reservaToBlock,
+  currentWeekDates,
+} from "@/components/ensalamento/types";
+
+type ViewMode = "mapa" | "grade";
+
 export default function EnsalamentoPageContent() {
-  const [unidadeFilter, setUnidadeFilter] = useState<string>("all");
-  const [ambienteFilter, setAmbienteFilter] = useState<string>("all");
-  const [cursoFilter, setCursoFilter] = useState<string>("all");
+  const [day, setDay] = useState<DiaSemana>("Segunda");
+  const [viewMode, setViewMode] = useState<ViewMode>("mapa");
+
+  const [unidadeFilter, setUnidadeFilter] = useState("all");
+  const [cursoFilter, setCursoFilter] = useState("all");
+  const [professorFilter, setProfessorFilter] = useState("all");
+
+  const [groupBy, setGroupBy] = useState<GroupBy>("bloco");
+  const [periodo, setPeriodo] = useState<"Todos" | Turno>("Todos");
+  const [blocosSel, setBlocosSel] = useState<string[]>([]);
+  const [andaresSel, setAndaresSel] = useState<string[]>([]);
+  const [tipoFilter, setTipoFilter] = useState<
+    "Todos" | "Sala" | "Laboratório"
+  >("Todos");
+
+  const [selectedBlock, setSelectedBlock] = useState<EnsalamentoBlock | null>(
+    null
+  );
+  const [newSlot, setNewSlot] = useState<{
+    ambienteId: string;
+    horarioInicio: string;
+  } | null>(null);
+
+  const {
+    views: savedViews,
+    save: saveView,
+    remove: removeView,
+  } = useSavedViews();
 
   const getAulas = useGetAulasService();
   const { data: aulasRes, isLoading: isLoadingAulas } = useQuery({
@@ -40,6 +94,17 @@ export default function EnsalamentoPageContent() {
   const aulas: Aula[] = useMemo(
     () => (aulasRes?.status === HTTP_CODES_ENUM.OK ? aulasRes.data.data : []),
     [aulasRes]
+  );
+
+  const getReservas = useGetReservasService();
+  const { data: reservasRes, isLoading: isLoadingReservas } = useQuery({
+    queryKey: ["reservas", { limit: 500 }],
+    queryFn: () => getReservas({ limit: 500 }),
+  });
+  const reservas: Reserva[] = useMemo(
+    () =>
+      reservasRes?.status === HTTP_CODES_ENUM.OK ? reservasRes.data.data : [],
+    [reservasRes]
   );
 
   const getAmbientes = useGetAmbientesService();
@@ -74,193 +139,295 @@ export default function EnsalamentoPageContent() {
     [cursosRes]
   );
 
-  // Map ambienteId -> unidadeId
+  const getUsers = useGetUsersService();
+  const { data: professoresRes, isLoading: isLoadingProfessores } = useQuery({
+    queryKey: ["professores"],
+    queryFn: () =>
+      getUsers({
+        page: 1,
+        limit: 50,
+        filters: { roles: [{ id: RoleEnum.PROFESSOR }] },
+      }),
+  });
+  const professores = useMemo(
+    () =>
+      professoresRes?.status === HTTP_CODES_ENUM.OK
+        ? professoresRes.data.data
+        : [],
+    [professoresRes]
+  );
+
+  const isLoading =
+    isLoadingAulas ||
+    isLoadingReservas ||
+    isLoadingAmbientes ||
+    isLoadingUnidades ||
+    isLoadingCursos ||
+    isLoadingProfessores;
+
   const ambienteToUnidadeMap = useMemo(() => {
     const map = new Map<string, string>();
-    ambientes.forEach((amb) => {
-      if (amb.unidade?.id) {
-        map.set(amb.id, amb.unidade.id);
-      }
+    ambientes.forEach((a) => {
+      if (a.unidade?.id) map.set(a.id, a.unidade.id);
     });
     return map;
   }, [ambientes]);
 
-  // Options for ambientes select filtered by selected unidade
-  const ambienteOptions = useMemo(() => {
+  const ambientesFiltradas = useMemo(() => {
     if (unidadeFilter === "all") return ambientes;
-    return ambientes.filter((amb) => amb.unidade?.id === unidadeFilter);
+    return ambientes.filter((a) => a.unidade?.id === unidadeFilter);
   }, [ambientes, unidadeFilter]);
 
-  const handleUnidadeChange = (value: string) => {
-    setUnidadeFilter(value);
-    // If the currently selected ambiente doesn't belong to the newly selected unidade, reset it
-    if (value !== "all" && ambienteFilter !== "all") {
-      const selectedAmb = ambientes.find((a) => a.id === ambienteFilter);
-      if (selectedAmb?.unidade?.id !== value) {
-        setAmbienteFilter("all");
-      }
-    }
-  };
+  const weekDates = useMemo(() => currentWeekDates(), []);
 
-  const isFiltered =
-    unidadeFilter !== "all" ||
-    ambienteFilter !== "all" ||
-    cursoFilter !== "all";
+  const dayBlocks: EnsalamentoBlock[] = useMemo(() => {
+    const aulaBlocks = aulas
+      .filter((a) => a.diaSemana === day)
+      .map(aulaToBlock);
 
-  const handleClearFilters = () => {
-    setUnidadeFilter("all");
-    setAmbienteFilter("all");
-    setCursoFilter("all");
-  };
+    const reservaBlocks = reservas
+      .filter((r) => r.status === "confirmada" && r.data === weekDates[day])
+      .map((r) => reservaToBlock(r, day));
 
-  const filteredAulas = useMemo(() => {
-    return aulas.filter((aula) => {
+    return [...aulaBlocks, ...reservaBlocks].filter((b) => {
       if (unidadeFilter !== "all") {
-        const aulaUnidadeId = ambienteToUnidadeMap.get(aula.ambiente.id);
-        if (aulaUnidadeId !== unidadeFilter) {
+        if (ambienteToUnidadeMap.get(b.ambienteId) !== unidadeFilter)
           return false;
-        }
       }
-
-      if (ambienteFilter !== "all") {
-        if (aula.ambiente.id !== ambienteFilter) {
-          return false;
-        }
-      }
-
       if (cursoFilter !== "all") {
-        if (aula.disciplina.curso.id !== cursoFilter) {
-          return false;
-        }
+        if (b.kind !== "aula") return false;
+        const aula = b.raw as Aula;
+        if (aula.disciplina.curso.id !== cursoFilter) return false;
       }
-
+      if (professorFilter !== "all") {
+        if (b.kind !== "aula") return false;
+        const aula = b.raw as Aula;
+        if (String(aula.professor.id) !== professorFilter) return false;
+      }
       return true;
     });
-  }, [aulas, unidadeFilter, ambienteFilter, cursoFilter, ambienteToUnidadeMap]);
+  }, [
+    aulas,
+    reservas,
+    day,
+    weekDates,
+    unidadeFilter,
+    cursoFilter,
+    professorFilter,
+    ambienteToUnidadeMap,
+  ]);
 
-  const isLoading =
-    isLoadingAulas ||
-    isLoadingAmbientes ||
-    isLoadingUnidades ||
-    isLoadingCursos;
+  const toggleBloco = (v: string) =>
+    setBlocosSel((prev) =>
+      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+    );
+  const toggleAndar = (v: string) =>
+    setAndaresSel((prev) =>
+      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+    );
+
+  const currentFilters: SavedViewFilters = {
+    unidadeFilter,
+    cursoFilter,
+    professorFilter,
+    groupBy,
+    periodo,
+    blocosSel,
+    andaresSel,
+    tipoFilter,
+  };
+
+  const applyView = (f: SavedViewFilters) => {
+    setUnidadeFilter(f.unidadeFilter);
+    setCursoFilter(f.cursoFilter);
+    setProfessorFilter(f.professorFilter);
+    setGroupBy(f.groupBy);
+    setPeriodo(f.periodo);
+    setBlocosSel(f.blocosSel);
+    setAndaresSel(f.andaresSel);
+    setTipoFilter(f.tipoFilter);
+  };
+
+  const handleEmptySlotClick = (ambienteId: string, horarioInicio: string) => {
+    setNewSlot({ ambienteId, horarioInicio });
+  };
 
   return (
     <>
       <AdminHeader
         title="Ensalamento"
-        subtitle="Visão geral da grade semanal de alocação de salas e turmas"
+        subtitle="Mapa de salas e grade de horários — filtre, visualize e resolva conflitos"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center bg-white p-4 rounded-xl border border-[#e6e5e0] shadow-sm">
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Unidade / Campus */}
-            <div>
-              <Select value={unidadeFilter} onValueChange={handleUnidadeChange}>
-                <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
-                  <SelectValue placeholder="Todas as unidades" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as unidades</SelectItem>
-                  {unidades.map((unidade) => (
-                    <SelectItem key={unidade.id} value={unidade.id}>
-                      {unidade.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <div className="px-6 py-4 max-w-[1400px] mx-auto w-full space-y-4">
+        {/* Top bar: day tabs, view mode, base filters */}
+        <div className="bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+              {DIAS_SEMANA.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDay(d)}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] transition-colors ${
+                    day === d
+                      ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
+                      : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                  }`}
+                >
+                  {DIA_ABREV[d]}
+                </button>
+              ))}
             </div>
 
-            {/* Ambiente / Sala */}
-            <div>
-              <Select value={ambienteFilter} onValueChange={setAmbienteFilter}>
-                <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
-                  <SelectValue placeholder="Todos os ambientes" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os ambientes</SelectItem>
-                  {ambienteOptions.map((ambiente) => (
-                    <SelectItem key={ambiente.id} value={ambiente.id}>
-                      {ambiente.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+              <button
+                onClick={() => setViewMode("mapa")}
+                className={`px-3.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
+                  viewMode === "mapa"
+                    ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
+                    : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                }`}
+              >
+                Mapa de salas
+              </button>
+              <button
+                onClick={() => setViewMode("grade")}
+                className={`px-3.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
+                  viewMode === "grade"
+                    ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
+                    : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                }`}
+              >
+                Grade de horários
+              </button>
             </div>
 
-            {/* Curso */}
-            <div>
-              <Select value={cursoFilter} onValueChange={setCursoFilter}>
-                <SelectTrigger className="border-[#dddbd3] bg-[#fbfaf7]">
-                  <SelectValue placeholder="Todos os cursos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os cursos</SelectItem>
-                  {cursos.map((curso) => (
-                    <SelectItem key={curso.id} value={curso.id}>
-                      {curso.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Select value={unidadeFilter} onValueChange={setUnidadeFilter}>
+              <SelectTrigger className="w-[170px] border-[#dddbd3] bg-white text-[13px] h-9">
+                <SelectValue placeholder="Unidade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as unidades</SelectItem>
+                {unidades.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={cursoFilter} onValueChange={setCursoFilter}>
+              <SelectTrigger className="w-[170px] border-[#dddbd3] bg-white text-[13px] h-9">
+                <SelectValue placeholder="Curso" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os cursos</SelectItem>
+                {cursos.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={professorFilter} onValueChange={setProfessorFilter}>
+              <SelectTrigger className="w-[190px] border-[#dddbd3] bg-white text-[13px] h-9">
+                <SelectValue placeholder="Professor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os professores</SelectItem>
+                {professores.map((p) => (
+                  <SelectItem key={p.id} value={String(p.id)}>
+                    {p.firstName} {p.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="ml-auto flex items-center gap-3">
+              <span className="text-[12.5px] text-[#8a9095]">
+                {dayBlocks.length} {dayBlocks.length === 1 ? "aula" : "aulas"} ·{" "}
+                {day}
+              </span>
+              <Button
+                className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white h-9"
+                onClick={() =>
+                  handleEmptySlotClick(ambientesFiltradas[0]?.id || "", "08:00")
+                }
+                disabled={ambientesFiltradas.length === 0}
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Nova aula
+              </Button>
             </div>
           </div>
 
-          {/* Clear Filters Button */}
-          {isFiltered && (
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              className="border-[#dddbd3] text-[#6f767b] hover:text-[#1c1f21] shrink-0"
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Limpar filtros
-            </Button>
+          {viewMode === "mapa" && (
+            <SavedViewsBar
+              views={savedViews}
+              currentFilters={currentFilters}
+              onApply={applyView}
+              onSave={(name, role) => saveView(name, role, currentFilters)}
+              onRemove={removeView}
+            />
           )}
         </div>
 
-        {/* Count & Info */}
-        <div className="flex items-center justify-between text-sm text-[#6f767b]">
-          <span className="font-medium text-[#1c1f21]">
-            {filteredAulas.length}{" "}
-            {filteredAulas.length === 1
-              ? "aula nesta visão"
-              : "aulas nesta visão"}
-          </span>
-        </div>
-
-        {/* Content / Grid */}
+        {/* Content */}
         {isLoading ? (
           <div className="flex justify-center items-center h-64 bg-white rounded-xl border border-[#e6e5e0] shadow-sm">
             <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
           </div>
-        ) : filteredAulas.length === 0 ? (
-          <div className="bg-white rounded-xl border border-[#e6e5e0] p-12 text-center shadow-sm">
-            <div className="mx-auto w-12 h-12 rounded-full bg-[#f0efea] flex items-center justify-center text-[#6f767b] mb-4">
-              <CalendarX className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#1c1f21]">
-              Nenhuma aula encontrada
-            </h3>
-            <p className="text-sm text-[#6f767b] mt-1 max-w-md mx-auto">
-              Não há aulas cadastradas para a combinação de filtros selecionada.
-              Tente ajustar a unidade, ambiente ou curso.
-            </p>
-            {isFiltered && (
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-                className="mt-4 border-[#dddbd3] text-[#1a4f8a]"
-              >
-                Limpar filtros
-              </Button>
+        ) : (
+          <div className="overflow-x-auto pb-2">
+            {viewMode === "mapa" ? (
+              <MapaView
+                ambientes={ambientesFiltradas}
+                blocks={dayBlocks}
+                unidades={unidades}
+                unidadeFilter={unidadeFilter}
+                onUnidadeChange={setUnidadeFilter}
+                groupBy={groupBy}
+                onGroupByChange={setGroupBy}
+                periodo={periodo}
+                onPeriodoChange={setPeriodo}
+                blocosSel={blocosSel}
+                onToggleBloco={toggleBloco}
+                andaresSel={andaresSel}
+                onToggleAndar={toggleAndar}
+                tipoFilter={tipoFilter}
+                onTipoChange={setTipoFilter}
+                onBlockClick={setSelectedBlock}
+                onEmptySlotClick={handleEmptySlotClick}
+              />
+            ) : (
+              <GradeView
+                ambientes={ambientesFiltradas}
+                blocks={dayBlocks}
+                onBlockClick={setSelectedBlock}
+                onEmptySlotClick={handleEmptySlotClick}
+              />
             )}
           </div>
-        ) : (
-          <WeekScheduleGrid aulas={filteredAulas} />
         )}
       </div>
+
+      <BlockDetailSheet
+        block={selectedBlock}
+        onClose={() => setSelectedBlock(null)}
+        onSaved={() => setSelectedBlock(null)}
+      />
+
+      {newSlot && (
+        <NewBlockSheet
+          open={!!newSlot}
+          onClose={() => setNewSlot(null)}
+          onCreated={() => setNewSlot(null)}
+          ambienteId={newSlot.ambienteId}
+          diaSemana={day}
+          horarioInicio={newSlot.horarioInicio}
+        />
+      )}
     </>
   );
 }
