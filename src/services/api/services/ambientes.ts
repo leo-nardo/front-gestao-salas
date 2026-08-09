@@ -9,7 +9,11 @@ export type Ambiente = {
   id: string;
   nome: string;
   tipo: string;
-  categoria: string;
+  tipoAmbiente: {
+    id: string;
+    nome: string;
+    descricao?: string | null;
+  };
   capacidade: number;
   bloco?: string | null;
   andar?: string | null;
@@ -22,7 +26,7 @@ export type Ambiente = {
 export type CreateAmbienteRequest = {
   nome: string;
   tipo: string;
-  categoria: string;
+  tipoAmbiente: { id: string };
   capacidade: number;
   unidade: { id: string };
   bloco?: string;

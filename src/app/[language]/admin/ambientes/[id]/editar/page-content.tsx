@@ -13,7 +13,6 @@ import { AdminHeader } from "@/components/admin-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -21,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AmbientePatrimonioSection } from "@/components/ambiente-patrimonio-section";
 import {
   useGetAmbienteService,
@@ -31,11 +29,15 @@ import {
   useGetUnidadesService,
   Unidade,
 } from "@/services/api/services/unidades";
+import {
+  useGetTipoAmbientesService,
+  TipoAmbiente,
+} from "@/services/api/services/tipo-ambientes";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 const schema = yup.object().shape({
   nome: yup.string().required("O nome do ambiente é obrigatório"),
-  categoria: yup.string().required("A categoria é obrigatória"),
+  tipoAmbienteId: yup.string().required("O tipo de ambiente é obrigatório"),
   tipo: yup.string().required("A disponibilidade é obrigatória"),
   capacidade: yup
     .number()
@@ -46,29 +48,18 @@ const schema = yup.object().shape({
   bloco: yup.string().optional(),
   andar: yup.string().optional(),
   estacoesTrabalho: yup.number().optional().nullable(),
-  caracteristicas: yup.array().of(yup.string()).optional(),
 });
 
 type FormData = {
   nome: string;
-  categoria: string;
+  tipoAmbienteId: string;
   tipo: string;
   capacidade: number;
   unidadeId: string;
   bloco?: string;
   andar?: string;
   estacoesTrabalho?: number | null;
-  caracteristicas?: (string | undefined)[];
 };
-
-const CARACTERISTICAS = [
-  "Projetor fixo",
-  "Ar-condicionado",
-  "Som fixo",
-  "Palco",
-  "Lousa digital",
-  "Bancadas",
-];
 
 export default function PageContent({
   id,
@@ -81,65 +72,63 @@ export default function PageContent({
   const getAmbiente = useGetAmbienteService();
   const updateAmbiente = useUpdateAmbienteService();
   const getUnidades = useGetUnidadesService();
+  const getTipoAmbientes = useGetTipoAmbientesService();
 
   const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [tipoAmbientes, setTipoAmbientes] = useState<TipoAmbiente[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const { register, handleSubmit, control, reset } = useForm<FormData>({
     resolver: yupResolver(schema) as never,
     defaultValues: {
-      categoria: "Sala",
       tipo: "Grade fixa",
-      caracteristicas: [],
     },
   });
 
   const { errors } = useFormState({ control });
-  const categoria = useWatch({ control, name: "categoria" });
-
-  useEffect(() => {
-    getUnidades()
-      .then((res) =>
-        setUnidades(res.status === HTTP_CODES_ENUM.OK ? res.data.data : [])
-      )
-      .catch(console.error);
-  }, [getUnidades]);
+  const tipoAmbienteId = useWatch({ control, name: "tipoAmbienteId" });
+  const tipoAmbienteSelecionado = tipoAmbientes.find(
+    (t) => t.id === tipoAmbienteId
+  );
 
   useEffect(() => {
     let isMounted = true;
-    getAmbiente(id)
-      .then((res) => {
+    Promise.all([
+      getUnidades(),
+      getTipoAmbientes({ limit: "500" }),
+      getAmbiente(id),
+    ])
+      .then(([resUnidades, resTipoAmbientes, resAmbiente]) => {
         if (!isMounted) return;
-        if (res.status === HTTP_CODES_ENUM.OK && res.data) {
-          const amb = res.data;
+        setUnidades(
+          resUnidades.status === HTTP_CODES_ENUM.OK ? resUnidades.data.data : []
+        );
+        setTipoAmbientes(
+          resTipoAmbientes.status === HTTP_CODES_ENUM.OK
+            ? resTipoAmbientes.data.data
+            : []
+        );
+
+        if (resAmbiente.status === HTTP_CODES_ENUM.OK && resAmbiente.data) {
+          const amb = resAmbiente.data;
           const rawDesc = amb.descricao || "";
-          const parts = rawDesc
-            .split(",")
-            .map((p) => p.trim())
-            .filter(Boolean);
-          const featList: string[] = [];
           let estacoes: number | null = null;
 
-          parts.forEach((p) => {
-            if (p.includes("estações de trabalho")) {
-              const match = p.match(/(\d+)/);
-              if (match) estacoes = parseInt(match[1], 10);
-            } else if (CARACTERISTICAS.includes(p)) {
-              featList.push(p);
-            }
-          });
+          if (rawDesc.includes("estações de trabalho")) {
+            const match = rawDesc.match(/(\d+)/);
+            if (match) estacoes = parseInt(match[1], 10);
+          }
 
           reset({
             nome: amb.nome || "",
-            categoria: amb.categoria || "Sala",
+            tipoAmbienteId: amb.tipoAmbiente?.id || "",
             tipo: amb.tipo || "Grade fixa",
             capacidade: amb.capacidade || 0,
             unidadeId: amb.unidade?.id || "",
             bloco: amb.bloco || "",
             andar: amb.andar || "",
             estacoesTrabalho: estacoes,
-            caracteristicas: featList,
           });
         } else {
           toast.error("Ambiente não encontrado.");
@@ -147,7 +136,7 @@ export default function PageContent({
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Erro ao carregar ambiente.");
+        toast.error("Erro ao carregar dados.");
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -156,24 +145,19 @@ export default function PageContent({
     return () => {
       isMounted = false;
     };
-  }, [id, getAmbiente, reset]);
+  }, [id, getAmbiente, getUnidades, getTipoAmbientes, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
       setSubmitting(true);
 
-      const descricaoParts = (data.caracteristicas || []).filter(
-        (c): c is string => Boolean(c)
-      );
-      if (data.estacoesTrabalho) {
-        descricaoParts.push(`${data.estacoesTrabalho} estações de trabalho`);
-      }
-      const descricao =
-        descricaoParts.length > 0 ? descricaoParts.join(", ") : undefined;
+      const descricao = data.estacoesTrabalho
+        ? `${data.estacoesTrabalho} estações de trabalho`
+        : undefined;
 
       const res = await updateAmbiente(id, {
         nome: data.nome,
-        categoria: data.categoria,
+        tipoAmbiente: { id: data.tipoAmbienteId },
         tipo: data.tipo,
         capacidade: data.capacidade,
         unidade: { id: data.unidadeId },
@@ -243,40 +227,31 @@ export default function PageContent({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Categoria *</Label>
+                    <Label>Tipo de ambiente *</Label>
                     <Controller
-                      name="categoria"
+                      name="tipoAmbienteId"
                       control={control}
                       render={({ field }) => (
-                        <RadioGroup
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
-                          className="flex gap-4 mt-2"
                         >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="Sala" id="cat-sala" />
-                            <Label
-                              htmlFor="cat-sala"
-                              className="font-normal cursor-pointer"
-                            >
-                              Sala comum
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="Laboratório" id="cat-lab" />
-                            <Label
-                              htmlFor="cat-lab"
-                              className="font-normal cursor-pointer"
-                            >
-                              Laboratório
-                            </Label>
-                          </div>
-                        </RadioGroup>
+                          <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tipoAmbientes.map((tipo) => (
+                              <SelectItem key={tipo.id} value={tipo.id}>
+                                {tipo.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       )}
                     />
-                    {errors.categoria && (
+                    {errors.tipoAmbienteId && (
                       <p className="text-sm text-[#a8442f]">
-                        {errors.categoria.message}
+                        {errors.tipoAmbienteId.message}
                       </p>
                     )}
                   </div>
@@ -378,7 +353,7 @@ export default function PageContent({
                     />
                   </div>
 
-                  {categoria === "Laboratório" && (
+                  {tipoAmbienteSelecionado?.nome.includes("Laboratório") && (
                     <div className="space-y-2">
                       <Label htmlFor="estacoesTrabalho">
                         Estações de trabalho
@@ -392,47 +367,6 @@ export default function PageContent({
                       />
                     </div>
                   )}
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-[#f0efea]">
-                  <Label>Características físicas</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <Controller
-                      name="caracteristicas"
-                      control={control}
-                      render={({ field }) => (
-                        <>
-                          {CARACTERISTICAS.map((feature) => (
-                            <div
-                              key={feature}
-                              className="flex items-center space-x-2"
-                            >
-                              <Checkbox
-                                id={`feature-${feature}`}
-                                checked={(field.value || []).includes(feature)}
-                                onCheckedChange={(checked) => {
-                                  const current = field.value || [];
-                                  if (checked) {
-                                    field.onChange([...current, feature]);
-                                  } else {
-                                    field.onChange(
-                                      current.filter((c) => c !== feature)
-                                    );
-                                  }
-                                }}
-                              />
-                              <Label
-                                htmlFor={`feature-${feature}`}
-                                className="font-normal cursor-pointer text-sm"
-                              >
-                                {feature}
-                              </Label>
-                            </div>
-                          ))}
-                        </>
-                      )}
-                    />
-                  </div>
                 </div>
               </div>
 

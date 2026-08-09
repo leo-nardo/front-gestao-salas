@@ -15,6 +15,10 @@ import {
   useGetAmbientesService,
   Ambiente,
 } from "@/services/api/services/ambientes";
+import {
+  useGetTipoAmbientesService,
+  TipoAmbiente,
+} from "@/services/api/services/tipo-ambientes";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import {
   Select,
@@ -31,9 +35,11 @@ import {
 export default function PageContent({ language }: { language: string }) {
   const getAmbientes = useGetAmbientesService();
   const getUnidades = useGetUnidadesService();
+  const getTipoAmbientes = useGetTipoAmbientesService();
 
   const [ambientes, setAmbientes] = useState<Ambiente[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [tipoAmbientes, setTipoAmbientes] = useState<TipoAmbiente[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -43,9 +49,10 @@ export default function PageContent({ language }: { language: string }) {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [ambientesRes, unidadesRes] = await Promise.all([
+      const [ambientesRes, unidadesRes, tiposRes] = await Promise.all([
         getAmbientes(),
         getUnidades(),
+        getTipoAmbientes({ limit: "500" }),
       ]);
       setAmbientes(
         ambientesRes.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : []
@@ -53,12 +60,15 @@ export default function PageContent({ language }: { language: string }) {
       setUnidades(
         unidadesRes.status === HTTP_CODES_ENUM.OK ? unidadesRes.data.data : []
       );
+      setTipoAmbientes(
+        tiposRes.status === HTTP_CODES_ENUM.OK ? tiposRes.data.data : []
+      );
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }, [getAmbientes, getUnidades]);
+  }, [getAmbientes, getUnidades, getTipoAmbientes]);
 
   useEffect(() => {
     loadData();
@@ -68,7 +78,8 @@ export default function PageContent({ language }: { language: string }) {
     const matchesSearch = amb.nome.toLowerCase().includes(search.toLowerCase());
     const matchesUnidade =
       unidadeFilter === "all" || amb.unidade?.id === unidadeFilter;
-    const matchesTipo = tipoFilter === "all" || amb.categoria === tipoFilter;
+    const matchesTipo =
+      tipoFilter === "all" || amb.tipoAmbiente.id === tipoFilter;
     return matchesSearch && matchesUnidade && matchesTipo;
   });
 
@@ -112,8 +123,11 @@ export default function PageContent({ language }: { language: string }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="Sala">Sala comum</SelectItem>
-                <SelectItem value="Laboratório">Laboratório</SelectItem>
+                {tipoAmbientes.map((tipo) => (
+                  <SelectItem key={tipo.id} value={tipo.id}>
+                    {tipo.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 

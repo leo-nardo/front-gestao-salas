@@ -32,6 +32,10 @@ import {
 } from "@/services/api/services/unidades";
 import { useGetCursosService, Curso } from "@/services/api/services/cursos";
 import { useGetUsersService } from "@/services/api/services/users";
+import {
+  useGetTipoAmbientesService,
+  TipoAmbiente,
+} from "@/services/api/services/tipo-ambientes";
 import { RoleEnum } from "@/services/api/types/role";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -68,9 +72,7 @@ export default function EnsalamentoPageContent() {
   const [periodo, setPeriodo] = useState<"Todos" | Turno>("Todos");
   const [blocosSel, setBlocosSel] = useState<string[]>([]);
   const [andaresSel, setAndaresSel] = useState<string[]>([]);
-  const [tipoFilter, setTipoFilter] = useState<
-    "Todos" | "Sala" | "Laboratório"
-  >("Todos");
+  const [tipoFilter, setTipoFilter] = useState<string>("Todos");
 
   const [selectedBlock, setSelectedBlock] = useState<EnsalamentoBlock | null>(
     null
@@ -139,6 +141,19 @@ export default function EnsalamentoPageContent() {
     [cursosRes]
   );
 
+  const getTipoAmbientes = useGetTipoAmbientesService();
+  const { data: tipoAmbientesRes, isLoading: isLoadingTipos } = useQuery({
+    queryKey: ["tipo-ambientes", { limit: "500" }],
+    queryFn: () => getTipoAmbientes({ limit: "500" }),
+  });
+  const tipoAmbientes: TipoAmbiente[] = useMemo(
+    () =>
+      tipoAmbientesRes?.status === HTTP_CODES_ENUM.OK
+        ? tipoAmbientesRes.data.data
+        : [],
+    [tipoAmbientesRes]
+  );
+
   const getUsers = useGetUsersService();
   const { data: professoresRes, isLoading: isLoadingProfessores } = useQuery({
     queryKey: ["professores"],
@@ -163,7 +178,8 @@ export default function EnsalamentoPageContent() {
     isLoadingAmbientes ||
     isLoadingUnidades ||
     isLoadingCursos ||
-    isLoadingProfessores;
+    isLoadingProfessores ||
+    isLoadingTipos;
 
   const ambienteToUnidadeMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -366,6 +382,7 @@ export default function EnsalamentoPageContent() {
             <SavedViewsBar
               views={savedViews}
               currentFilters={currentFilters}
+              tipoAmbientes={tipoAmbientes}
               onApply={applyView}
               onSave={(name, role) => saveView(name, role, currentFilters)}
               onRemove={removeView}
@@ -397,6 +414,7 @@ export default function EnsalamentoPageContent() {
                 onToggleAndar={toggleAndar}
                 tipoFilter={tipoFilter}
                 onTipoChange={setTipoFilter}
+                tipoAmbientes={tipoAmbientes}
                 onBlockClick={setSelectedBlock}
                 onEmptySlotClick={handleEmptySlotClick}
               />

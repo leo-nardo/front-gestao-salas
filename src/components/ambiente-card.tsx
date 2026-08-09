@@ -6,6 +6,7 @@ import Link from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Ambiente } from "@/services/api/services/ambientes";
+import { getTipoAmbienteBadgeClasses } from "@/lib/tipo-ambiente-colors";
 
 interface AmbienteCardProps {
   ambiente: Ambiente;
@@ -13,7 +14,6 @@ interface AmbienteCardProps {
 }
 
 export function AmbienteCard({ ambiente }: AmbienteCardProps) {
-  // Try to parse some characteristics from descricao or use defaults if not present
   const features = ambiente.descricao
     ? ambiente.descricao
         .split(",")
@@ -21,28 +21,16 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
         .filter(Boolean)
     : [];
 
-  const getCategoryColor = (categoria: string) => {
-    switch (categoria) {
-      case "Laboratório":
-        return "bg-[#f7e7e2] text-[#a8442f] hover:bg-[#f7e7e2]/80 border-transparent";
-      default:
-        return "bg-[#e7edf8] text-[#3a4a99] hover:bg-[#e7edf8]/80 border-transparent";
-    }
-  };
-
-  const getCategoryLabel = (categoria: string) => {
-    if (categoria === "Laboratório") return "Lab.";
-    return categoria || "Sala";
-  };
-
   return (
     <div className="bg-white rounded-xl border border-[#e6e5e0] hover:border-[#c1d0e8] transition-colors p-5 flex flex-col h-full shadow-sm">
       <div className="flex items-start justify-between mb-4">
         <div className="text-sm font-mono font-medium text-[#6f767b]">
           {ambiente.id.split("-")[0].toUpperCase()}
         </div>
-        <Badge className={getCategoryColor(ambiente.categoria)}>
-          {getCategoryLabel(ambiente.categoria)}
+        <Badge
+          className={getTipoAmbienteBadgeClasses(ambiente.tipoAmbiente.nome)}
+        >
+          {ambiente.tipoAmbiente.nome}
         </Badge>
       </div>
 

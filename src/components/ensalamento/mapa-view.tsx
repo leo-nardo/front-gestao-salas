@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Ambiente } from "@/services/api/services/ambientes";
+import { TipoAmbiente } from "@/services/api/services/tipo-ambientes";
 import { Unidade } from "@/services/api/services/unidades";
 import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
 import { EnsalamentoBlock, Turno, TURNOS, kindBadge } from "./types";
@@ -24,8 +25,9 @@ type MapaViewProps = {
   onToggleBloco: (v: string) => void;
   andaresSel: string[];
   onToggleAndar: (v: string) => void;
-  tipoFilter: "Todos" | "Sala" | "Laboratório";
-  onTipoChange: (v: "Todos" | "Sala" | "Laboratório") => void;
+  tipoFilter: string;
+  onTipoChange: (v: string) => void;
+  tipoAmbientes: TipoAmbiente[];
   onBlockClick: (block: EnsalamentoBlock) => void;
   onEmptySlotClick: (ambienteId: string, horarioInicio: string) => void;
 };
@@ -70,6 +72,7 @@ export function MapaView({
   onToggleAndar,
   tipoFilter,
   onTipoChange,
+  tipoAmbientes,
   onBlockClick,
   onEmptySlotClick,
 }: MapaViewProps) {
@@ -95,7 +98,8 @@ export function MapaView({
       if (blocosSel.length && !blocosSel.includes(a.bloco || "")) return false;
       if (andaresSel.length && !andaresSel.includes(a.andar || ""))
         return false;
-      if (tipoFilter !== "Todos" && a.categoria !== tipoFilter) return false;
+      if (tipoFilter !== "Todos" && a.tipoAmbiente.id !== tipoFilter)
+        return false;
       return true;
     });
   }, [ambientes, blocosSel, andaresSel, tipoFilter]);
@@ -245,13 +249,13 @@ export function MapaView({
             </button>
           ))}
           <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
-          {(["Sala", "Laboratório"] as const).map((t) => (
+          {(tipoAmbientes || []).map((t) => (
             <button
-              key={t}
-              onClick={() => onTipoChange(tipoFilter === t ? "Todos" : t)}
-              className={chipClass(tipoFilter === t)}
+              key={t.id}
+              onClick={() => onTipoChange(tipoFilter === t.id ? "Todos" : t.id)}
+              className={chipClass(tipoFilter === t.id)}
             >
-              {t === "Sala" ? "Sala comum" : "Laboratório"}
+              {t.nome}
             </button>
           ))}
         </div>

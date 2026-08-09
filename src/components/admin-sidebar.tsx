@@ -17,6 +17,7 @@ import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Tags from "lucide-react/dist/esm/icons/tags";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ const navGroups = [
     title: "Espaços e recursos",
     items: [
       { name: "Ambientes", href: "/admin/ambientes", icon: DoorOpen },
+      { name: "Tipos de Ambiente", href: "/admin/tipos-ambiente", icon: Tags },
       { name: "Patrimônio", href: "/admin/patrimonio", icon: ClipboardList },
       { name: "Equipamentos", href: "/admin/equipamentos", icon: MonitorPlay },
     ],

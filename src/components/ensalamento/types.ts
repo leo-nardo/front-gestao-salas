@@ -1,6 +1,7 @@
 import { Aula, DiaSemana } from "@/services/api/services/aulas";
 import { Reserva } from "@/services/api/services/reservas";
 import { Ambiente } from "@/services/api/services/ambientes";
+import { getTipoAmbienteBadgeColors } from "@/lib/tipo-ambiente-colors";
 
 export const DIAS_SEMANA: DiaSemana[] = [
   "Segunda",
@@ -108,9 +109,6 @@ export function reservaToBlock(
 
 export type AmbienteWithMeta = Ambiente;
 
-export function kindBadge(ambiente: Pick<Ambiente, "categoria">) {
-  if (ambiente.categoria === "Laboratório") {
-    return { label: "Laboratório", fg: "#a8442f", bg: "#f7e7e2" };
-  }
-  return { label: "Sala", fg: "#3a4a99", bg: "#eceef8" };
+export function kindBadge(ambiente: Pick<Ambiente, "tipoAmbiente">) {
+  return getTipoAmbienteBadgeColors(ambiente.tipoAmbiente.nome);
 }

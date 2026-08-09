@@ -20,7 +20,7 @@ export type SavedViewFilters = {
   periodo: "Todos" | Turno;
   blocosSel: string[];
   andaresSel: string[];
-  tipoFilter: "Todos" | "Sala" | "Laboratório";
+  tipoFilter: string;
 };
 
 export type SavedView = {
@@ -88,6 +88,7 @@ function summarize(f: SavedViewFilters) {
 type SavedViewsBarProps = {
   views: SavedView[];
   currentFilters: SavedViewFilters;
+  tipoAmbientes: { id: string; nome: string }[];
   onApply: (filters: SavedViewFilters) => void;
   onSave: (name: string, role: SavedView["role"]) => void;
   onRemove: (id: string) => void;
@@ -96,6 +97,7 @@ type SavedViewsBarProps = {
 export function SavedViewsBar({
   views,
   currentFilters,
+  tipoAmbientes,
   onApply,
   onSave,
   onRemove,
@@ -139,7 +141,14 @@ export function SavedViewsBar({
                 {roleMeta.label}
               </span>
               <span className="text-[11px] text-[#8a9095]">
-                {summarize(v.filters)}
+                {summarize({
+                  ...v.filters,
+                  tipoFilter:
+                    v.filters.tipoFilter === "Todos"
+                      ? "Todos"
+                      : tipoAmbientes.find((t) => t.id === v.filters.tipoFilter)
+                          ?.nome || v.filters.tipoFilter,
+                })}
               </span>
             </button>
             <button
@@ -171,7 +180,15 @@ export function SavedViewsBar({
             Salvar visão pessoal
           </div>
           <div className="text-[11px] text-[#8a9095] mb-2.5">
-            {summarize(currentFilters)}
+            {summarize({
+              ...currentFilters,
+              tipoFilter:
+                currentFilters.tipoFilter === "Todos"
+                  ? "Todos"
+                  : tipoAmbientes.find(
+                      (t) => t.id === currentFilters.tipoFilter
+                    )?.nome || currentFilters.tipoFilter,
+            })}
           </div>
           <Input
             value={name}
