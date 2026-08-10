@@ -374,15 +374,7 @@ export default function EnsalamentoPageContent() {
       .map((r) => reservaToBlock(r, day));
 
     return [...aulaBlocks, ...reservaBlocks].filter(filterBlock);
-  }, [
-    aulas,
-    reservas,
-    day,
-    weekDates,
-    ambientesFiltradasIds,
-    cursoFilter,
-    professorFilter,
-  ]);
+  }, [aulas, reservas, day, weekDates, filterBlock]);
 
   // Blocks for calendar views (dia/semana/mes) — expanded from aulas + calReservas
   const calendarBlocks: EnsalamentoBlock[] = useMemo(() => {
@@ -416,16 +408,7 @@ export default function EnsalamentoPageContent() {
       cur = addDays(cur, 1);
     }
     return allBlocks.filter(filterBlock);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    viewMode,
-    focusDate,
-    aulas,
-    calReservas,
-    ambientesFiltradasIds,
-    cursoFilter,
-    professorFilter,
-  ]);
+  }, [viewMode, focusDate, aulas, calReservas, filterBlock]);
 
   // Calendar week start for week view
   const calendarWeekStart = useMemo(
@@ -777,18 +760,14 @@ export default function EnsalamentoPageContent() {
           </div>
         </div>
 
-        {/* Section 2: Opções do Mapa de salas (only visible on mapa view but always rendered) */}
+        {/* Visões salvas (only relevant to Mapa de salas) — Agrupar/Período live inside MapaView itself */}
         <div
           className={cn(
-            "bg-[#fbfaf7] p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3 transition-opacity duration-200",
+            "bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3 transition-opacity duration-200",
             viewMode !== "mapa" &&
               "opacity-0 pointer-events-none h-0 overflow-hidden !p-0 !border-0 !my-0"
           )}
         >
-          <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
-            Opções do Mapa de salas
-          </div>
-
           <SavedViewsBar
             views={savedViews}
             currentFilters={currentFilters}
