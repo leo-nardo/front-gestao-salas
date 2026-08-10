@@ -28,6 +28,8 @@ import {
   useGetTipoAmbientesService,
   TipoAmbiente,
 } from "@/services/api/services/tipo-ambientes";
+import { useGetBlocosService, Bloco } from "@/services/api/services/blocos";
+import { useGetAndaresService, Andar } from "@/services/api/services/andares";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 const schema = yup.object().shape({
@@ -40,8 +42,8 @@ const schema = yup.object().shape({
     .positive("Deve ser maior que zero")
     .required("A capacidade é obrigatória"),
   unidadeId: yup.string().required("A unidade é obrigatória"),
-  bloco: yup.string().optional(),
-  andar: yup.string().optional(),
+  blocoId: yup.string().optional(),
+  andarId: yup.string().optional(),
   estacoesTrabalho: yup.number().optional().nullable(),
 });
 
@@ -51,8 +53,8 @@ type FormData = {
   tipo: string;
   capacidade: number;
   unidadeId: string;
-  bloco?: string;
-  andar?: string;
+  blocoId?: string;
+  andarId?: string;
   estacoesTrabalho?: number | null;
 };
 
@@ -61,9 +63,13 @@ export default function PageContent({ language }: { language: string }) {
   const createAmbiente = useCreateAmbienteService();
   const getUnidades = useGetUnidadesService();
   const getTipoAmbientes = useGetTipoAmbientesService();
+  const getBlocos = useGetBlocosService();
+  const getAndares = useGetAndaresService();
 
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [tipoAmbientes, setTipoAmbientes] = useState<TipoAmbiente[]>([]);
+  const [blocos, setBlocos] = useState<Bloco[]>([]);
+  const [andares, setAndares] = useState<Andar[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const { register, handleSubmit, control } = useForm<FormData>({
@@ -91,7 +97,19 @@ export default function PageContent({ language }: { language: string }) {
         setTipoAmbientes(res.status === HTTP_CODES_ENUM.OK ? res.data.data : [])
       )
       .catch(console.error);
-  }, [getUnidades, getTipoAmbientes]);
+
+    getBlocos({ limit: "500" })
+      .then((res) =>
+        setBlocos(res.status === HTTP_CODES_ENUM.OK ? res.data.data : [])
+      )
+      .catch(console.error);
+
+    getAndares({ limit: "500" })
+      .then((res) =>
+        setAndares(res.status === HTTP_CODES_ENUM.OK ? res.data.data : [])
+      )
+      .catch(console.error);
+  }, [getUnidades, getTipoAmbientes, getBlocos, getAndares]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -107,8 +125,10 @@ export default function PageContent({ language }: { language: string }) {
         tipo: data.tipo,
         capacidade: data.capacidade,
         unidade: { id: data.unidadeId },
-        bloco: data.bloco,
-        andar: data.andar,
+        bloco:
+          data.blocoId && data.blocoId !== "none" ? { id: data.blocoId } : null,
+        andar:
+          data.andarId && data.andarId !== "none" ? { id: data.andarId } : null,
         descricao,
       });
 
@@ -272,22 +292,54 @@ export default function PageContent({ language }: { language: string }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bloco">Bloco</Label>
-                  <Input
-                    id="bloco"
-                    placeholder="Ex: B"
-                    className="bg-[#fbfaf7] border-[#dddbd3]"
-                    {...register("bloco")}
+                  <Label>Bloco</Label>
+                  <Controller
+                    name="blocoId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                          <SelectValue placeholder="Selecione o bloco" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhum</SelectItem>
+                          {blocos.map((bloco) => (
+                            <SelectItem key={bloco.id} value={bloco.id}>
+                              {bloco.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="andar">Andar</Label>
-                  <Input
-                    id="andar"
-                    placeholder="Ex: 3"
-                    className="bg-[#fbfaf7] border-[#dddbd3]"
-                    {...register("andar")}
+                  <Label>Andar</Label>
+                  <Controller
+                    name="andarId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                          <SelectValue placeholder="Selecione o andar" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhum</SelectItem>
+                          {andares.map((andar) => (
+                            <SelectItem key={andar.id} value={andar.id}>
+                              {andar.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
                 </div>
 

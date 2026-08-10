@@ -18,6 +18,8 @@ import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import Tags from "lucide-react/dist/esm/icons/tags";
+import Building from "lucide-react/dist/esm/icons/building";
+import Layers3 from "lucide-react/dist/esm/icons/layers-3";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,6 +37,8 @@ const navGroups = [
     items: [
       { name: "Ambientes", href: "/admin/ambientes", icon: DoorOpen },
       { name: "Tipos de Ambiente", href: "/admin/tipos-ambiente", icon: Tags },
+      { name: "Blocos", href: "/admin/blocos", icon: Building },
+      { name: "Andares", href: "/admin/andares", icon: Layers3 },
       { name: "Patrimônio", href: "/admin/patrimonio", icon: ClipboardList },
       { name: "Equipamentos", href: "/admin/equipamentos", icon: MonitorPlay },
     ],

@@ -56,8 +56,8 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
               <MapPin className="w-4 h-4 shrink-0" />
               <span className="truncate">
                 {[
-                  ambiente.andar ? `${ambiente.andar}º andar` : null,
-                  ambiente.bloco ? `Bloco ${ambiente.bloco}` : null,
+                  ambiente.andar ? `${ambiente.andar.nome}º andar` : null,
+                  ambiente.bloco ? `Bloco ${ambiente.bloco.nome}` : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")}

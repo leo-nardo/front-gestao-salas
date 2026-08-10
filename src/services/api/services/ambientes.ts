@@ -15,8 +15,8 @@ export type Ambiente = {
     descricao?: string | null;
   };
   capacidade: number;
-  bloco?: string | null;
-  andar?: string | null;
+  bloco?: { id: string; nome: string; descricao?: string | null } | null;
+  andar?: { id: string; nome: string; descricao?: string | null } | null;
   descricao?: string | null;
   unidade?: Unidade;
   createdAt: string;
@@ -29,8 +29,8 @@ export type CreateAmbienteRequest = {
   tipoAmbiente: { id: string };
   capacidade: number;
   unidade: { id: string };
-  bloco?: string;
-  andar?: string;
+  bloco?: { id: string } | null;
+  andar?: { id: string } | null;
   descricao?: string;
 };
 

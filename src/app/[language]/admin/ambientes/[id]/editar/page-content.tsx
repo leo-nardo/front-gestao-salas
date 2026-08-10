@@ -33,6 +33,8 @@ import {
   useGetTipoAmbientesService,
   TipoAmbiente,
 } from "@/services/api/services/tipo-ambientes";
+import { useGetBlocosService, Bloco } from "@/services/api/services/blocos";
+import { useGetAndaresService, Andar } from "@/services/api/services/andares";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 const schema = yup.object().shape({
@@ -45,8 +47,8 @@ const schema = yup.object().shape({
     .positive("Deve ser maior que zero")
     .required("A capacidade é obrigatória"),
   unidadeId: yup.string().required("A unidade é obrigatória"),
-  bloco: yup.string().optional(),
-  andar: yup.string().optional(),
+  blocoId: yup.string().optional(),
+  andarId: yup.string().optional(),
   estacoesTrabalho: yup.number().optional().nullable(),
 });
 
@@ -56,8 +58,8 @@ type FormData = {
   tipo: string;
   capacidade: number;
   unidadeId: string;
-  bloco?: string;
-  andar?: string;
+  blocoId?: string;
+  andarId?: string;
   estacoesTrabalho?: number | null;
 };
 
@@ -73,9 +75,13 @@ export default function PageContent({
   const updateAmbiente = useUpdateAmbienteService();
   const getUnidades = useGetUnidadesService();
   const getTipoAmbientes = useGetTipoAmbientesService();
+  const getBlocos = useGetBlocosService();
+  const getAndares = useGetAndaresService();
 
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [tipoAmbientes, setTipoAmbientes] = useState<TipoAmbiente[]>([]);
+  const [blocos, setBlocos] = useState<Bloco[]>([]);
+  const [andares, setAndares] = useState<Andar[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -97,43 +103,61 @@ export default function PageContent({
     Promise.all([
       getUnidades(),
       getTipoAmbientes({ limit: "500" }),
+      getBlocos({ limit: "500" }),
+      getAndares({ limit: "500" }),
       getAmbiente(id),
     ])
-      .then(([resUnidades, resTipoAmbientes, resAmbiente]) => {
-        if (!isMounted) return;
-        setUnidades(
-          resUnidades.status === HTTP_CODES_ENUM.OK ? resUnidades.data.data : []
-        );
-        setTipoAmbientes(
-          resTipoAmbientes.status === HTTP_CODES_ENUM.OK
-            ? resTipoAmbientes.data.data
-            : []
-        );
+      .then(
+        ([
+          resUnidades,
+          resTipoAmbientes,
+          resBlocos,
+          resAndares,
+          resAmbiente,
+        ]) => {
+          if (!isMounted) return;
+          setUnidades(
+            resUnidades.status === HTTP_CODES_ENUM.OK
+              ? resUnidades.data.data
+              : []
+          );
+          setTipoAmbientes(
+            resTipoAmbientes.status === HTTP_CODES_ENUM.OK
+              ? resTipoAmbientes.data.data
+              : []
+          );
+          setBlocos(
+            resBlocos.status === HTTP_CODES_ENUM.OK ? resBlocos.data.data : []
+          );
+          setAndares(
+            resAndares.status === HTTP_CODES_ENUM.OK ? resAndares.data.data : []
+          );
 
-        if (resAmbiente.status === HTTP_CODES_ENUM.OK && resAmbiente.data) {
-          const amb = resAmbiente.data;
-          const rawDesc = amb.descricao || "";
-          let estacoes: number | null = null;
+          if (resAmbiente.status === HTTP_CODES_ENUM.OK && resAmbiente.data) {
+            const amb = resAmbiente.data;
+            const rawDesc = amb.descricao || "";
+            let estacoes: number | null = null;
 
-          if (rawDesc.includes("estações de trabalho")) {
-            const match = rawDesc.match(/(\d+)/);
-            if (match) estacoes = parseInt(match[1], 10);
+            if (rawDesc.includes("estações de trabalho")) {
+              const match = rawDesc.match(/(\d+)/);
+              if (match) estacoes = parseInt(match[1], 10);
+            }
+
+            reset({
+              nome: amb.nome || "",
+              tipoAmbienteId: amb.tipoAmbiente?.id || "",
+              tipo: amb.tipo || "Grade fixa",
+              capacidade: amb.capacidade || 0,
+              unidadeId: amb.unidade?.id || "",
+              blocoId: amb.bloco?.id || "none",
+              andarId: amb.andar?.id || "none",
+              estacoesTrabalho: estacoes,
+            });
+          } else {
+            toast.error("Ambiente não encontrado.");
           }
-
-          reset({
-            nome: amb.nome || "",
-            tipoAmbienteId: amb.tipoAmbiente?.id || "",
-            tipo: amb.tipo || "Grade fixa",
-            capacidade: amb.capacidade || 0,
-            unidadeId: amb.unidade?.id || "",
-            bloco: amb.bloco || "",
-            andar: amb.andar || "",
-            estacoesTrabalho: estacoes,
-          });
-        } else {
-          toast.error("Ambiente não encontrado.");
         }
-      })
+      )
       .catch((err) => {
         console.error(err);
         toast.error("Erro ao carregar dados.");
@@ -145,7 +169,15 @@ export default function PageContent({
     return () => {
       isMounted = false;
     };
-  }, [id, getAmbiente, getUnidades, getTipoAmbientes, reset]);
+  }, [
+    id,
+    getAmbiente,
+    getUnidades,
+    getTipoAmbientes,
+    getBlocos,
+    getAndares,
+    reset,
+  ]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -161,8 +193,10 @@ export default function PageContent({
         tipo: data.tipo,
         capacidade: data.capacidade,
         unidade: { id: data.unidadeId },
-        bloco: data.bloco || undefined,
-        andar: data.andar || undefined,
+        bloco:
+          data.blocoId && data.blocoId !== "none" ? { id: data.blocoId } : null,
+        andar:
+          data.andarId && data.andarId !== "none" ? { id: data.andarId } : null,
         descricao,
       });
 
@@ -334,22 +368,54 @@ export default function PageContent({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bloco">Bloco</Label>
-                    <Input
-                      id="bloco"
-                      placeholder="Ex: B"
-                      className="bg-[#fbfaf7] border-[#dddbd3]"
-                      {...register("bloco")}
+                    <Label>Bloco</Label>
+                    <Controller
+                      name="blocoId"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                            <SelectValue placeholder="Selecione o bloco" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {blocos.map((bloco) => (
+                              <SelectItem key={bloco.id} value={bloco.id}>
+                                {bloco.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="andar">Andar</Label>
-                    <Input
-                      id="andar"
-                      placeholder="Ex: 3"
-                      className="bg-[#fbfaf7] border-[#dddbd3]"
-                      {...register("andar")}
+                    <Label>Andar</Label>
+                    <Controller
+                      name="andarId"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                            <SelectValue placeholder="Selecione o andar" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {andares.map((andar) => (
+                              <SelectItem key={andar.id} value={andar.id}>
+                                {andar.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
                   </div>
 
