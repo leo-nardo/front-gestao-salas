@@ -3,9 +3,6 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Ambiente } from "@/services/api/services/ambientes";
-import { TipoAmbiente } from "@/services/api/services/tipo-ambientes";
-import { Unidade } from "@/services/api/services/unidades";
-import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
 import { EnsalamentoBlock, Turno, TURNOS, kindBadge } from "./types";
 import { getCourseColor } from "@/lib/course-colors";
 
@@ -14,20 +11,10 @@ export type GroupBy = "bloco" | "andar" | "campus";
 type MapaViewProps = {
   ambientes: Ambiente[];
   blocks: EnsalamentoBlock[];
-  unidades: Unidade[];
-  unidadeFilter: string;
-  onUnidadeChange: (v: string) => void;
   groupBy: GroupBy;
   onGroupByChange: (v: GroupBy) => void;
   periodo: "Todos" | Turno;
   onPeriodoChange: (v: "Todos" | Turno) => void;
-  blocosSel: string[];
-  onToggleBloco: (v: string) => void;
-  andaresSel: string[];
-  onToggleAndar: (v: string) => void;
-  tipoFilter: string;
-  onTipoChange: (v: string) => void;
-  tipoAmbientes: TipoAmbiente[];
   onBlockClick: (block: EnsalamentoBlock) => void;
   onEmptySlotClick: (ambienteId: string, horarioInicio: string) => void;
 };
@@ -47,62 +34,18 @@ function tabClass(active: boolean) {
   );
 }
 
-function chipClass(active: boolean) {
-  return cn(
-    "text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors",
-    active
-      ? "bg-[#e7edf8] text-[#1a4f8a] border-[#b1c2e2]"
-      : "bg-white text-[#6f767b] border-[#e0ded6] hover:border-[#c7c4b9]"
-  );
-}
-
 export function MapaView({
   ambientes,
   blocks,
-  unidades,
-  unidadeFilter,
-  onUnidadeChange,
   groupBy,
   onGroupByChange,
   periodo,
   onPeriodoChange,
-  blocosSel,
-  onToggleBloco,
-  andaresSel,
-  onToggleAndar,
-  tipoFilter,
-  onTipoChange,
-  tipoAmbientes,
   onBlockClick,
   onEmptySlotClick,
 }: MapaViewProps) {
-  const blocosDisponiveis = useMemo(
-    () =>
-      Array.from(
-        new Set(ambientes.map((a) => a.bloco).filter(Boolean))
-      ) as string[],
-    [ambientes]
-  );
-  const andaresDisponiveis = useMemo(
-    () =>
-      Array.from(
-        new Set(ambientes.map((a) => a.andar).filter(Boolean))
-      ) as string[],
-    [ambientes]
-  );
-
   const visTurnos = periodo === "Todos" ? TURNOS : [periodo];
-
-  const visRooms = useMemo(() => {
-    return ambientes.filter((a) => {
-      if (blocosSel.length && !blocosSel.includes(a.bloco || "")) return false;
-      if (andaresSel.length && !andaresSel.includes(a.andar || ""))
-        return false;
-      if (tipoFilter !== "Todos" && a.tipoAmbiente.id !== tipoFilter)
-        return false;
-      return true;
-    });
-  }, [ambientes, blocosSel, andaresSel, tipoFilter]);
+  const visRooms = ambientes;
 
   const blocksByAmbiente = useMemo(() => {
     const map = new Map<string, EnsalamentoBlock[]>();
@@ -117,10 +60,10 @@ export function MapaView({
   const groups = useMemo(() => {
     const keyFn =
       groupBy === "andar"
-        ? (a: Ambiente) => a.andar || "Sem andar"
+        ? (a: Ambiente) => a.andar?.nome || "Sem andar"
         : groupBy === "campus"
           ? (a: Ambiente) => a.unidade?.nome || "Sem unidade"
-          : (a: Ambiente) => (a.bloco ? `Bloco ${a.bloco}` : "Sem bloco");
+          : (a: Ambiente) => (a.bloco ? `Bloco ${a.bloco.nome}` : "Sem bloco");
 
     const order: string[] = [];
     const map: Record<string, Ambiente[]> = {};
@@ -138,23 +81,16 @@ export function MapaView({
   let occCount = 0;
   let cellTotal = 0;
 
-  const filtersActive =
-    blocosSel.length > 0 || andaresSel.length > 0 || tipoFilter !== "Todos";
-
-  const clearFilters = () => {
-    blocosSel.forEach((b) => onToggleBloco(b));
-    andaresSel.forEach((a) => onToggleAndar(a));
-    onTipoChange("Todos");
-    onPeriodoChange("Todos");
-  };
-
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-[#e6e5e0] rounded-xl p-3.5 flex flex-col gap-3 min-w-[760px]">
+      <div className="bg-[#fbfaf7] border border-[#e6e5e0] rounded-xl p-3.5 flex flex-col gap-3 min-w-[760px]">
+        <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+          Opções do Mapa de salas
+        </div>
         <div className="flex items-center gap-5 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
-              Agrupar
+              Agrupar por
             </span>
             <div className="flex bg-[#efeee9] rounded-lg p-0.5">
               {(
@@ -190,74 +126,6 @@ export function MapaView({
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
-              Campus
-            </span>
-            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
-              <button
-                onClick={() => onUnidadeChange("all")}
-                className={tabClass(unidadeFilter === "all")}
-              >
-                Todos os campi
-              </button>
-              {unidades.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => onUnidadeChange(u.id)}
-                  className={tabClass(unidadeFilter === u.id)}
-                >
-                  {u.nome}
-                </button>
-              ))}
-            </div>
-          </div>
-          {filtersActive && (
-            <button
-              onClick={clearFilters}
-              className="ml-auto text-xs font-semibold text-[#a8442f] hover:underline inline-flex items-center gap-1"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Limpar filtros
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-wrap pt-2.5 border-t border-[#f0efea]">
-          <span className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide mr-1">
-            Filtrar
-          </span>
-          {blocosDisponiveis.map((b) => (
-            <button
-              key={b}
-              onClick={() => onToggleBloco(b)}
-              className={chipClass(blocosSel.includes(b))}
-            >
-              Bloco {b}
-            </button>
-          ))}
-          {blocosDisponiveis.length > 0 && andaresDisponiveis.length > 0 && (
-            <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
-          )}
-          {andaresDisponiveis.map((a) => (
-            <button
-              key={a}
-              onClick={() => onToggleAndar(a)}
-              className={chipClass(andaresSel.includes(a))}
-            >
-              {a}
-            </button>
-          ))}
-          <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
-          {(tipoAmbientes || []).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onTipoChange(tipoFilter === t.id ? "Todos" : t.id)}
-              className={chipClass(tipoFilter === t.id)}
-            >
-              {t.nome}
-            </button>
-          ))}
         </div>
       </div>
 

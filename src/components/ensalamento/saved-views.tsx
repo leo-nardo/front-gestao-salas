@@ -20,7 +20,8 @@ export type SavedViewFilters = {
   periodo: "Todos" | Turno;
   blocosSel: string[];
   andaresSel: string[];
-  tipoFilter: string;
+  tipoSel: string[];
+  searchText: string;
 };
 
 export type SavedView = {
@@ -30,7 +31,7 @@ export type SavedView = {
   filters: SavedViewFilters;
 };
 
-const STORAGE_KEY = "ambienta:ensalamento:savedViews";
+const STORAGE_KEY = "ambienta:ensalamento:savedViews:v2";
 
 export function useSavedViews() {
   const [views, setViews] = useState<SavedView[]>([]);
@@ -75,13 +76,36 @@ const ROLE_LABEL: Record<
   tecnico: { label: "Técnico de lab.", fg: "#a8442f", bg: "#f7e7e2" },
 };
 
-function summarize(f: SavedViewFilters) {
+function summarize(
+  f: SavedViewFilters,
+  tipoAmbientes: { id: string; nome: string }[],
+  blocos: { id: string; nome: string }[],
+  andares: { id: string; nome: string }[]
+) {
   const parts: string[] = [];
   if (f.groupBy) parts.push(`Agrupado por ${f.groupBy}`);
   if (f.periodo !== "Todos") parts.push(f.periodo);
-  if (f.blocosSel.length) parts.push(`Bloco ${f.blocosSel.join("/")}`);
-  if (f.andaresSel.length) parts.push(f.andaresSel.join("/"));
-  if (f.tipoFilter !== "Todos") parts.push(f.tipoFilter);
+
+  if (f.blocosSel && f.blocosSel.length) {
+    const nomes = f.blocosSel.map(
+      (id) => blocos.find((b) => b.id === id)?.nome || id
+    );
+    parts.push(`Bloco ${nomes.join("/")}`);
+  }
+  if (f.andaresSel && f.andaresSel.length) {
+    const nomes = f.andaresSel.map(
+      (id) => andares.find((a) => a.id === id)?.nome || id
+    );
+    parts.push(`Andar ${nomes.join("/")}`);
+  }
+  if (f.tipoSel && f.tipoSel.length) {
+    const nomes = f.tipoSel.map(
+      (id) => tipoAmbientes.find((t) => t.id === id)?.nome || id
+    );
+    parts.push(nomes.join("/"));
+  }
+  if (f.searchText) parts.push(`Busca: "${f.searchText}"`);
+
   return parts.length ? parts.join(" · ") : "Sem filtros adicionais";
 }
 
@@ -89,6 +113,8 @@ type SavedViewsBarProps = {
   views: SavedView[];
   currentFilters: SavedViewFilters;
   tipoAmbientes: { id: string; nome: string }[];
+  blocos: { id: string; nome: string }[];
+  andares: { id: string; nome: string }[];
   onApply: (filters: SavedViewFilters) => void;
   onSave: (name: string, role: SavedView["role"]) => void;
   onRemove: (id: string) => void;
@@ -98,6 +124,8 @@ export function SavedViewsBar({
   views,
   currentFilters,
   tipoAmbientes,
+  blocos,
+  andares,
   onApply,
   onSave,
   onRemove,
@@ -141,14 +169,7 @@ export function SavedViewsBar({
                 {roleMeta.label}
               </span>
               <span className="text-[11px] text-[#8a9095]">
-                {summarize({
-                  ...v.filters,
-                  tipoFilter:
-                    v.filters.tipoFilter === "Todos"
-                      ? "Todos"
-                      : tipoAmbientes.find((t) => t.id === v.filters.tipoFilter)
-                          ?.nome || v.filters.tipoFilter,
-                })}
+                {summarize(v.filters, tipoAmbientes, blocos, andares)}
               </span>
             </button>
             <button
@@ -180,15 +201,7 @@ export function SavedViewsBar({
             Salvar visão pessoal
           </div>
           <div className="text-[11px] text-[#8a9095] mb-2.5">
-            {summarize({
-              ...currentFilters,
-              tipoFilter:
-                currentFilters.tipoFilter === "Todos"
-                  ? "Todos"
-                  : tipoAmbientes.find(
-                      (t) => t.id === currentFilters.tipoFilter
-                    )?.nome || currentFilters.tipoFilter,
-            })}
+            {summarize(currentFilters, tipoAmbientes, blocos, andares)}
           </div>
           <Input
             value={name}

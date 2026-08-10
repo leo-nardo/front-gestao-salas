@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import {
@@ -51,6 +51,12 @@ import {
   useGetTipoAmbientesService,
   TipoAmbiente,
 } from "@/services/api/services/tipo-ambientes";
+import Search from "lucide-react/dist/esm/icons/search";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useGetBlocosService, Bloco } from "@/services/api/services/blocos";
+import { useGetAndaresService, Andar } from "@/services/api/services/andares";
 import { RoleEnum } from "@/services/api/types/role";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -100,7 +106,8 @@ export default function EnsalamentoPageContent() {
   const [periodo, setPeriodo] = useState<"Todos" | Turno>("Todos");
   const [blocosSel, setBlocosSel] = useState<string[]>([]);
   const [andaresSel, setAndaresSel] = useState<string[]>([]);
-  const [tipoFilter, setTipoFilter] = useState<string>("Todos");
+  const [tipoSel, setTipoSel] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
 
   const [selectedBlock, setSelectedBlock] = useState<EnsalamentoBlock | null>(
     null
@@ -231,6 +238,27 @@ export default function EnsalamentoPageContent() {
     [tipoAmbientesRes]
   );
 
+  const getBlocos = useGetBlocosService();
+  const { data: blocosRes, isLoading: isLoadingBlocos } = useQuery({
+    queryKey: ["blocos", { limit: "500" }],
+    queryFn: () => getBlocos({ limit: "500" }),
+  });
+  const blocos: Bloco[] = useMemo(
+    () => (blocosRes?.status === HTTP_CODES_ENUM.OK ? blocosRes.data.data : []),
+    [blocosRes]
+  );
+
+  const getAndares = useGetAndaresService();
+  const { data: andaresRes, isLoading: isLoadingAndares } = useQuery({
+    queryKey: ["andares", { limit: "500" }],
+    queryFn: () => getAndares({ limit: "500" }),
+  });
+  const andares: Andar[] = useMemo(
+    () =>
+      andaresRes?.status === HTTP_CODES_ENUM.OK ? andaresRes.data.data : [],
+    [andaresRes]
+  );
+
   const getUsers = useGetUsersService();
   const { data: professoresRes, isLoading: isLoadingProfessores } = useQuery({
     queryKey: ["professores"],
@@ -257,15 +285,9 @@ export default function EnsalamentoPageContent() {
     isLoadingCursos ||
     isLoadingProfessores ||
     isLoadingTipos ||
+    isLoadingBlocos ||
+    isLoadingAndares ||
     (isCalendarMode(viewMode) && isLoadingCalReservas);
-
-  const ambienteToUnidadeMap = useMemo(() => {
-    const map = new Map<string, string>();
-    ambientes.forEach((a) => {
-      if (a.unidade?.id) map.set(a.id, a.unidade.id);
-    });
-    return map;
-  }, [ambientes]);
 
   const ambienteFocado = useMemo(
     () =>
@@ -284,32 +306,49 @@ export default function EnsalamentoPageContent() {
   }, [ambienteFocado]);
 
   const ambientesFiltradas = useMemo(() => {
-    const base =
-      unidadeFilter === "all"
-        ? ambientes
-        : ambientes.filter((a) => a.unidade?.id === unidadeFilter);
+    let base = ambientes;
+    if (unidadeFilter !== "all") {
+      base = base.filter((a) => a.unidade?.id === unidadeFilter);
+    }
     if (ambienteFocusId) {
-      return base.filter((a) => a.id === ambienteFocusId);
+      base = base.filter((a) => a.id === ambienteFocusId);
+    }
+    if (blocosSel.length > 0) {
+      base = base.filter((a) => a.bloco?.id && blocosSel.includes(a.bloco.id));
+    }
+    if (andaresSel.length > 0) {
+      base = base.filter((a) => a.andar?.id && andaresSel.includes(a.andar.id));
+    }
+    if (tipoSel.length > 0) {
+      base = base.filter((a) => tipoSel.includes(a.tipoAmbiente.id));
+    }
+    if (searchText.trim().length > 0) {
+      const lower = searchText.toLowerCase();
+      base = base.filter((a) => a.nome.toLowerCase().includes(lower));
     }
     return base;
-  }, [ambientes, unidadeFilter, ambienteFocusId]);
+  }, [
+    ambientes,
+    unidadeFilter,
+    ambienteFocusId,
+    blocosSel,
+    andaresSel,
+    tipoSel,
+    searchText,
+  ]);
 
   const weekDates = useMemo(() => currentWeekDates(), []);
 
-  const dayBlocks: EnsalamentoBlock[] = useMemo(() => {
-    const aulaBlocks = aulas
-      .filter((a) => a.diaSemana === day)
-      .map(aulaToBlock);
+  const ambientesFiltradasIds = useMemo(
+    () => new Set(ambientesFiltradas.map((a) => a.id)),
+    [ambientesFiltradas]
+  );
 
-    const reservaBlocks = reservas
-      .filter((r) => r.status === "confirmada" && r.data === weekDates[day])
-      .map((r) => reservaToBlock(r, day));
+  // Shared filter predicate used for both existing and calendar views
+  const filterBlock = useCallback(
+    (b: EnsalamentoBlock) => {
+      if (!ambientesFiltradasIds.has(b.ambienteId)) return false;
 
-    return [...aulaBlocks, ...reservaBlocks].filter((b) => {
-      if (unidadeFilter !== "all") {
-        if (ambienteToUnidadeMap.get(b.ambienteId) !== unidadeFilter)
-          return false;
-      }
       if (cursoFilter !== "all") {
         if (b.kind !== "aula") return false;
         const aula = b.raw as Aula;
@@ -321,39 +360,29 @@ export default function EnsalamentoPageContent() {
         if (String(aula.professor.id) !== professorFilter) return false;
       }
       return true;
-    });
+    },
+    [ambientesFiltradasIds, cursoFilter, professorFilter]
+  );
+
+  const dayBlocks: EnsalamentoBlock[] = useMemo(() => {
+    const aulaBlocks = aulas
+      .filter((a) => a.diaSemana === day)
+      .map(aulaToBlock);
+
+    const reservaBlocks = reservas
+      .filter((r) => r.status === "confirmada" && r.data === weekDates[day])
+      .map((r) => reservaToBlock(r, day));
+
+    return [...aulaBlocks, ...reservaBlocks].filter(filterBlock);
   }, [
     aulas,
     reservas,
     day,
     weekDates,
-    unidadeFilter,
+    ambientesFiltradasIds,
     cursoFilter,
     professorFilter,
-    ambienteToUnidadeMap,
   ]);
-
-  // Shared filter predicate used for both existing and calendar views
-  const filterBlock = (b: EnsalamentoBlock) => {
-    if (unidadeFilter !== "all") {
-      if (ambienteToUnidadeMap.get(b.ambienteId) !== unidadeFilter)
-        return false;
-    }
-    if (cursoFilter !== "all") {
-      if (b.kind !== "aula") return false;
-      const aula = b.raw as Aula;
-      if (aula.disciplina.curso.id !== cursoFilter) return false;
-    }
-    if (professorFilter !== "all") {
-      if (b.kind !== "aula") return false;
-      const aula = b.raw as Aula;
-      if (String(aula.professor.id) !== professorFilter) return false;
-    }
-    if (ambienteFocusId) {
-      if (b.ambienteId !== ambienteFocusId) return false;
-    }
-    return true;
-  };
 
   // Blocks for calendar views (dia/semana/mes) — expanded from aulas + calReservas
   const calendarBlocks: EnsalamentoBlock[] = useMemo(() => {
@@ -393,11 +422,9 @@ export default function EnsalamentoPageContent() {
     focusDate,
     aulas,
     calReservas,
-    unidadeFilter,
+    ambientesFiltradasIds,
     cursoFilter,
     professorFilter,
-    ambienteFocusId,
-    ambienteToUnidadeMap,
   ]);
 
   // Calendar week start for week view
@@ -465,7 +492,8 @@ export default function EnsalamentoPageContent() {
     periodo,
     blocosSel,
     andaresSel,
-    tipoFilter,
+    tipoSel,
+    searchText,
   };
 
   const applyView = (f: SavedViewFilters) => {
@@ -474,10 +502,45 @@ export default function EnsalamentoPageContent() {
     setProfessorFilter(f.professorFilter);
     setGroupBy(f.groupBy);
     setPeriodo(f.periodo);
-    setBlocosSel(f.blocosSel);
-    setAndaresSel(f.andaresSel);
-    setTipoFilter(f.tipoFilter);
+    setBlocosSel(f.blocosSel || []);
+    setAndaresSel(f.andaresSel || []);
+    setTipoSel(f.tipoSel || []);
+    setSearchText(f.searchText || "");
   };
+
+  const toggleTipo = (v: string) =>
+    setTipoSel((prev) =>
+      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+    );
+
+  const filtersActive =
+    unidadeFilter !== "all" ||
+    cursoFilter !== "all" ||
+    professorFilter !== "all" ||
+    blocosSel.length > 0 ||
+    andaresSel.length > 0 ||
+    tipoSel.length > 0 ||
+    searchText !== "";
+
+  const clearFilters = () => {
+    setUnidadeFilter("all");
+    setCursoFilter("all");
+    setProfessorFilter("all");
+    setBlocosSel([]);
+    setAndaresSel([]);
+    setTipoSel([]);
+    setSearchText("");
+    setPeriodo("Todos");
+  };
+
+  function chipClass(active: boolean) {
+    return cn(
+      "text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors",
+      active
+        ? "bg-[#e7edf8] text-[#1a4f8a] border-[#b1c2e2]"
+        : "bg-white text-[#6f767b] border-[#e0ded6] hover:border-[#c7c4b9]"
+    );
+  }
 
   const handleEmptySlotClick = (
     ambienteId: string,
@@ -503,75 +566,89 @@ export default function EnsalamentoPageContent() {
       />
 
       <div className="px-6 py-4 max-w-[1400px] mx-auto w-full space-y-4">
-        {/* Top bar: day tabs, view mode, base filters */}
-        <div className="bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Weekday tabs — hidden in calendar views */}
-            {!isCalendarMode(viewMode) && (
-              <div className="flex bg-[#efeee9] rounded-lg p-0.5">
-                {DIAS_SEMANA.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDay(d)}
-                    className={`px-3.5 py-1.5 rounded-md text-[13px] transition-colors ${
-                      day === d
-                        ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
-                        : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
-                    }`}
-                  >
-                    {DIA_ABREV[d]}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Date navigation — shown only in calendar views */}
-            {isCalendarMode(viewMode) && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={navigatePrev}
-                  className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={navigateToday}
-                  className="px-3 py-1.5 rounded-md text-[13px] font-semibold text-[#1a4f8a] hover:bg-[#eaf0fa] transition-colors"
-                >
-                  Hoje
-                </button>
-                <button
-                  onClick={navigateNext}
-                  className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <span className="ml-2 text-[13px] font-semibold text-[#1c1f21] capitalize">
-                  {dateLabel}
-                </span>
-              </div>
-            )}
-
+        {/* Navigation & Controls */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {!isCalendarMode(viewMode) && (
             <div className="flex bg-[#efeee9] rounded-lg p-0.5">
-              {[
-                { key: "mapa" as ViewMode, label: "Mapa de salas" },
-                { key: "grade" as ViewMode, label: "Grade de horários" },
-                { key: "dia" as ViewMode, label: "Dia" },
-                { key: "semana" as ViewMode, label: "Semana" },
-                { key: "mes" as ViewMode, label: "Mês" },
-              ].map((tab) => (
+              {DIAS_SEMANA.map((d) => (
                 <button
-                  key={tab.key}
-                  onClick={() => setViewMode(tab.key)}
-                  className={`px-3.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
-                    viewMode === tab.key
+                  key={d}
+                  onClick={() => setDay(d)}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] transition-colors ${
+                    day === d
                       ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
                       : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
                   }`}
                 >
-                  {tab.label}
+                  {DIA_ABREV[d]}
                 </button>
               ))}
+            </div>
+          )}
+          {isCalendarMode(viewMode) && (
+            <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-[#e6e5e0]">
+              <button
+                onClick={navigatePrev}
+                className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={navigateToday}
+                className="px-3 py-1.5 rounded-md text-[13px] font-semibold text-[#1a4f8a] hover:bg-[#eaf0fa] transition-colors"
+              >
+                Hoje
+              </button>
+              <button
+                onClick={navigateNext}
+                className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <span className="ml-2 pr-2 text-[13px] font-semibold text-[#1c1f21] capitalize">
+                {dateLabel}
+              </span>
+            </div>
+          )}
+
+          <div className="flex bg-[#efeee9] rounded-lg p-0.5 ml-auto">
+            {[
+              { key: "mapa" as ViewMode, label: "Mapa de salas" },
+              { key: "grade" as ViewMode, label: "Grade de horários" },
+              { key: "dia" as ViewMode, label: "Dia" },
+              { key: "semana" as ViewMode, label: "Semana" },
+              { key: "mes" as ViewMode, label: "Mês" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setViewMode(tab.key)}
+                className={`px-3.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
+                  viewMode === tab.key
+                    ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
+                    : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Section 1: Filtros */}
+        <div className="bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3">
+          <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+            Filtros
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8a9095]" />
+              <Input
+                placeholder="Buscar sala..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-9 h-9 w-[190px] text-[13px] border-[#dddbd3]"
+              />
             </div>
 
             <Select value={unidadeFilter} onValueChange={setUnidadeFilter}>
@@ -652,16 +729,76 @@ export default function EnsalamentoPageContent() {
             </div>
           </div>
 
-          {viewMode === "mapa" && (
-            <SavedViewsBar
-              views={savedViews}
-              currentFilters={currentFilters}
-              tipoAmbientes={tipoAmbientes}
-              onApply={applyView}
-              onSave={(name, role) => saveView(name, role, currentFilters)}
-              onRemove={removeView}
-            />
+          <div className="flex items-center gap-1.5 flex-wrap pt-2.5 border-t border-[#f0efea]">
+            {blocos.map((b) => (
+              <button
+                key={b.id}
+                onClick={() => toggleBloco(b.id)}
+                className={chipClass(blocosSel.includes(b.id))}
+              >
+                Bloco {b.nome}
+              </button>
+            ))}
+            {blocos.length > 0 && andares.length > 0 && (
+              <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
+            )}
+            {andares.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => toggleAndar(a.id)}
+                className={chipClass(andaresSel.includes(a.id))}
+              >
+                {a.nome}
+              </button>
+            ))}
+            {(blocos.length > 0 || andares.length > 0) &&
+              tipoAmbientes.length > 0 && (
+                <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
+              )}
+            {tipoAmbientes.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => toggleTipo(t.id)}
+                className={chipClass(tipoSel.includes(t.id))}
+              >
+                {t.nome}
+              </button>
+            ))}
+
+            {filtersActive && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-xs font-semibold text-[#a8442f] hover:underline inline-flex items-center gap-1"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Section 2: Opções do Mapa de salas (only visible on mapa view but always rendered) */}
+        <div
+          className={cn(
+            "bg-[#fbfaf7] p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3 transition-opacity duration-200",
+            viewMode !== "mapa" &&
+              "opacity-0 pointer-events-none h-0 overflow-hidden !p-0 !border-0 !my-0"
           )}
+        >
+          <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+            Opções do Mapa de salas
+          </div>
+
+          <SavedViewsBar
+            views={savedViews}
+            currentFilters={currentFilters}
+            tipoAmbientes={tipoAmbientes}
+            blocos={blocos}
+            andares={andares}
+            onApply={applyView}
+            onSave={(name, role) => saveView(name, role, currentFilters)}
+            onRemove={removeView}
+          />
         </div>
 
         {/* Content */}
@@ -675,20 +812,10 @@ export default function EnsalamentoPageContent() {
               <MapaView
                 ambientes={ambientesFiltradas}
                 blocks={dayBlocks}
-                unidades={unidades}
-                unidadeFilter={unidadeFilter}
-                onUnidadeChange={setUnidadeFilter}
                 groupBy={groupBy}
                 onGroupByChange={setGroupBy}
                 periodo={periodo}
                 onPeriodoChange={setPeriodo}
-                blocosSel={blocosSel}
-                onToggleBloco={toggleBloco}
-                andaresSel={andaresSel}
-                onToggleAndar={toggleAndar}
-                tipoFilter={tipoFilter}
-                onTipoChange={setTipoFilter}
-                tipoAmbientes={tipoAmbientes}
                 onBlockClick={setSelectedBlock}
                 onEmptySlotClick={handleEmptySlotClick}
               />
