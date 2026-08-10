@@ -1,3 +1,4 @@
+import { startOfWeek, addDays, format } from "date-fns";
 import { Aula, DiaSemana } from "@/services/api/services/aulas";
 import { Reserva } from "@/services/api/services/reservas";
 import { Ambiente } from "@/services/api/services/ambientes";
@@ -35,23 +36,12 @@ export function turnoOf(horarioInicio: string): Turno {
 export function currentWeekDates(
   today: Date = new Date()
 ): Record<DiaSemana, string> {
-  const day = today.getDay(); // 0 = Sunday
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + mondayOffset);
-
-  const toIso = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${dd}`;
-  };
+  const monday = startOfWeek(today, { weekStartsOn: 1 });
 
   const result = {} as Record<DiaSemana, string>;
   DIAS_SEMANA.forEach((dia, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    result[dia] = toIso(d);
+    const d = addDays(monday, i);
+    result[dia] = format(d, "yyyy-MM-dd");
   });
   return result;
 }
@@ -111,4 +101,61 @@ export type AmbienteWithMeta = Ambiente;
 
 export function kindBadge(ambiente: Pick<Ambiente, "tipoAmbiente">) {
   return getTipoAmbienteBadgeColors(ambiente.tipoAmbiente.nome);
+}
+
+export function expandBlocksForDate(
+  aulas: Aula[],
+  reservas: Reserva[],
+  date: Date
+): EnsalamentoBlock[] {
+  const dayIndex = date.getDay(); // 0 = Sunday
+  const isSunday = dayIndex === 0;
+  // Sunday has no matching DiaSemana (DIAS_SEMANA only covers Mon–Sat).
+  // Use "Segunda" as a fallback label for reservas on Sundays (display-only).
+  const diaSemana: DiaSemana = isSunday ? "Segunda" : DIAS_SEMANA[dayIndex - 1];
+
+  // No aulas on Sunday since DIAS_SEMANA excludes it
+  const aulaBlocks = isSunday
+    ? []
+    : aulas.filter((a) => a.diaSemana === diaSemana).map(aulaToBlock);
+
+  const reservaDateStr = format(date, "yyyy-MM-dd");
+  const reservaBlocks = reservas
+    .filter((r) => r.status === "confirmada" && r.data === reservaDateStr)
+    .map((r) => reservaToBlock(r, diaSemana));
+
+  return [...aulaBlocks, ...reservaBlocks];
+}
+
+export function packOverlaps(
+  blocks: EnsalamentoBlock[]
+): (EnsalamentoBlock & { lane: number; laneCount: number })[] {
+  const sorted = [...blocks].sort((a, b) =>
+    a.horarioInicio.localeCompare(b.horarioInicio)
+  );
+  const lanes: string[] = [];
+  const assignments: { block: EnsalamentoBlock; lane: number }[] = [];
+
+  for (const block of sorted) {
+    let laneFound = false;
+    for (let i = 0; i < lanes.length; i++) {
+      if (lanes[i] <= block.horarioInicio) {
+        lanes[i] = block.horarioFim;
+        assignments.push({ block, lane: i });
+        laneFound = true;
+        break;
+      }
+    }
+    if (!laneFound) {
+      lanes.push(block.horarioFim);
+      assignments.push({ block, lane: lanes.length - 1 });
+    }
+  }
+
+  const laneCount = lanes.length;
+  return assignments.map((a) => ({
+    ...a.block,
+    lane: a.lane,
+    laneCount,
+  }));
 }

@@ -32,6 +32,7 @@ import { useCreateReservaService } from "@/services/api/services/reservas";
 import useAuth from "@/services/auth/use-auth";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { currentWeekDates, DIAS_SEMANA } from "./types";
+import { format } from "date-fns";
 
 const TIME_OPTIONS = Array.from({ length: 31 }, (_, i) => {
   const hours = Math.floor(i / 2) + 7;
@@ -46,6 +47,9 @@ type NewBlockSheetProps = {
   ambienteId: string;
   diaSemana: DiaSemana;
   horarioInicio: string;
+  /** Absolute date the slot was clicked on (calendar views). When present,
+   * overrides the "current week" default used for the reserva date field. */
+  date?: Date;
 };
 
 export function NewBlockSheet({
@@ -55,6 +59,7 @@ export function NewBlockSheet({
   ambienteId,
   diaSemana,
   horarioInicio,
+  date,
 }: NewBlockSheetProps) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -89,9 +94,11 @@ export function NewBlockSheet({
     setFim(`${String(Math.min(startHour + 3, 22)).padStart(2, "0")}:00`);
     setTitulo("");
     setDescricao("");
-    setReservaData(currentWeekDates()[diaSemana]);
+    setReservaData(
+      date ? format(date, "yyyy-MM-dd") : currentWeekDates()[diaSemana]
+    );
     setConflictMsg(null);
-  }, [open, ambienteId, diaSemana, horarioInicio]);
+  }, [open, ambienteId, diaSemana, horarioInicio, date]);
 
   const getCursos = useGetCursosService();
   const { data: cursosRes } = useQuery({

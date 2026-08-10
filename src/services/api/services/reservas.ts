@@ -45,6 +45,8 @@ export type CreateReservaResponse =
 export type ReservasRequest = {
   page?: number;
   limit?: number;
+  dataInicio?: string;
+  dataFim?: string;
 };
 
 export function useGetReservasService() {
@@ -58,6 +60,12 @@ export function useGetReservasService() {
       }
       if (params?.limit !== undefined) {
         url.searchParams.append("limit", params.limit.toString());
+      }
+      if (params?.dataInicio !== undefined) {
+        url.searchParams.append("dataInicio", params.dataInicio);
+      }
+      if (params?.dataFim !== undefined) {
+        url.searchParams.append("dataFim", params.dataFim);
       }
       return fetchBase(url.toString(), {
         method: "GET",
