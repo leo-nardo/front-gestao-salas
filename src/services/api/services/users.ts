@@ -5,6 +5,7 @@ import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
 import { User } from "../types/user";
 import { InfinityPaginationType } from "../types/infinity-pagination";
 import { Role } from "../types/role";
+import { Status } from "../types/status";
 import { SortEnum } from "../types/sort-type";
 import { RequestConfigType } from "./types/request-config";
 
@@ -13,6 +14,7 @@ export type UsersRequest = {
   limit: number;
   filters?: {
     roles?: Role[];
+    statuses?: Status[];
   };
   sort?: Array<{
     orderBy: keyof User;

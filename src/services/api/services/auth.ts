@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useFetch from "../use-fetch";
 import { API_URL } from "../config";
 import { User } from "../types/user";
+import { Role } from "../types/role";
 import { Tokens } from "../types/tokens";
 import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
 import { RequestConfigType } from "./types/request-config";
@@ -199,6 +200,77 @@ export function useAuthPatchMeService() {
       }).then(wrapperFetchJsonResponse<AuthPatchMeResponse>);
     },
     [fetch]
+  );
+}
+
+export type AuthInviteUserRequest = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: Role;
+};
+
+export type AuthInviteUserResponse = User;
+
+export function useAuthInviteUserService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: AuthInviteUserRequest, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/auth/admin/invite`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<AuthInviteUserResponse>);
+    },
+    [fetchBase]
+  );
+}
+
+export type AuthSendFirstAccessInviteRequest = {
+  userId: User["id"];
+};
+
+export type AuthSendFirstAccessInviteResponse = void;
+
+export function useAuthSendFirstAccessInviteService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (
+      data: AuthSendFirstAccessInviteRequest,
+      requestConfig?: RequestConfigType
+    ) => {
+      return fetchBase(`${API_URL}/v1/auth/admin/invite/${data.userId}/send`, {
+        method: "POST",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<AuthSendFirstAccessInviteResponse>);
+    },
+    [fetchBase]
+  );
+}
+
+export type AuthFirstAccessRequest = {
+  password: string;
+  hash: string;
+};
+
+export type AuthFirstAccessResponse = Tokens & {
+  user: User;
+};
+
+export function useAuthFirstAccessService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: AuthFirstAccessRequest, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/auth/first-access`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<AuthFirstAccessResponse>);
+    },
+    [fetchBase]
   );
 }
 

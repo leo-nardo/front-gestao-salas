@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePostUserService } from "@/services/api/services/users";
+import { useAuthInviteUserService } from "@/services/api/services/auth";
 import { RoleEnum } from "@/services/api/types/role";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -29,10 +29,6 @@ const schema = yup.object().shape({
     .string()
     .email("Insira um e-mail válido")
     .required("O e-mail é obrigatório"),
-  password: yup
-    .string()
-    .min(6, "A senha deve ter no mínimo 6 caracteres")
-    .required("A senha é obrigatória"),
   roleId: yup.string().required("O papel é obrigatório"),
 });
 
@@ -49,7 +45,7 @@ const ROLE_OPTIONS = [
 
 export default function PageContent() {
   const router = useRouter();
-  const postUser = usePostUserService();
+  const inviteUser = useAuthInviteUserService();
   const [submitting, setSubmitting] = useState(false);
 
   const { register, handleSubmit, control } = useForm<FormData>({
@@ -60,13 +56,11 @@ export default function PageContent() {
   const onSubmit = async (data: FormData) => {
     try {
       setSubmitting(true);
-      const res = await postUser({
+      const res = await inviteUser({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        password: data.password,
         role: { id: Number(data.roleId) },
-        status: { id: 1 },
       });
 
       if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
@@ -82,7 +76,9 @@ export default function PageContent() {
         return;
       }
 
-      toast.success("Usuário criado com sucesso!");
+      toast.success(
+        "Usuário pré-cadastrado! Envie o convite de acesso na lista de usuários."
+      );
       router.push("/admin/usuarios");
     } catch (error) {
       console.error(error);
@@ -158,20 +154,10 @@ export default function PageContent() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                className="bg-[#fbfaf7] border-[#dddbd3]"
-                {...register("password")}
-              />
-              {errors.password && (
-                <p className="text-sm text-[#a8442f]">
-                  {errors.password.message}
-                </p>
-              )}
+            <div className="rounded-lg border border-[#dddbd3] bg-[#fbfaf7] p-4 text-sm text-[#6f767b]">
+              A pessoa ainda não terá senha definida. Depois de salvar, envie o
+              convite de primeiro acesso na lista de usuários para que ela possa
+              criar sua própria senha.
             </div>
 
             <div className="space-y-2">

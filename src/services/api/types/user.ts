@@ -1,5 +1,6 @@
 import { FileEntity } from "./file-entity";
 import { Role } from "./role";
+import { Status } from "./status";
 
 export enum UserProviderEnum {
   EMAIL = "email",
@@ -15,4 +16,6 @@ export type User = {
   provider?: UserProviderEnum;
   socialId?: string;
   role?: Role;
+  status?: Status;
+  createdAt?: string;
 };
