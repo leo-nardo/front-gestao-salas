@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
 import Eye from "lucide-react/dist/esm/icons/eye";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import { toast } from "sonner";
@@ -84,17 +85,17 @@ function LoginPageContent() {
   return (
     <div className="flex min-h-screen">
       {/* Left Panel - Hidden on mobile */}
-      <div className="hidden lg:flex flex-1 flex-col justify-between bg-gradient-to-br from-[#1a4f8a] to-[#123c6e] p-12 text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 flex-col justify-between bg-gradient-to-br from-primary to-[#123c6e] p-12 text-white relative overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute -left-20 -top-20 w-96 h-96 rounded-full bg-white opacity-5 mix-blend-overlay"></div>
         <div className="absolute right-10 bottom-20 w-64 h-64 rounded-full bg-white opacity-5 mix-blend-overlay"></div>
 
         <div className="relative z-10">
           <div className="flex items-center space-x-3 mb-16">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1a4f8a] font-bold text-xl">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary font-bold text-xl">
               A
             </div>
-            <span className="font-mono text-xs tracking-[0.2em] text-[#cad6e8] uppercase">
+            <span className="font-mono text-xs tracking-[0.2em] text-sidebar-foreground uppercase">
               GESTÃO DE ESPAÇOS ACADÊMICOS
             </span>
           </div>
@@ -103,43 +104,43 @@ function LoginPageContent() {
             <h1 className="mb-6 font-sans text-[40px] font-extrabold leading-tight text-white">
               Todo o campus, uma grade só.
             </h1>
-            <p className="text-[#cad6e8] text-lg leading-relaxed max-w-md">
+            <p className="text-sidebar-foreground text-lg leading-relaxed max-w-md">
               Ensalamento, reservas, equipamentos e limpeza no mesmo lugar — sem
               planilha solta, sem conflito escondido.
             </p>
           </div>
         </div>
 
-        <div className="relative z-10 text-[#cad6e8] text-sm">
+        <div className="relative z-10 text-sidebar-foreground text-sm">
           © {new Date().getFullYear()} Gestão de Espaços Acadêmicos.
         </div>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex flex-1 items-center justify-center bg-[#f6f5f1] p-6 lg:p-12">
+      <div className="flex flex-1 items-center justify-center bg-background p-6 lg:p-12">
         {/* Mobile simplified header when hero is hidden */}
         <div className="lg:hidden absolute top-8 left-8 flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a4f8a] text-white font-bold text-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
             A
           </div>
-          <span className="font-mono text-[10px] tracking-wider text-[#1a4f8a] font-bold">
+          <span className="font-mono text-[10px] tracking-wider text-primary font-bold">
             GEA
           </span>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-[#e6e5e0] p-8">
+        <Card className="w-full max-w-md p-8">
           <div className="mb-8">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1a4f8a] text-white font-bold">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-white font-bold">
                 H
               </div>
-              <span className="font-semibold text-[#1c1f21]">
+              <span className="font-semibold text-foreground">
                 Faculdade Horizonte
               </span>
             </div>
 
-            <h2 className="text-2xl font-bold text-[#1c1f21] mb-2">Entrar</h2>
-            <p className="text-[#6f767b] text-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Entrar</h2>
+            <p className="text-muted-foreground text-sm">
               Acesse com suas credenciais institucionais.
             </p>
           </div>
@@ -150,45 +151,41 @@ function LoginPageContent() {
               className="space-y-5"
             >
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#1c1f21]">
-                  E-mail
-                </Label>
+                <Label htmlFor="email">E-mail</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="exemplo@instituicao.edu.br"
-                  className="bg-[#fbfaf7] border-[#dddbd3] focus:border-[#1a4f8a] focus-visible:ring-1 focus-visible:ring-[#1a4f8a] rounded-lg h-11"
+                  className="h-11"
                   {...methods.register("email")}
                 />
                 {methods.formState.errors.email && (
-                  <p className="text-[#a8442f] text-sm mt-1">
+                  <p className="text-destructive text-sm mt-1">
                     {methods.formState.errors.email.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#1c1f21]">
-                  Senha
-                </Label>
+                <Label htmlFor="password">Senha</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Sua senha"
-                    className="bg-[#fbfaf7] border-[#dddbd3] focus:border-[#1a4f8a] focus-visible:ring-1 focus-visible:ring-[#1a4f8a] rounded-lg h-11 pr-10"
+                    className="h-11 pr-10"
                     {...methods.register("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a9095] hover:text-[#1c1f21]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
                 {methods.formState.errors.password && (
-                  <p className="text-[#a8442f] text-sm mt-1">
+                  <p className="text-destructive text-sm mt-1">
                     {methods.formState.errors.password.message}
                   </p>
                 )}
@@ -196,20 +193,17 @@ function LoginPageContent() {
 
               <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    className="border-[#dddbd3] data-[state=checked]:bg-[#1a4f8a] data-[state=checked]:border-[#1a4f8a]"
-                  />
+                  <Checkbox id="remember" />
                   <label
                     htmlFor="remember"
-                    className="text-sm font-medium leading-none text-[#6f767b] cursor-pointer"
+                    className="text-sm font-medium leading-none text-muted-foreground cursor-pointer"
                   >
                     Manter conectado
                   </label>
                 </div>
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-medium text-[#1a4f8a] hover:underline"
+                  className="text-sm font-medium text-primary hover:underline"
                 >
                   Esqueci a senha
                 </Link>
@@ -218,19 +212,19 @@ function LoginPageContent() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#1a4f8a] hover:bg-[#123c6e] text-white h-11 rounded-lg font-semibold"
+                className="w-full h-11 rounded-lg font-semibold"
               >
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           </FormProvider>
 
-          <div className="mt-8 text-center border-t border-[#e6e5e0] pt-6">
-            <p className="text-[#8a9095] text-xs">
+          <div className="mt-8 text-center border-t pt-6">
+            <p className="text-muted-foreground/70 text-xs">
               Ambiente de demonstração · perfil Coordenação
             </p>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

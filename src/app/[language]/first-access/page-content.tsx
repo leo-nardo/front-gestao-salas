@@ -134,7 +134,7 @@ function Form() {
               <h1 className="text-xl font-semibold">
                 Bem-vindo! Defina sua senha de acesso
               </h1>
-              <p className="text-sm text-[#6f767b] mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Sua conta já foi criada pelo administrador. Escolha uma senha
                 para ativar seu acesso.
               </p>
