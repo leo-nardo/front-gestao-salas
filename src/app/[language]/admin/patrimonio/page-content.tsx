@@ -7,20 +7,13 @@ import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Edit from "lucide-react/dist/esm/icons/edit";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/data-table";
 import { toast } from "sonner";
+import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -31,6 +24,7 @@ import {
 import {
   useGetItemPatrimonialsService,
   useDeleteItemPatrimonialService,
+  type ItemPatrimonial,
 } from "@/services/api/services/item-patrimonials";
 import { useGetAmbientesService } from "@/services/api/services/ambientes";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
@@ -38,20 +32,21 @@ import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 const estadoBadge: Record<string, { label: string; className: string }> = {
   funcionando: {
     label: "Funcionando",
-    className: "bg-[#e6f2ea] text-[#2f7d4f]",
+    className: "bg-success-bg text-success",
   },
   com_defeito: {
     label: "Com defeito",
-    className: "bg-[#f7e7e2] text-[#a8442f]",
+    className: "bg-destructive-bg text-destructive",
   },
   em_manutencao: {
     label: "Em manutenção",
-    className: "bg-[#f6eede] text-[#b26a12]",
+    className: "bg-warning-bg text-warning",
   },
 };
 
 export default function PageContent() {
   const queryClient = useQueryClient();
+  const { confirmDialog } = useConfirmDialog();
   const searchParams = useSearchParams();
   const defaultAmbiente = searchParams.get("ambiente");
 
@@ -93,12 +88,15 @@ export default function PageContent() {
     },
   });
 
-  const handleDelete = (id: string) => {
-    if (
-      // eslint-disable-next-line no-alert
-      window.confirm("Tem certeza que deseja excluir este item patrimonial?")
-    ) {
-      deleteMutation.mutate(id);
+  const handleDelete = async (item: ItemPatrimonial) => {
+    const confirmed = await confirmDialog({
+      title: "Excluir item patrimonial",
+      message: `Tem certeza que deseja excluir "${item.nome}"? Essa ação não pode ser desfeita.`,
+      successButtonText: "Excluir",
+      cancelButtonText: "Cancelar",
+    });
+    if (confirmed) {
+      deleteMutation.mutate(item.id);
     }
   };
 
@@ -109,11 +107,11 @@ export default function PageContent() {
         subtitle="Gerencie os itens patrimoniais e equipamentos das salas"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full">
-        <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="w-full md:w-[300px]">
             <Select value={ambienteFiltro} onValueChange={setAmbienteFiltro}>
-              <SelectTrigger className="bg-white border-[#dddbd3]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filtrar por ambiente" />
               </SelectTrigger>
               <SelectContent>
@@ -129,112 +127,94 @@ export default function PageContent() {
           <Link
             href={`/admin/patrimonio/novo${ambienteFiltro !== "todos" ? `?ambiente=${ambienteFiltro}` : ""}`}
           >
-            <Button className="h-10 bg-[#1a4f8a] hover:bg-[#123c6e] text-white w-full md:w-auto">
+            <Button className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Novo item
             </Button>
           </Link>
         </div>
 
-        {isLoadingItens ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
-          </div>
-        ) : filteredItens.length > 0 ? (
-          <div className="bg-white rounded-xl border border-[#e6e5e0] overflow-hidden">
-            <Table>
-              <TableHeader className="bg-[#faf9f5]">
-                <TableRow className="border-b-[#f0efea]">
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Nome
-                  </TableHead>
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Tipo
-                  </TableHead>
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Ambiente
-                  </TableHead>
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Nº Patrimônio
-                  </TableHead>
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Estado
-                  </TableHead>
-                  <TableHead className="font-semibold text-[#1c1f21]">
-                    Ações
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredItens.map((item) => {
-                  const badge =
-                    estadoBadge[item.estado] || estadoBadge.funcionando;
-                  return (
-                    <TableRow key={item.id} className="border-b-[#f0efea]">
-                      <TableCell className="font-medium text-[#1c1f21]">
-                        {item.nome}
-                      </TableCell>
-                      <TableCell className="text-[#6f767b]">
-                        {item.tipo}
-                      </TableCell>
-                      <TableCell className="text-[#6f767b]">
-                        {item.ambiente.nome}
-                      </TableCell>
-                      <TableCell className="text-[#6f767b]">
-                        {item.numeroPatrimonio || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={`${badge.className} border-transparent`}
-                        >
-                          {badge.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link href={`/admin/patrimonio/${item.id}/editar`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 text-[#1a4f8a] hover:text-[#123c6e] px-2"
-                            >
-                              <Edit className="w-3.5 h-3.5 mr-1" />
-                              Editar
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deleteMutation.isPending}
-                            className="h-8 text-[#a8442f] hover:bg-[#f7e7e2] px-2"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 mr-1" />
-                            Excluir
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="border-2 border-dashed border-[#dddbd3] rounded-xl p-12 flex flex-col items-center justify-center text-center bg-white/50 mt-8">
-            <div className="w-16 h-16 rounded-full bg-[#f0efea] flex items-center justify-center mb-4">
-              <ClipboardList className="w-8 h-8 text-[#6f767b]" />
-            </div>
-            <h3 className="text-xl font-semibold text-[#1c1f21] mb-2">
-              Nenhum item patrimonial encontrado
-            </h3>
-            <Link href="/admin/patrimonio/novo">
-              <Button className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white">
-                Cadastrar item
-              </Button>
-            </Link>
-          </div>
-        )}
+        <DataTable
+          data={filteredItens}
+          isLoading={isLoadingItens}
+          getRowKey={(item) => item.id}
+          searchValue={(item) =>
+            `${item.nome} ${item.tipo} ${item.numeroPatrimonio ?? ""}`
+          }
+          searchPlaceholder="Buscar por nome, tipo ou nº de patrimônio..."
+          emptyState={{
+            icon: <ClipboardList className="w-8 h-8" />,
+            title: "Nenhum item patrimonial encontrado",
+            action: (
+              <Link href="/admin/patrimonio/novo">
+                <Button>Cadastrar item</Button>
+              </Link>
+            ),
+          }}
+          columns={[
+            {
+              header: "Nome",
+              cell: (item) => <span className="font-medium">{item.nome}</span>,
+            },
+            {
+              header: "Tipo",
+              cell: (item) => (
+                <span className="text-muted-foreground">{item.tipo}</span>
+              ),
+            },
+            {
+              header: "Ambiente",
+              cell: (item) => (
+                <span className="text-muted-foreground">
+                  {item.ambiente.nome}
+                </span>
+              ),
+            },
+            {
+              header: "Nº Patrimônio",
+              cell: (item) => (
+                <span className="text-muted-foreground">
+                  {item.numeroPatrimonio || "-"}
+                </span>
+              ),
+            },
+            {
+              header: "Estado",
+              cell: (item) => {
+                const badge =
+                  estadoBadge[item.estado] || estadoBadge.funcionando;
+                return (
+                  <Badge className={`${badge.className} border-transparent`}>
+                    {badge.label}
+                  </Badge>
+                );
+              },
+            },
+            {
+              header: "Ações",
+              cell: (item) => (
+                <div className="flex items-center gap-2">
+                  <Link href={`/admin/patrimonio/${item.id}/editar`}>
+                    <Button variant="ghost" size="sm">
+                      <Edit className="w-3.5 h-3.5 mr-1" />
+                      Editar
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(item)}
+                    disabled={deleteMutation.isPending}
+                    className="text-destructive hover:bg-destructive-bg hover:text-destructive"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Excluir
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+        />
       </div>
     </>
   );

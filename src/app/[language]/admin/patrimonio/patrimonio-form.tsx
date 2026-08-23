@@ -1,0 +1,258 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "sonner";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Link from "@/components/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
+import { applyApiFormErrors } from "@/services/api/apply-api-form-errors";
+import { useGetAmbientesService } from "@/services/api/services/ambientes";
+import type { ItemPatrimonial } from "@/services/api/services/item-patrimonials";
+
+const schema = yup.object().shape({
+  nome: yup.string().required("O nome é obrigatório"),
+  tipo: yup.string().required("O tipo é obrigatório"),
+  ambienteId: yup.string().required("O ambiente é obrigatório"),
+  numeroPatrimonio: yup.string().optional(),
+  estado: yup.string().required("O estado é obrigatório"),
+});
+
+export type PatrimonioFormData = yup.InferType<typeof schema>;
+
+type ApiResult =
+  | {
+      status: typeof HTTP_CODES_ENUM.OK | typeof HTTP_CODES_ENUM.CREATED;
+      data: ItemPatrimonial;
+    }
+  | {
+      status: number;
+      data?: { errors?: Record<string, string>; message?: string };
+    };
+
+type PatrimonioFormProps = {
+  title: string;
+  submitLabel: string;
+  submittingLabel: string;
+  successMessage: string;
+  backHref: string;
+  defaultValues?: Partial<PatrimonioFormData>;
+  onSave: (data: PatrimonioFormData) => Promise<ApiResult>;
+  onSaved: () => void;
+};
+
+export function PatrimonioForm({
+  title,
+  submitLabel,
+  submittingLabel,
+  successMessage,
+  backHref,
+  defaultValues,
+  onSave,
+  onSaved,
+}: PatrimonioFormProps) {
+  const [submitting, setSubmitting] = useState(false);
+  const getAmbientes = useGetAmbientesService();
+
+  const { data: ambientesRes, isLoading: isLoadingAmbientes } = useQuery({
+    queryKey: ["ambientes", { limit: "500" }],
+    queryFn: () => getAmbientes({ limit: "500" }),
+  });
+  const ambientes =
+    ambientesRes?.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : [];
+
+  const form = useForm<PatrimonioFormData>({
+    resolver: yupResolver(schema) as never,
+    defaultValues: {
+      nome: "",
+      tipo: "",
+      ambienteId: "",
+      numeroPatrimonio: "",
+      estado: "funcionando",
+      ...defaultValues,
+    },
+    values: defaultValues as PatrimonioFormData | undefined,
+  });
+
+  const onSubmit = async (data: PatrimonioFormData) => {
+    setSubmitting(true);
+    try {
+      const res = await onSave(data);
+      if (
+        res.status === HTTP_CODES_ENUM.OK ||
+        res.status === HTTP_CODES_ENUM.CREATED
+      ) {
+        toast.success(successMessage);
+        onSaved();
+        return;
+      }
+      applyApiFormErrors(res as never, form.setError);
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível salvar. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-[600px] mx-auto w-full">
+      <Link
+        href={backHref}
+        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Voltar para patrimônio
+      </Link>
+
+      <Card>
+        <CardHeader className="border-b pb-6">
+          <CardTitle className="text-xl">{title}</CardTitle>
+        </CardHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6 pt-6">
+              <FormField
+                control={form.control}
+                name="nome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Projetor Epson" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Projetor, Ar Condicionado"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="numeroPatrimonio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de Patrimônio</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Opcional" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ambienteId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ambiente *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isLoadingAmbientes}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o ambiente" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ambientes.map((amb) => (
+                          <SelectItem key={amb.id} value={amb.id}>
+                            {amb.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="estado"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o estado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="funcionando">Funcionando</SelectItem>
+                        <SelectItem value="com_defeito">Com defeito</SelectItem>
+                        <SelectItem value="em_manutencao">
+                          Em manutenção
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+
+            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
+              <Link href={backHref}>
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? submittingLabel : submitLabel}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </div>
+  );
+}

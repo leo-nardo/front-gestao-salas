@@ -172,14 +172,20 @@ de teste, conferir visualmente, depois descartar) antes de considerar pronto.
 
 ## Fase 2 — Retrofit das 12 telas de recurso admin (lista + criar + editar)
 
-Ordem sugerida (mais simples → mais complexa, pra validar o padrão cedo):
-1. ~~`blocos`~~ ✅ **feito** — referência do padrão novo (ver abaixo)
-   , `andares`, `tipos-ambiente` (mesmíssima estrutura de `blocos`)
-2. `disciplinas`, `turmas`, `equipamentos`
-3. `ambientes` (formulário com mais campos relacionados)
-4. `patrimonio`, `reservas`, `solicitacoes`, `aulas`
-5. `usuarios` (mais sensível — tem o fluxo de convite/primeiro acesso, mexer
-   com cuidado pra não regredir isso)
+Progresso: **7 de 12 concluídos** (18/08).
+
+1. ✅ `blocos` — referência do padrão novo (ver abaixo)
+2. ✅ `andares`, ✅ `tipos-ambiente` (mesma estrutura de `blocos`)
+3. ✅ `disciplinas`, ✅ `turmas` (form + select de Curso via useQuery)
+4. ✅ `equipamentos` (mantido grid de cards já existente, só tokens+useQuery)
+5. ✅ `ambientes` — form mais complexo até agora (8 campos, select
+   condicional, sentinels "none" pra bloco/andar opcionais). Corrigido de
+   quebra um bug de texto real no `AmbienteCard` ("1ºº andar").
+6. **Faltam**: `patrimonio`, `reservas`, `solicitacoes`, `aulas`, `usuarios`
+   — esses têm workflows de status (aprovar/rejeitar) em vez de só
+   CRUD simples, então vão exigir mais atenção individual.
+   `usuarios` é o mais sensível (fluxo de convite/primeiro acesso já
+   implementado — mexer com cuidado pra não regredir isso).
 
 ### Padrão de referência (`blocos`, 18/08)
 
