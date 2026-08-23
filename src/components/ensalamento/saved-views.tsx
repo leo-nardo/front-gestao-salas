@@ -142,12 +142,12 @@ export function SavedViewsBar({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-[#f0efea]">
+    <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-secondary">
       <div className="flex items-center gap-2 shrink-0">
-        <Bookmark className="w-4 h-4 text-[#8a9095]" />
+        <Bookmark className="w-4 h-4 text-muted-foreground/70" />
         <div>
           <div className="text-[12.5px] font-bold">Visões salvas</div>
-          <div className="text-[11px] text-[#8a9095] max-w-[220px]">
+          <div className="text-[11px] text-muted-foreground/70 max-w-[220px]">
             Filtros salvos localmente neste navegador.
           </div>
         </div>
@@ -159,7 +159,7 @@ export function SavedViewsBar({
           <div key={v.id} className="relative group">
             <button
               onClick={() => onApply(v.filters)}
-              className="flex flex-col items-start gap-0.5 px-3 py-1.5 border border-[#e6e5e0] rounded-lg bg-[#fbfaf7] hover:border-[#b1c2e2] hover:bg-[#f4f7fc] transition-colors min-w-[160px] text-left"
+              className="flex flex-col items-start gap-0.5 px-3 py-1.5 border rounded-lg bg-surface-4 hover:border-info/40 hover:bg-info-bg/40 transition-colors min-w-[160px] text-left"
             >
               <span className="text-[12.5px] font-bold">{v.name}</span>
               <span
@@ -168,7 +168,7 @@ export function SavedViewsBar({
               >
                 {roleMeta.label}
               </span>
-              <span className="text-[11px] text-[#8a9095]">
+              <span className="text-[11px] text-muted-foreground/70">
                 {summarize(v.filters, tipoAmbientes, blocos, andares)}
               </span>
             </button>
@@ -177,7 +177,7 @@ export function SavedViewsBar({
                 e.stopPropagation();
                 onRemove(v.id);
               }}
-              className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#a8442f] text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-destructive text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
               title="Remover visão salva"
             >
               ×
@@ -191,7 +191,7 @@ export function SavedViewsBar({
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto border-[#ccd8ec] bg-[#e7edf8] text-[#1a4f8a] hover:bg-[#dbe6f6] font-bold"
+            className="ml-auto border-info/30 bg-info-bg text-info hover:bg-info-bg/70 font-bold"
           >
             + Salvar visão atual
           </Button>
@@ -200,7 +200,7 @@ export function SavedViewsBar({
           <div className="text-[12.5px] font-bold mb-1">
             Salvar visão pessoal
           </div>
-          <div className="text-[11px] text-[#8a9095] mb-2.5">
+          <div className="text-[11px] text-muted-foreground/70 mb-2.5">
             {summarize(currentFilters, tipoAmbientes, blocos, andares)}
           </div>
           <Input
@@ -209,7 +209,7 @@ export function SavedViewsBar({
             placeholder="Nome (ex.: Auxiliar Noite · Bloco C)"
             className="mb-2.5 text-[12.5px]"
           />
-          <div className="flex bg-[#efeee9] rounded-lg p-0.5 mb-3">
+          <div className="flex bg-muted rounded-lg p-0.5 mb-3">
             {(
               [
                 ["auxiliar", "Auxiliar"],
@@ -222,8 +222,8 @@ export function SavedViewsBar({
                 onClick={() => setRole(v)}
                 className={`flex-1 py-1.5 rounded-md text-[11.5px] font-semibold transition-colors ${
                   role === v
-                    ? "bg-white text-[#1a4f8a] shadow-sm"
-                    : "text-[#8a9095]"
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground/70"
                 }`}
               >
                 {label}
@@ -234,16 +234,12 @@ export function SavedViewsBar({
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 border-[#dddbd3]"
+              className="flex-1"
               onClick={() => setOpen(false)}
             >
               Cancelar
             </Button>
-            <Button
-              size="sm"
-              className="flex-[1.3] bg-[#1a4f8a] hover:bg-[#123c6e] text-white"
-              onClick={handleSave}
-            >
+            <Button size="sm" className="flex-[1.3]" onClick={handleSave}>
               Salvar
             </Button>
           </div>

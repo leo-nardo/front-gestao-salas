@@ -67,13 +67,13 @@ export function MonthView({
   }, [gridDays]);
 
   return (
-    <div className="border border-[#e6e5e0] rounded-xl overflow-hidden bg-white">
+    <div className="border rounded-xl overflow-hidden bg-card">
       {/* DOW header row */}
-      <div className="grid grid-cols-7 bg-[#faf9f5] border-b border-[#e6e5e0]">
+      <div className="grid grid-cols-7 bg-surface-3 border-b">
         {DOW_HEADERS.map((dow) => (
           <div
             key={dow}
-            className="py-2 text-center text-[11px] font-bold text-[#8a9095] uppercase tracking-wider border-r border-[#f0efea] last:border-r-0"
+            className="py-2 text-center text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider border-r border-secondary last:border-r-0"
           >
             {dow}
           </div>
@@ -84,7 +84,7 @@ export function MonthView({
       {weeks.map((week, wi) => (
         <div
           key={wi}
-          className="grid grid-cols-7 border-b border-[#f0efea] last:border-b-0"
+          className="grid grid-cols-7 border-b border-secondary last:border-b-0"
         >
           {week.map((date, di) => {
             const globalIdx = wi * 7 + di;
@@ -98,17 +98,17 @@ export function MonthView({
               <button
                 key={di}
                 onClick={() => onDayClick(date)}
-                className={`min-h-[80px] p-2 border-r border-[#f0efea] last:border-r-0 text-left flex flex-col hover:bg-[#f5f8fd] transition-colors ${
+                className={`min-h-[80px] p-2 border-r border-secondary last:border-r-0 text-left flex flex-col hover:bg-info-bg/50 transition-colors ${
                   inMonth ? "" : "opacity-40"
-                } ${today ? "bg-[#f0f5ff]" : ""}`}
+                } ${today ? "bg-info-bg" : ""}`}
               >
                 <span
                   className={`text-[12px] font-semibold self-end ${
                     today
-                      ? "bg-[#1a4f8a] text-white w-6 h-6 rounded-full flex items-center justify-center"
+                      ? "bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center"
                       : inMonth
-                        ? "text-[#1c1f21]"
-                        : "text-[#b0b5b9]"
+                        ? "text-foreground"
+                        : "text-muted-foreground/50"
                   }`}
                 >
                   {dayNum}
@@ -129,7 +129,7 @@ export function MonthView({
                       );
                     })}
                     {extraCount > 0 && (
-                      <span className="text-[10px] font-semibold text-[#8a9095] ml-0.5">
+                      <span className="text-[10px] font-semibold text-muted-foreground/70 ml-0.5">
                         +{extraCount}
                       </span>
                     )}
