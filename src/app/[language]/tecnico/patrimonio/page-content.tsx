@@ -8,6 +8,7 @@ import Wrench from "lucide-react/dist/esm/icons/wrench";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import {
   useGetItemPatrimonialsService,
   useReportarDefeitoService,
@@ -18,15 +19,15 @@ import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 const estadoBadge: Record<string, { label: string; className: string }> = {
   funcionando: {
     label: "Funcionando",
-    className: "bg-[#e6f2ea] text-[#2f7d4f]",
+    className: "bg-success-bg text-success",
   },
   com_defeito: {
     label: "Com defeito",
-    className: "bg-[#f7e7e2] text-[#a8442f]",
+    className: "bg-destructive-bg text-destructive",
   },
   em_manutencao: {
     label: "Em manutenção",
-    className: "bg-[#f6eede] text-[#b26a12]",
+    className: "bg-warning-bg text-warning",
   },
 };
 
@@ -72,10 +73,10 @@ export default function PageContent() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#1c1f21] font-public-sans tracking-tight">
+        <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Itens patrimoniais
         </h1>
-        <p className="text-sm text-[#6f767b] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Reporte defeitos em ativos fixos das salas e laboratórios
         </p>
       </div>
@@ -87,11 +88,6 @@ export default function PageContent() {
             variant={filtro === f ? "default" : "outline"}
             size="sm"
             onClick={() => setFiltro(f)}
-            className={
-              filtro === f
-                ? "bg-[#1c1f21] text-white"
-                : "border-[#dddbd3] text-[#1c1f21]"
-            }
           >
             {f}
           </Button>
@@ -100,25 +96,22 @@ export default function PageContent() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       ) : filteredItens.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 border border-[#e6e5e0] shadow-sm text-center">
-          <p className="text-[#6f767b]">Nenhum item encontrado.</p>
-        </div>
+        <Card className="p-12 text-center">
+          <p className="text-muted-foreground">Nenhum item encontrado.</p>
+        </Card>
       ) : (
         <div className="space-y-3">
           {filteredItens.map((item) => {
             const badge = estadoBadge[item.estado];
             return (
-              <div
-                key={item.id}
-                className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm"
-              >
+              <Card key={item.id} className="p-5">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="font-semibold text-[#1c1f21]">{item.nome}</p>
-                    <p className="text-sm text-[#6f767b]">
+                    <p className="font-semibold text-foreground">{item.nome}</p>
+                    <p className="text-sm text-muted-foreground">
                       {item.ambiente.nome}
                       {item.numeroPatrimonio && ` · ${item.numeroPatrimonio}`}
                     </p>
@@ -129,25 +122,24 @@ export default function PageContent() {
                 </div>
 
                 {item.descricaoDefeito && (
-                  <p className="text-sm text-[#a8442f] flex items-center gap-1 mb-2">
+                  <p className="text-sm text-destructive flex items-center gap-1 mb-2">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     {item.descricaoDefeito}
                   </p>
                 )}
 
                 {reportingId === item.id ? (
-                  <div className="space-y-2 pt-2 border-t border-[#f0efea]">
+                  <div className="space-y-2 pt-2 border-t">
                     <Textarea
                       autoFocus
                       placeholder="Descreva o defeito encontrado"
-                      className="bg-[#fbfaf7] border-[#dddbd3] text-sm"
+                      className="text-sm"
                       value={descricao}
                       onChange={(e) => setDescricao(e.target.value)}
                     />
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
-                        className="border-[#dddbd3]"
                         onClick={() => {
                           setReportingId(null);
                           setDescricao("");
@@ -156,7 +148,7 @@ export default function PageContent() {
                         Cancelar
                       </Button>
                       <Button
-                        className="bg-[#a8442f] hover:bg-[#8a3626] text-white"
+                        variant="destructive"
                         disabled={!descricao || mutation.isPending}
                         onClick={() =>
                           mutation.mutate({
@@ -175,7 +167,6 @@ export default function PageContent() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#dddbd3] text-[#1c1f21]"
                         onClick={() => setReportingId(item.id)}
                       >
                         <Wrench className="w-3.5 h-3.5 mr-2" />
@@ -186,7 +177,6 @@ export default function PageContent() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#dddbd3] text-[#1c1f21]"
                         disabled={updateMutation.isPending}
                         onClick={() =>
                           updateMutation.mutate({
@@ -203,7 +193,6 @@ export default function PageContent() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#dddbd3] text-[#1c1f21]"
                         disabled={updateMutation.isPending}
                         onClick={() =>
                           updateMutation.mutate({
@@ -218,7 +207,7 @@ export default function PageContent() {
                     )}
                   </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
