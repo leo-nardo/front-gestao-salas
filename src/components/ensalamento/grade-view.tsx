@@ -60,15 +60,15 @@ export function GradeView({
 
   return (
     <div className="space-y-4">
-      <div className="inline-flex min-w-full border border-[#e6e5e0] rounded-xl overflow-hidden bg-white">
+      <div className="inline-flex min-w-full border rounded-xl overflow-hidden bg-card">
         {/* hour axis */}
-        <div className="shrink-0 w-[58px] bg-[#faf9f5] border-r border-[#e6e5e0]">
-          <div className="h-[62px] border-b border-[#e6e5e0]" />
+        <div className="shrink-0 w-[58px] bg-surface-3 border-r">
+          <div className="h-[62px] border-b" />
           <div className="relative" style={{ height: GRID_HEIGHT }}>
             {hourAxis.map((h) => (
               <div
                 key={h}
-                className="absolute left-0 right-0 px-2 font-ibm-plex-mono text-[10.5px] text-[#a2a8ac] -translate-y-1/2"
+                className="absolute left-0 right-0 px-2 font-ibm-plex-mono text-[10.5px] text-muted-foreground/60 -translate-y-1/2"
                 style={{ top: (h - HOUR_START) * ROW_HEIGHT }}
               >
                 {String(h).padStart(2, "0")}:00
@@ -78,8 +78,8 @@ export function GradeView({
         </div>
 
         {/* turno labels rail */}
-        <div className="shrink-0 w-[40px] bg-[#fbfaf7] border-r border-[#e6e5e0]">
-          <div className="h-[62px] border-b border-[#e6e5e0]" />
+        <div className="shrink-0 w-[40px] bg-surface-4 border-r">
+          <div className="h-[62px] border-b" />
           <div className="relative" style={{ height: GRID_HEIGHT }}>
             {TURNO_BANDS.map((t) => (
               <div
@@ -91,7 +91,7 @@ export function GradeView({
                 }}
               >
                 <span
-                  className="text-[10px] font-bold text-[#8a9095] uppercase tracking-wider"
+                  className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider"
                   style={{
                     writingMode: "vertical-rl",
                     transform: "rotate(180deg)",
@@ -111,9 +111,9 @@ export function GradeView({
           return (
             <div
               key={amb.id}
-              className="flex-1 min-w-[190px] border-r border-[#f0efea] last:border-r-0"
+              className="flex-1 min-w-[190px] border-r border-secondary last:border-r-0"
             >
-              <div className="h-[62px] border-b border-[#e6e5e0] px-3 py-2 bg-[#faf9f5]">
+              <div className="h-[62px] border-b px-3 py-2 bg-surface-3">
                 <div className="flex items-center gap-1.5">
                   <span className="font-ibm-plex-mono text-[12.5px] font-semibold">
                     {amb.nome}
@@ -125,7 +125,7 @@ export function GradeView({
                     {cb.label}
                   </span>
                 </div>
-                <div className="text-[11.5px] text-[#8a9095] mt-0.5 truncate">
+                <div className="text-[11.5px] text-muted-foreground/70 mt-0.5 truncate">
                   {amb.capacidade} lug.
                 </div>
               </div>
@@ -133,7 +133,7 @@ export function GradeView({
                 {TURNO_BANDS.map((t) => (
                   <div
                     key={t.label}
-                    className="absolute left-0 right-0 bg-[#faf9f5]/60 border-t border-b border-[#f0efea]"
+                    className="absolute left-0 right-0 bg-surface-3/60 border-t border-b border-secondary"
                     style={{
                       top: (t.start - HOUR_START) * ROW_HEIGHT,
                       height: (t.end - t.start) * ROW_HEIGHT,
@@ -143,7 +143,7 @@ export function GradeView({
                 {hourAxis.map((h) => (
                   <div
                     key={h}
-                    className="absolute left-0 right-0 border-t border-[#f4f3ee]"
+                    className="absolute left-0 right-0 border-t border-secondary"
                     style={{ top: (h - HOUR_START) * ROW_HEIGHT }}
                   />
                 ))}
@@ -182,10 +182,10 @@ export function GradeView({
                           {b.kind === "aula" ? "Fixa" : "Reserva"}
                         </span>
                       </div>
-                      <div className="text-[12.5px] font-bold text-[#1c1f21] leading-tight truncate">
+                      <div className="text-[12.5px] font-bold text-foreground leading-tight truncate">
                         {b.titulo}
                       </div>
-                      <div className="text-[11px] text-[#565b5e] mt-auto truncate">
+                      <div className="text-[11px] text-muted-foreground mt-auto truncate">
                         {b.subtitulo}
                       </div>
                     </button>
@@ -208,7 +208,7 @@ export function GradeView({
                         `${String(t.start).padStart(2, "0")}:00`
                       )
                     }
-                    className="absolute left-1 right-1 rounded-lg border border-dashed border-transparent text-[#cbd0d3] text-xs hover:border-[#b1c2e2] hover:bg-[#eef3fb] hover:text-[#1a4f8a] transition-colors"
+                    className="absolute left-1 right-1 rounded-lg border border-dashed border-transparent text-muted-foreground/40 text-xs hover:border-info/40 hover:bg-info-bg/60 hover:text-primary transition-colors"
                     style={{
                       top: (t.start - HOUR_START) * ROW_HEIGHT + 2,
                       height: (t.end - t.start) * ROW_HEIGHT - 4,
@@ -223,17 +223,17 @@ export function GradeView({
         })}
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap text-xs text-[#8a9095]">
+      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground/70">
         <span className="inline-flex items-center gap-1.5">
           <span className="w-3.5 h-2.5 rounded-sm bg-[#eceef8] border-l-2 border-[#3a4a99] inline-block" />
           Aula fixa
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3.5 h-2.5 rounded-sm bg-white border border-[#5b53a6] border-l-2 inline-block" />
+          <span className="w-3.5 h-2.5 rounded-sm bg-card border border-[#5b53a6] border-l-2 inline-block" />
           Reserva avulsa
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-4 h-2.5 rounded-sm border border-dashed border-[#b1c2e2] inline-block" />
+          <span className="w-4 h-2.5 rounded-sm border border-dashed border-info/40 inline-block" />
           Livre · clique para reservar
         </span>
       </div>
