@@ -1,24 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Search from "lucide-react/dist/esm/icons/search";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Upload from "lucide-react/dist/esm/icons/upload";
 import Inbox from "lucide-react/dist/esm/icons/inbox";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { AdminHeader } from "@/components/admin-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AmbienteCard } from "@/components/ambiente-card";
-import {
-  useGetAmbientesService,
-  Ambiente,
-} from "@/services/api/services/ambientes";
-import {
-  useGetTipoAmbientesService,
-  TipoAmbiente,
-} from "@/services/api/services/tipo-ambientes";
+import { useGetAmbientesService } from "@/services/api/services/ambientes";
+import { useGetTipoAmbientesService } from "@/services/api/services/tipo-ambientes";
+import { useGetUnidadesService } from "@/services/api/services/unidades";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import {
   Select,
@@ -27,52 +23,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useGetUnidadesService,
-  Unidade,
-} from "@/services/api/services/unidades";
 
 export default function PageContent({ language }: { language: string }) {
   const getAmbientes = useGetAmbientesService();
   const getUnidades = useGetUnidadesService();
   const getTipoAmbientes = useGetTipoAmbientesService();
 
-  const [ambientes, setAmbientes] = useState<Ambiente[]>([]);
-  const [unidades, setUnidades] = useState<Unidade[]>([]);
-  const [tipoAmbientes, setTipoAmbientes] = useState<TipoAmbiente[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
   const [unidadeFilter, setUnidadeFilter] = useState("all");
   const [tipoFilter, setTipoFilter] = useState("all");
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [ambientesRes, unidadesRes, tiposRes] = await Promise.all([
-        getAmbientes(),
-        getUnidades(),
-        getTipoAmbientes({ limit: "500" }),
-      ]);
-      setAmbientes(
-        ambientesRes.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : []
-      );
-      setUnidades(
-        unidadesRes.status === HTTP_CODES_ENUM.OK ? unidadesRes.data.data : []
-      );
-      setTipoAmbientes(
-        tiposRes.status === HTTP_CODES_ENUM.OK ? tiposRes.data.data : []
-      );
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [getAmbientes, getUnidades, getTipoAmbientes]);
+  const { data: ambientesRes, isLoading: isLoadingAmbientes } = useQuery({
+    queryKey: ["ambientes"],
+    queryFn: () => getAmbientes(),
+  });
+  const { data: unidadesRes } = useQuery({
+    queryKey: ["unidades"],
+    queryFn: () => getUnidades(),
+  });
+  const { data: tiposRes } = useQuery({
+    queryKey: ["tipos-ambiente", { limit: 500 }],
+    queryFn: () => getTipoAmbientes({ limit: "500" }),
+  });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const ambientes =
+    ambientesRes?.status === HTTP_CODES_ENUM.OK ? ambientesRes.data.data : [];
+  const unidades =
+    unidadesRes?.status === HTTP_CODES_ENUM.OK ? unidadesRes.data.data : [];
+  const tipoAmbientes =
+    tiposRes?.status === HTTP_CODES_ENUM.OK ? tiposRes.data.data : [];
 
   const filteredAmbientes = ambientes.filter((amb) => {
     const matchesSearch = amb.nome.toLowerCase().includes(search.toLowerCase());
@@ -93,10 +72,10 @@ export default function PageContent({ language }: { language: string }) {
       <div className="p-6 max-w-[1200px] mx-auto w-full">
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6f767b]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar sala, laboratório ou bloco…"
-              className="pl-9 h-10 bg-[#fbfaf7] border-[#dddbd3]"
+              className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -104,7 +83,7 @@ export default function PageContent({ language }: { language: string }) {
 
           <div className="flex gap-4">
             <Select value={unidadeFilter} onValueChange={setUnidadeFilter}>
-              <SelectTrigger className="w-[180px] h-10 bg-[#fbfaf7] border-[#dddbd3]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Todas as unidades" />
               </SelectTrigger>
               <SelectContent>
@@ -118,7 +97,7 @@ export default function PageContent({ language }: { language: string }) {
             </Select>
 
             <Select value={tipoFilter} onValueChange={setTipoFilter}>
-              <SelectTrigger className="w-[160px] h-10 bg-[#fbfaf7] border-[#dddbd3]">
+              <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Todos os tipos" />
               </SelectTrigger>
               <SelectContent>
@@ -132,7 +111,7 @@ export default function PageContent({ language }: { language: string }) {
             </Select>
 
             <Link href="/admin/ambientes/novo">
-              <Button className="h-10 bg-[#1a4f8a] hover:bg-[#123c6e] text-white">
+              <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo ambiente
               </Button>
@@ -140,9 +119,11 @@ export default function PageContent({ language }: { language: string }) {
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
+        {isLoadingAmbientes ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-56 w-full rounded-xl" />
+            ))}
           </div>
         ) : filteredAmbientes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -155,27 +136,22 @@ export default function PageContent({ language }: { language: string }) {
             ))}
           </div>
         ) : (
-          <div className="border-2 border-dashed border-[#dddbd3] rounded-xl p-12 flex flex-col items-center justify-center text-center bg-white/50 mt-8">
-            <div className="w-16 h-16 rounded-full bg-[#f0efea] flex items-center justify-center mb-4">
-              <Inbox className="w-8 h-8 text-[#6f767b]" />
+          <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30 mt-8">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
+              <Inbox className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1c1f21] mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               Nenhum ambiente encontrado
             </h3>
-            <p className="text-[#6f767b] max-w-md mb-8">
+            <p className="text-muted-foreground max-w-md mb-8">
               Você ainda não tem ambientes cadastrados com esses filtros. Tente
               mudar a busca ou adicione um novo ambiente.
             </p>
             <div className="flex items-center gap-4">
               <Link href="/admin/ambientes/novo">
-                <Button className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white">
-                  Cadastrar primeiro ambiente
-                </Button>
+                <Button>Cadastrar primeiro ambiente</Button>
               </Link>
-              <Button
-                variant="outline"
-                className="border-[#dddbd3] text-[#1c1f21]"
-              >
+              <Button variant="outline">
                 <Upload className="w-4 h-4 mr-2" />
                 Importar planilha
               </Button>
