@@ -520,8 +520,8 @@ export default function EnsalamentoPageContent() {
     return cn(
       "text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors",
       active
-        ? "bg-[#e7edf8] text-[#1a4f8a] border-[#b1c2e2]"
-        : "bg-white text-[#6f767b] border-[#e0ded6] hover:border-[#c7c4b9]"
+        ? "bg-info-bg text-primary border-info/40"
+        : "bg-card text-muted-foreground border-border hover:border-muted-foreground/40"
     );
   }
 
@@ -552,15 +552,15 @@ export default function EnsalamentoPageContent() {
         {/* Navigation & Controls */}
         <div className="flex items-center gap-3 flex-wrap">
           {!isCalendarMode(viewMode) && (
-            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+            <div className="flex bg-muted rounded-lg p-0.5">
               {DIAS_SEMANA.map((d) => (
                 <button
                   key={d}
                   onClick={() => setDay(d)}
                   className={`px-3.5 py-1.5 rounded-md text-[13px] transition-colors ${
                     day === d
-                      ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
-                      : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                      ? "bg-card text-primary font-bold shadow-sm"
+                      : "text-muted-foreground/70 font-medium hover:text-foreground"
                   }`}
                 >
                   {DIA_ABREV[d]}
@@ -569,32 +569,32 @@ export default function EnsalamentoPageContent() {
             </div>
           )}
           {isCalendarMode(viewMode) && (
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-[#e6e5e0]">
+            <div className="flex items-center gap-1.5 bg-card p-1 rounded-lg border">
               <button
                 onClick={navigatePrev}
-                className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={navigateToday}
-                className="px-3 py-1.5 rounded-md text-[13px] font-semibold text-[#1a4f8a] hover:bg-[#eaf0fa] transition-colors"
+                className="px-3 py-1.5 rounded-md text-[13px] font-semibold text-primary hover:bg-info-bg/60 transition-colors"
               >
                 Hoje
               </button>
               <button
                 onClick={navigateNext}
-                className="p-1.5 rounded-md hover:bg-[#efeee9] text-[#8a9095] hover:text-[#1c1f21] transition-colors"
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
-              <span className="ml-2 pr-2 text-[13px] font-semibold text-[#1c1f21] capitalize">
+              <span className="ml-2 pr-2 text-[13px] font-semibold text-foreground capitalize">
                 {dateLabel}
               </span>
             </div>
           )}
 
-          <div className="flex bg-[#efeee9] rounded-lg p-0.5 ml-auto">
+          <div className="flex bg-muted rounded-lg p-0.5 ml-auto">
             {[
               { key: "mapa" as ViewMode, label: "Mapa de salas" },
               { key: "grade" as ViewMode, label: "Grade de horários" },
@@ -607,8 +607,8 @@ export default function EnsalamentoPageContent() {
                 onClick={() => setViewMode(tab.key)}
                 className={`px-3.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
                   viewMode === tab.key
-                    ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
-                    : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+                    ? "bg-card text-primary font-bold shadow-sm"
+                    : "text-muted-foreground/70 font-medium hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -618,24 +618,24 @@ export default function EnsalamentoPageContent() {
         </div>
 
         {/* Section 1: Filtros */}
-        <div className="bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3">
-          <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+        <div className="bg-card p-3.5 rounded-xl border shadow-sm flex flex-col gap-3">
+          <div className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wide">
             Filtros
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8a9095]" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70" />
               <Input
                 placeholder="Buscar sala..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="pl-9 h-9 w-[190px] text-[13px] border-[#dddbd3]"
+                className="pl-9 h-9 w-[190px] text-[13px]"
               />
             </div>
 
             <Select value={unidadeFilter} onValueChange={setUnidadeFilter}>
-              <SelectTrigger className="w-[170px] border-[#dddbd3] bg-white text-[13px] h-9">
+              <SelectTrigger className="w-[170px] bg-card text-[13px] h-9">
                 <SelectValue placeholder="Unidade" />
               </SelectTrigger>
               <SelectContent>
@@ -649,7 +649,7 @@ export default function EnsalamentoPageContent() {
             </Select>
 
             <Select value={cursoFilter} onValueChange={setCursoFilter}>
-              <SelectTrigger className="w-[170px] border-[#dddbd3] bg-white text-[13px] h-9">
+              <SelectTrigger className="w-[170px] bg-card text-[13px] h-9">
                 <SelectValue placeholder="Curso" />
               </SelectTrigger>
               <SelectContent>
@@ -663,7 +663,7 @@ export default function EnsalamentoPageContent() {
             </Select>
 
             <Select value={professorFilter} onValueChange={setProfessorFilter}>
-              <SelectTrigger className="w-[190px] border-[#dddbd3] bg-white text-[13px] h-9">
+              <SelectTrigger className="w-[190px] bg-card text-[13px] h-9">
                 <SelectValue placeholder="Professor" />
               </SelectTrigger>
               <SelectContent>
@@ -679,7 +679,7 @@ export default function EnsalamentoPageContent() {
             {ambienteFocado && (
               <button
                 onClick={() => setAmbienteFocusId(null)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e7edf8] border border-[#b1c2e2] text-[#1a4f8a] text-[13px] font-semibold hover:bg-[#dbe6f6] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info-bg border border-info/40 text-primary text-[13px] font-semibold hover:bg-info-bg/70 transition-colors"
               >
                 Sala: {ambienteFocado.nome}
                 <X className="w-3.5 h-3.5" />
@@ -688,19 +688,19 @@ export default function EnsalamentoPageContent() {
 
             <div className="ml-auto flex items-center gap-3">
               {!isCalendarMode(viewMode) && (
-                <span className="text-[12.5px] text-[#8a9095]">
+                <span className="text-[12.5px] text-muted-foreground/70">
                   {dayBlocks.length} {dayBlocks.length === 1 ? "aula" : "aulas"}{" "}
                   · {day}
                 </span>
               )}
               {isCalendarMode(viewMode) && (
-                <span className="text-[12.5px] text-[#8a9095]">
+                <span className="text-[12.5px] text-muted-foreground/70">
                   {calendarBlocks.length}{" "}
                   {calendarBlocks.length === 1 ? "evento" : "eventos"}
                 </span>
               )}
               <Button
-                className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white h-9"
+                className="bg-primary text-white h-9"
                 onClick={() =>
                   handleEmptySlotClick(ambientesFiltradas[0]?.id || "", "08:00")
                 }
@@ -712,7 +712,7 @@ export default function EnsalamentoPageContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap pt-2.5 border-t border-[#f0efea]">
+          <div className="flex items-center gap-1.5 flex-wrap pt-2.5 border-t">
             {blocos.map((b) => (
               <button
                 key={b.id}
@@ -723,7 +723,7 @@ export default function EnsalamentoPageContent() {
               </button>
             ))}
             {blocos.length > 0 && andares.length > 0 && (
-              <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
+              <span className="w-px h-4 bg-border mx-1" />
             )}
             {andares.map((a) => (
               <button
@@ -736,7 +736,7 @@ export default function EnsalamentoPageContent() {
             ))}
             {(blocos.length > 0 || andares.length > 0) &&
               tipoAmbientes.length > 0 && (
-                <span className="w-px h-4 bg-[#e6e5e0] mx-1" />
+                <span className="w-px h-4 bg-border mx-1" />
               )}
             {tipoAmbientes.map((t) => (
               <button
@@ -751,7 +751,7 @@ export default function EnsalamentoPageContent() {
             {filtersActive && (
               <button
                 onClick={clearFilters}
-                className="ml-auto text-xs font-semibold text-[#a8442f] hover:underline inline-flex items-center gap-1"
+                className="ml-auto text-xs font-semibold text-destructive hover:underline inline-flex items-center gap-1"
               >
                 <RotateCcw className="w-3 h-3" />
                 Limpar filtros
@@ -763,7 +763,7 @@ export default function EnsalamentoPageContent() {
         {/* Visões salvas (only relevant to Mapa de salas) — Agrupar/Período live inside MapaView itself */}
         <div
           className={cn(
-            "bg-white p-3.5 rounded-xl border border-[#e6e5e0] shadow-sm flex flex-col gap-3 transition-opacity duration-200",
+            "bg-card p-3.5 rounded-xl border shadow-sm flex flex-col gap-3 transition-opacity duration-200",
             viewMode !== "mapa" &&
               "opacity-0 pointer-events-none h-0 overflow-hidden !p-0 !border-0 !my-0"
           )}
@@ -782,8 +782,8 @@ export default function EnsalamentoPageContent() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex justify-center items-center h-64 bg-white rounded-xl border border-[#e6e5e0] shadow-sm">
-            <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
+          <div className="flex justify-center items-center h-64 bg-card rounded-xl border shadow-sm">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
           <div className="overflow-x-auto pb-2">

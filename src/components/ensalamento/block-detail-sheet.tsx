@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -59,6 +60,7 @@ export function BlockDetailSheet({
   onSaved,
 }: BlockDetailSheetProps) {
   const queryClient = useQueryClient();
+  const { confirmDialog } = useConfirmDialog();
   const [editing, setEditing] = useState(false);
   const [ambienteId, setAmbienteId] = useState("");
   const [diaSemana, setDiaSemana] = useState<DiaSemana>("Segunda");
@@ -155,13 +157,17 @@ export function BlockDetailSheet({
     onError: () => toast.error("Erro ao remover. Tente novamente."),
   });
 
-  const handleDelete = () => {
-    const msg =
-      block?.kind === "aula"
-        ? "Remover esta aula da grade fixa?"
-        : "Cancelar esta reserva?";
-    // eslint-disable-next-line no-alert
-    if (window.confirm(msg)) {
+  const handleDelete = async () => {
+    const isAula = block?.kind === "aula";
+    const confirmed = await confirmDialog({
+      title: isAula ? "Remover aula" : "Cancelar reserva",
+      message: isAula
+        ? "Remover esta aula da grade fixa? Essa ação não pode ser desfeita."
+        : "Cancelar esta reserva? Essa ação não pode ser desfeita.",
+      successButtonText: isAula ? "Remover" : "Cancelar reserva",
+      cancelButtonText: "Voltar",
+    });
+    if (confirmed) {
       deleteMutation.mutate();
     }
   };

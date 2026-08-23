@@ -234,13 +234,30 @@ Progresso: **12 de 12 concluídos** (23/08). Fase 2 encerrada.
 `aluno/*`, `professor/*`, `auxiliar/*`, `limpeza/*`, `tecnico/*` — mesmo
 padrão da Fase 2, adaptado pro que cada tela já faz.
 
-## Fase 4 — Ensalamento e componentes compartilhados
+## Fase 4 — Ensalamento e componentes compartilhados ✅ concluída (23/08)
 
-- Aplicar a troca de cores no `AdminHeader`, `block-detail-sheet.tsx` e
-  demais componentes de `src/components/ensalamento/`.
-- Não mexer na lógica/interação da tela (é a referência boa) — só cor e,
-  se fizer sentido, o `ConfirmDialog` novo em vez de qualquer confirm nativo
-  que exista lá.
+Trocada 1:1 de hex por token nos 8 componentes de
+`src/components/ensalamento/` (month/day/week/grade/mapa-view,
+saved-views, new-block-sheet, block-detail-sheet) e na tela principal
+`admin/ensalamento/page-content.tsx`. Nenhuma mudança de lógica ou
+interação — só cor, exatamente como planejado. `AdminHeader` já
+tinha sido feito antes, na Fase 0.
+
+Mantidas intencionalmente como hex direto (mesmo padrão de
+`tipo-ambiente-colors.ts`): a paleta categórica de `getCourseColor`,
+a cor roxa fixa de reserva avulsa, o mapa de cor por papel em
+`ROLE_LABEL` (saved-views) e o badge de tipo aula/reserva.
+
+Trocado o único `window.confirm()` nativo restante (exclusão de
+aula/reserva em `block-detail-sheet.tsx`) pelo `useConfirmDialog()`
+já padrão no resto do app.
+
+De brinde: descoberto e corrigido um caso de duplicação —
+`src/lib/curso-colors.ts` (criado na Fase 3, retrofit de Aulas) e
+`src/lib/course-colors.ts` (já existente, usado pelo Ensalamento)
+faziam a mesma coisa com paletas e hashes diferentes. Consolidado no
+`course-colors.ts` existente (mais completo: paleta maior, cache,
+trata nome undefined/null).
 
 ## Fase 5 — Revisão final
 
