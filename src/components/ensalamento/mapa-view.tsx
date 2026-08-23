@@ -29,8 +29,8 @@ function tabClass(active: boolean) {
   return cn(
     "px-3 py-1.5 rounded-md text-[12.5px] whitespace-nowrap transition-colors",
     active
-      ? "bg-white text-[#1a4f8a] font-bold shadow-sm"
-      : "text-[#8a9095] font-medium hover:text-[#1c1f21]"
+      ? "bg-card text-primary font-bold shadow-sm"
+      : "text-muted-foreground/70 font-medium hover:text-foreground"
   );
 }
 
@@ -83,16 +83,16 @@ export function MapaView({
 
   return (
     <div className="space-y-4">
-      <div className="bg-[#fbfaf7] border border-[#e6e5e0] rounded-xl p-3.5 flex flex-col gap-3 min-w-[760px]">
-        <div className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+      <div className="bg-surface-4 border rounded-xl p-3.5 flex flex-col gap-3 min-w-[760px]">
+        <div className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wide">
           Opções do Mapa de salas
         </div>
         <div className="flex items-center gap-5 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+            <span className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wide">
               Agrupar por
             </span>
-            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+            <div className="flex bg-muted rounded-lg p-0.5">
               {(
                 [
                   ["bloco", "Bloco"],
@@ -111,10 +111,10 @@ export function MapaView({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-[#8a9095] uppercase tracking-wide">
+            <span className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wide">
               Período
             </span>
-            <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+            <div className="flex bg-muted rounded-lg p-0.5">
               {(["Todos", "Manhã", "Tarde", "Noite"] as const).map((p) => (
                 <button
                   key={p}
@@ -129,20 +129,22 @@ export function MapaView({
         </div>
       </div>
 
-      <div className="bg-white border border-[#e6e5e0] rounded-xl overflow-hidden min-w-[760px]">
+      <div className="bg-card border rounded-xl overflow-hidden min-w-[760px]">
         <div
-          className="grid border-b border-[#e6e5e0] bg-[#faf9f5]"
+          className="grid border-b bg-surface-3"
           style={{
             gridTemplateColumns: `224px repeat(${visTurnos.length}, minmax(0, 1fr))`,
           }}
         >
-          <div className="p-3 text-[11.5px] font-bold text-[#8a9095] uppercase tracking-wide">
+          <div className="p-3 text-[11.5px] font-bold text-muted-foreground/70 uppercase tracking-wide">
             Sala · {visRooms.length} no total
           </div>
           {visTurnos.map((t) => (
-            <div key={t} className="p-3 border-l border-[#f0efea]">
-              <div className="text-[12.5px] font-bold text-[#565b5e]">{t}</div>
-              <div className="font-ibm-plex-mono text-[10.5px] text-[#a2a8ac] mt-0.5">
+            <div key={t} className="p-3 border-l border-secondary">
+              <div className="text-[12.5px] font-bold text-muted-foreground">
+                {t}
+              </div>
+              <div className="font-ibm-plex-mono text-[10.5px] text-muted-foreground/60 mt-0.5">
                 {TURNO_RANGE[t]}
               </div>
             </div>
@@ -151,9 +153,9 @@ export function MapaView({
 
         {groups.map((g) => (
           <div key={g.key}>
-            <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[#6f767b] bg-[#f2f1ec] border-b border-[#e6e5e0] flex items-center gap-2">
+            <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground bg-muted border-b flex items-center gap-2">
               <span>{g.key}</span>
-              <span className="font-medium normal-case tracking-normal text-[#a2a8ac]">
+              <span className="font-medium normal-case tracking-normal text-muted-foreground/60">
                 · {g.rooms.length} salas
               </span>
             </div>
@@ -163,12 +165,12 @@ export function MapaView({
               return (
                 <div
                   key={room.id}
-                  className="grid border-b border-[#f0efea] min-h-[74px]"
+                  className="grid border-b border-secondary min-h-[74px]"
                   style={{
                     gridTemplateColumns: `224px repeat(${visTurnos.length}, minmax(0, 1fr))`,
                   }}
                 >
-                  <div className="px-3.5 py-2.5 flex items-center gap-2 bg-[#fbfaf7] border-r border-[#f0efea]">
+                  <div className="px-3.5 py-2.5 flex items-center gap-2 bg-surface-4 border-r border-secondary">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="font-ibm-plex-mono text-[13px] font-semibold">
@@ -181,7 +183,7 @@ export function MapaView({
                           {cb.label}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[#a2a8ac] mt-0.5 truncate">
+                      <div className="text-[11px] text-muted-foreground/60 mt-0.5 truncate">
                         {room.capacidade} lug.
                       </div>
                     </div>
@@ -196,7 +198,7 @@ export function MapaView({
                         : { text: "#5b53a6", bg: "#ffffff", border: "#5b53a6" }
                       : null;
                     return (
-                      <div key={t} className="border-l border-[#f0efea] p-1">
+                      <div key={t} className="border-l border-secondary p-1">
                         {block ? (
                           <button
                             onClick={() => onBlockClick(block)}
@@ -219,7 +221,7 @@ export function MapaView({
                                 {block.subtitulo.split(" · ")[0]}
                               </span>
                             </div>
-                            <div className="text-[13px] font-bold text-[#1c1f21] leading-tight truncate">
+                            <div className="text-[13px] font-bold text-foreground leading-tight truncate">
                               {block.titulo}
                             </div>
                           </button>
@@ -233,7 +235,7 @@ export function MapaView({
                                 ).padStart(2, "0")}:00`
                               )
                             }
-                            className="w-full h-full min-h-[62px] rounded-lg border border-dashed border-transparent text-[#cbd0d3] text-xs hover:border-[#b1c2e2] hover:bg-[#eef3fb] hover:text-[#1a4f8a] transition-colors"
+                            className="w-full h-full min-h-[62px] rounded-lg border border-dashed border-transparent text-muted-foreground/40 text-xs hover:border-info/40 hover:bg-info-bg/60 hover:text-primary transition-colors"
                           >
                             + reservar
                           </button>
@@ -248,9 +250,9 @@ export function MapaView({
         ))}
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap text-xs text-[#8a9095]">
+      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground/70">
         <span>
-          <strong className="text-[#1c1f21]">
+          <strong className="text-foreground">
             {cellTotal ? Math.round((occCount / cellTotal) * 100) : 0}%
           </strong>{" "}
           ocupado neste recorte

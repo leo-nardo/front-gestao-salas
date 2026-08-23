@@ -226,7 +226,7 @@ export function NewBlockSheet({
         side="right"
         className="w-[420px] sm:max-w-[420px] p-0 gap-0"
       >
-        <SheetHeader className="p-5 border-b border-[#f0efea]">
+        <SheetHeader className="p-5 border-b border-secondary">
           <SheetTitle>Reservar horário</SheetTitle>
           <SheetDescription>
             {ambientes.find((a) => a.id === amb)?.nome} · {dia} · {inicio}
@@ -234,13 +234,13 @@ export function NewBlockSheet({
         </SheetHeader>
 
         <div className="p-5 pb-3">
-          <div className="flex bg-[#efeee9] rounded-lg p-0.5">
+          <div className="flex bg-muted rounded-lg p-0.5">
             <button
               onClick={() => setTipo("aula")}
               className={`flex-1 py-2 rounded-md text-sm font-semibold transition-colors ${
                 tipo === "aula"
-                  ? "bg-white text-[#1a4f8a] shadow-sm"
-                  : "text-[#8a9095]"
+                  ? "bg-card text-primary shadow-sm"
+                  : "text-muted-foreground/70"
               }`}
             >
               Aula fixa
@@ -249,8 +249,8 @@ export function NewBlockSheet({
               onClick={() => setTipo("reserva")}
               className={`flex-1 py-2 rounded-md text-sm font-semibold transition-colors ${
                 tipo === "reserva"
-                  ? "bg-white text-[#1a4f8a] shadow-sm"
-                  : "text-[#8a9095]"
+                  ? "bg-card text-primary shadow-sm"
+                  : "text-muted-foreground/70"
               }`}
             >
               Reserva avulsa
@@ -264,7 +264,7 @@ export function NewBlockSheet({
               <div className="space-y-2">
                 <Label>Curso</Label>
                 <Select value={cursoId} onValueChange={setCursoId}>
-                  <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione o curso" />
                   </SelectTrigger>
                   <SelectContent>
@@ -283,7 +283,7 @@ export function NewBlockSheet({
                   onValueChange={setDisciplinaId}
                   disabled={!cursoId}
                 >
-                  <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione a disciplina" />
                   </SelectTrigger>
                   <SelectContent>
@@ -303,7 +303,7 @@ export function NewBlockSheet({
                     onValueChange={setTurmaId}
                     disabled={!cursoId}
                   >
-                    <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                    <SelectTrigger>
                       <SelectValue placeholder="Turma" />
                     </SelectTrigger>
                     <SelectContent>
@@ -318,7 +318,7 @@ export function NewBlockSheet({
                 <div className="space-y-2">
                   <Label>Professor</Label>
                   <Select value={professorId} onValueChange={setProfessorId}>
-                    <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                    <SelectTrigger>
                       <SelectValue placeholder="Professor" />
                     </SelectTrigger>
                     <SelectContent>
@@ -337,7 +337,7 @@ export function NewBlockSheet({
                   value={dia}
                   onValueChange={(v) => setDia(v as DiaSemana)}
                 >
-                  <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -358,7 +358,6 @@ export function NewBlockSheet({
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Ex: Reunião de colegiado"
-                  className="bg-[#fbfaf7] border-[#dddbd3]"
                 />
               </div>
               <div className="space-y-2">
@@ -367,7 +366,6 @@ export function NewBlockSheet({
                   type="date"
                   value={reservaData}
                   onChange={(e) => setReservaData(e.target.value)}
-                  className="bg-[#fbfaf7] border-[#dddbd3]"
                 />
               </div>
               <div className="space-y-2">
@@ -375,7 +373,6 @@ export function NewBlockSheet({
                 <Input
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
-                  className="bg-[#fbfaf7] border-[#dddbd3]"
                 />
               </div>
             </>
@@ -384,7 +381,7 @@ export function NewBlockSheet({
           <div className="space-y-2">
             <Label>Ambiente</Label>
             <Select value={amb} onValueChange={setAmb}>
-              <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecione o ambiente" />
               </SelectTrigger>
               <SelectContent>
@@ -401,7 +398,7 @@ export function NewBlockSheet({
             <div className="space-y-2">
               <Label>Início</Label>
               <Select value={inicio} onValueChange={setInicio}>
-                <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3] font-ibm-plex-mono">
+                <SelectTrigger className="font-ibm-plex-mono">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -416,7 +413,7 @@ export function NewBlockSheet({
             <div className="space-y-2">
               <Label>Fim</Label>
               <Select value={fim} onValueChange={setFim}>
-                <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3] font-ibm-plex-mono">
+                <SelectTrigger className="font-ibm-plex-mono">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -431,22 +428,18 @@ export function NewBlockSheet({
           </div>
 
           {conflictMsg && (
-            <div className="p-3 rounded-lg bg-[#f7e7e2] border border-[#ecc9bf] text-sm text-[#8a3020]">
+            <div className="p-3 rounded-lg bg-destructive-bg border border-destructive/30 text-sm text-destructive">
               {conflictMsg}
             </div>
           )}
         </div>
 
-        <SheetFooter className="p-4 border-t border-[#f0efea] bg-[#faf9f5] flex-row gap-2">
-          <Button
-            variant="outline"
-            className="flex-1 border-[#dddbd3]"
-            onClick={onClose}
-          >
+        <SheetFooter className="p-4 border-t bg-surface-3 flex-row gap-2">
+          <Button variant="outline" className="flex-1" onClick={onClose}>
             Cancelar
           </Button>
           <Button
-            className="flex-1 bg-[#1a4f8a] hover:bg-[#123c6e] text-white"
+            className="flex-1"
             disabled={!isValid || createMutation.isPending}
             onClick={() => createMutation.mutate()}
           >
