@@ -183,7 +183,7 @@ export function BlockDetailSheet({
         side="right"
         className="w-[420px] sm:max-w-[420px] p-0 gap-0"
       >
-        <SheetHeader className="p-5 border-b border-[#f0efea]">
+        <SheetHeader className="p-5 border-b border-secondary">
           <div className="flex items-center gap-2">
             <span
               className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
@@ -204,7 +204,7 @@ export function BlockDetailSheet({
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <div className="text-[11px] font-semibold text-[#8a9095] uppercase tracking-wide mb-1">
+                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
                     Ambiente
                   </div>
                   <div className="font-medium">
@@ -213,7 +213,7 @@ export function BlockDetailSheet({
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] font-semibold text-[#8a9095] uppercase tracking-wide mb-1">
+                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
                     {block.kind === "aula" ? "Dia da semana" : "Data"}
                   </div>
                   <div className="font-medium">
@@ -221,7 +221,7 @@ export function BlockDetailSheet({
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] font-semibold text-[#8a9095] uppercase tracking-wide mb-1">
+                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
                     Horário
                   </div>
                   <div className="font-medium font-ibm-plex-mono">
@@ -230,7 +230,7 @@ export function BlockDetailSheet({
                 </div>
                 {aula && (
                   <div>
-                    <div className="text-[11px] font-semibold text-[#8a9095] uppercase tracking-wide mb-1">
+                    <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
                       Turma
                     </div>
                     <div className="font-medium">{aula.turma.codigo}</div>
@@ -240,17 +240,19 @@ export function BlockDetailSheet({
 
               {reserva?.descricao && (
                 <div>
-                  <div className="text-[11px] font-semibold text-[#8a9095] uppercase tracking-wide mb-1">
+                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
                     Descrição
                   </div>
-                  <p className="text-sm text-[#565b5e]">{reserva.descricao}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {reserva.descricao}
+                  </p>
                 </div>
               )}
 
               {aula && (
                 <Link
                   href={`/admin/aulas/${aula.id}/editar`}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1a4f8a] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   Editar disciplina, turma e professor
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -266,7 +268,6 @@ export function BlockDetailSheet({
                     id="sheet-titulo"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
-                    className="bg-[#fbfaf7] border-[#dddbd3]"
                   />
                 </div>
               )}
@@ -274,7 +275,7 @@ export function BlockDetailSheet({
               <div className="space-y-2">
                 <Label>Ambiente</Label>
                 <Select value={ambienteId} onValueChange={setAmbienteId}>
-                  <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione o ambiente" />
                   </SelectTrigger>
                   <SelectContent>
@@ -294,7 +295,7 @@ export function BlockDetailSheet({
                     value={diaSemana}
                     onValueChange={(v) => setDiaSemana(v as DiaSemana)}
                   >
-                    <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3]">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -314,7 +315,6 @@ export function BlockDetailSheet({
                     type="date"
                     value={data}
                     onChange={(e) => setData(e.target.value)}
-                    className="bg-[#fbfaf7] border-[#dddbd3]"
                   />
                 </div>
               )}
@@ -326,7 +326,7 @@ export function BlockDetailSheet({
                     value={horarioInicio}
                     onValueChange={setHorarioInicio}
                   >
-                    <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3] font-ibm-plex-mono">
+                    <SelectTrigger className="font-ibm-plex-mono">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -344,7 +344,7 @@ export function BlockDetailSheet({
                 <div className="space-y-2">
                   <Label>Fim</Label>
                   <Select value={horarioFim} onValueChange={setHorarioFim}>
-                    <SelectTrigger className="bg-[#fbfaf7] border-[#dddbd3] font-ibm-plex-mono">
+                    <SelectTrigger className="font-ibm-plex-mono">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -368,13 +368,12 @@ export function BlockDetailSheet({
                     id="sheet-desc"
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
-                    className="bg-[#fbfaf7] border-[#dddbd3]"
                   />
                 </div>
               )}
 
               {conflictMsg && (
-                <div className="p-3 rounded-lg bg-[#f7e7e2] border border-[#ecc9bf] text-sm text-[#8a3020]">
+                <div className="p-3 rounded-lg bg-destructive-bg border border-destructive/30 text-sm text-destructive">
                   {conflictMsg}
                 </div>
               )}
@@ -382,12 +381,12 @@ export function BlockDetailSheet({
           )}
         </div>
 
-        <SheetFooter className="p-4 border-t border-[#f0efea] bg-[#faf9f5] flex-row gap-2">
+        <SheetFooter className="p-4 border-t border-secondary bg-surface-3 flex-row gap-2">
           {editing ? (
             <>
               <Button
                 variant="outline"
-                className="flex-1 border-[#dddbd3]"
+                className="flex-1"
                 onClick={() => {
                   setEditing(false);
                   setConflictMsg(null);
@@ -396,7 +395,7 @@ export function BlockDetailSheet({
                 Cancelar
               </Button>
               <Button
-                className="flex-1 bg-[#1a4f8a] hover:bg-[#123c6e] text-white"
+                className="flex-1 bg-primary text-white"
                 disabled={saveMutation.isPending}
                 onClick={() => saveMutation.mutate()}
               >
@@ -407,7 +406,7 @@ export function BlockDetailSheet({
             <>
               <Button
                 variant="outline"
-                className="border-[#dddbd3] text-[#a8442f] hover:text-[#a8442f]"
+                className="text-destructive hover:text-destructive"
                 disabled={deleteMutation.isPending}
                 onClick={handleDelete}
               >
@@ -415,7 +414,7 @@ export function BlockDetailSheet({
                 {block.kind === "aula" ? "Remover" : "Cancelar"}
               </Button>
               <Button
-                className="flex-1 bg-[#1a4f8a] hover:bg-[#123c6e] text-white"
+                className="flex-1 bg-primary text-white"
                 onClick={() => setEditing(true)}
               >
                 <Pencil className="w-4 h-4 mr-1.5" />
