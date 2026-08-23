@@ -1,5 +1,5 @@
-import React from "react";
 import { Aula, DiaSemana } from "@/services/api/services/aulas";
+import { getCursoColors } from "@/lib/curso-colors";
 
 const diasSemana: DiaSemana[] = [
   "Segunda",
@@ -8,17 +8,6 @@ const diasSemana: DiaSemana[] = [
   "Quinta",
   "Sexta",
 ];
-
-const courseColors: Record<
-  string,
-  { text: string; bg: string; border: string }
-> = {
-  Direito: { text: "#3a4a99", bg: "#eceef8", border: "#3a4a99" },
-  Administração: { text: "#8a5a1a", bg: "#f6eede", border: "#8a5a1a" },
-  Enfermagem: { text: "#0e6b62", bg: "#e2f0ee", border: "#0e6b62" },
-  Biomedicina: { text: "#a8442f", bg: "#f7e7e2", border: "#a8442f" },
-  "Eng. de Software": { text: "#5b53a6", bg: "#ecebf7", border: "#5b53a6" },
-};
 
 type WeekScheduleGridProps = {
   aulas: Aula[];
@@ -34,15 +23,15 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#e6e5e0] overflow-hidden shadow-sm">
-      <div className="grid grid-cols-6 border-b border-[#e6e5e0] bg-[#faf9f5]">
-        <div className="p-3 text-center border-r border-[#e6e5e0] text-sm font-semibold text-[#6f767b]">
+    <div className="bg-card rounded-xl border overflow-hidden shadow-sm">
+      <div className="grid grid-cols-6 border-b bg-surface-3">
+        <div className="p-3 text-center border-r text-sm font-semibold text-muted-foreground">
           Horário
         </div>
         {days.map((day) => (
           <div
             key={day}
-            className="p-3 text-center border-r last:border-r-0 border-[#e6e5e0] text-sm font-semibold text-[#1c1f21]"
+            className="p-3 text-center border-r last:border-r-0 text-sm font-semibold text-foreground"
           >
             {day}
           </div>
@@ -54,18 +43,18 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
         {hours.map((hour, i) => (
           <div
             key={hour}
-            className="absolute w-full border-t border-[#f0efea] flex"
+            className="absolute w-full border-t border-secondary flex"
             style={{ top: `${i * 60}px`, height: "60px" }}
           >
-            <div className="w-[16.666%] border-r border-[#e6e5e0] flex items-start justify-center pt-2">
-              <span className="text-xs font-ibm-plex-mono text-[#8a9095]">
+            <div className="w-[16.666%] border-r flex items-start justify-center pt-2">
+              <span className="text-xs font-ibm-plex-mono text-muted-foreground">
                 {hour.toString().padStart(2, "0")}:00
               </span>
             </div>
             {days.map((day) => (
               <div
                 key={day}
-                className="w-[16.666%] border-r last:border-r-0 border-[#f0efea]"
+                className="w-[16.666%] border-r last:border-r-0 border-secondary"
               ></div>
             ))}
           </div>
@@ -82,11 +71,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
           const height = duration * 60;
           const dayIndex = days.indexOf(aula.diaSemana);
           const left = 16.666 + dayIndex * 16.666;
-          const courseColor = courseColors[aula.disciplina.curso.nome] || {
-            text: "#1c1f21",
-            bg: "#f0efea",
-            border: "#dddbd3",
-          };
+          const courseColor = getCursoColors(aula.disciplina.curso.nome);
 
           return (
             <div
@@ -99,7 +84,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
                 left: `${left}%`,
                 width: "16.666%",
                 backgroundColor: courseColor.bg,
-                borderColor: courseColor.border,
+                borderColor: courseColor.text,
               }}
             >
               <div
@@ -108,11 +93,11 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
               >
                 {aula.disciplina.nome}
               </div>
-              <div className="text-[10px] text-[#6f767b] truncate">
+              <div className="text-[10px] text-muted-foreground truncate">
                 {aula.ambiente.nome}
                 {aula.turma?.codigo ? ` • ${aula.turma.codigo}` : ""}
               </div>
-              <div className="text-[10px] font-ibm-plex-mono text-[#8a9095] mt-1">
+              <div className="text-[10px] font-ibm-plex-mono text-muted-foreground/80 mt-1">
                 {aula.horarioInicio} - {aula.horarioFim}
               </div>
             </div>

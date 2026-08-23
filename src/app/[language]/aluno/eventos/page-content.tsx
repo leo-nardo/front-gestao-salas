@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import { Card } from "@/components/ui/card";
 import { useGetEventosAbertosService } from "@/services/api/services/reservas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -18,35 +19,36 @@ export default function PageContent() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#1c1f21] font-public-sans tracking-tight">
+        <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Eventos
         </h1>
-        <p className="text-sm text-[#6f767b] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Eventos abertos a todos os alunos
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       ) : eventos.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 border border-[#e6e5e0] shadow-sm text-center">
-          <CalendarDays className="w-8 h-8 text-[#6f767b] mx-auto mb-4" />
-          <p className="text-[#6f767b]">Nenhum evento aberto no momento.</p>
-        </div>
+        <Card className="p-12 text-center">
+          <CalendarDays className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            Nenhum evento aberto no momento.
+          </p>
+        </Card>
       ) : (
         <div className="space-y-3">
           {eventos.map((e) => (
-            <div
-              key={e.id}
-              className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm"
-            >
-              <p className="font-semibold text-[#1c1f21] mb-1">{e.titulo}</p>
+            <Card key={e.id} className="p-5">
+              <p className="font-semibold text-foreground mb-1">{e.titulo}</p>
               {e.descricao && (
-                <p className="text-sm text-[#6f767b] mb-3">{e.descricao}</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {e.descricao}
+                </p>
               )}
-              <div className="flex items-center gap-4 text-sm text-[#6f767b]">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <CalendarDays className="w-3.5 h-3.5" />
                   {e.data} · {e.horarioInicio}-{e.horarioFim}
@@ -56,7 +58,7 @@ export default function PageContent() {
                   {e.ambiente.nome}
                 </span>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

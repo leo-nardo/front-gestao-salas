@@ -25,15 +25,15 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
   const { logOut } = useAuthActions();
 
   return (
-    <aside className="w-[280px] bg-[#15294c] flex flex-col h-full shrink-0">
+    <aside className="w-[280px] bg-sidebar flex flex-col h-full shrink-0">
       <div className="p-6">
         <h2 className="text-xl font-bold text-white font-public-sans tracking-tight">
-          Ambienta<span className="text-[#89a8d6]">.</span>
+          Ambienta<span className="text-sidebar-foreground/70">.</span>
         </h2>
       </div>
 
       <div className="px-4 py-2">
-        <p className="text-xs font-semibold text-[#89a8d6] uppercase tracking-wider mb-4 px-2">
+        <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider mb-4 px-2">
           {menuLabel}
         </p>
         <nav className="space-y-1">
@@ -46,8 +46,8 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-[#1e3a68] text-white"
-                    : "text-[#cad6e8] hover:bg-[#1a325c] hover:text-white"
+                    ? "bg-sidebar-accent text-white"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-white"
                 )}
               >
                 <item.icon className="w-5 h-5 shrink-0" />
@@ -61,9 +61,9 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
       <div className="mt-auto p-4">
         <Link
           href="/profile"
-          className="bg-[#10203d] rounded-xl p-4 flex items-center gap-3 mb-4 hover:bg-[#152a4d] transition-colors"
+          className="bg-black/20 rounded-xl p-4 flex items-center gap-3 mb-4 hover:bg-black/30 transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-[#1e3a68] flex items-center justify-center text-white font-bold shrink-0">
+          <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-white font-bold shrink-0">
             {user?.firstName?.[0]}
             {user?.lastName?.[0]}
           </div>
@@ -71,13 +71,15 @@ export function RoleSidebar({ menuLabel, navItems }: RoleSidebarProps) {
             <p className="text-sm font-medium text-white truncate">
               {user?.firstName} {user?.lastName}
             </p>
-            <p className="text-xs text-[#89a8d6] truncate">{user?.email}</p>
+            <p className="text-xs text-sidebar-foreground/70 truncate">
+              {user?.email}
+            </p>
           </div>
         </Link>
 
         <button
           onClick={logOut}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-[#cad6e8] hover:bg-[#1a325c] hover:text-white transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-white transition-colors"
         >
           <LogOut className="w-5 h-5 shrink-0" />
           Sair do sistema

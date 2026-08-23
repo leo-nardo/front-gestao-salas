@@ -14,7 +14,7 @@ const navItems = [
 
 function LimpezaLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#eceae4] font-sans">
+    <div className="flex h-screen w-full overflow-hidden bg-background font-sans">
       <RoleSidebar menuLabel="Menu da Limpeza" navItems={navItems} />
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
