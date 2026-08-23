@@ -4,9 +4,10 @@ import PageContent from "./page-content";
 export async function generateMetadata({
   params,
 }: {
-  params: { language: string };
+  params: Promise<{ language: string }>;
 }) {
-  const { t } = await getServerTranslation(params.language, "common");
+  const { language } = await params;
+  const { t } = await getServerTranslation(language, "common");
   return {
     title: t("title"),
   };

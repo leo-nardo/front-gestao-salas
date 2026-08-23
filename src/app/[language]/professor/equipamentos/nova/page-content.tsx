@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, Controller, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Link from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -20,11 +20,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetEquipamentosService } from "@/services/api/services/equipamentos";
 import {
-  useCreateSolicitacaoEquipamentoService,
-  CreateSolicitacaoEquipamentoRequest,
-} from "@/services/api/services/solicitacao-equipamentos";
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { applyApiFormErrors } from "@/services/api/apply-api-form-errors";
+import { useGetEquipamentosService } from "@/services/api/services/equipamentos";
+import { useCreateSolicitacaoEquipamentoService } from "@/services/api/services/solicitacao-equipamentos";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 const schema = yup.object().shape({
@@ -43,8 +56,7 @@ type FormData = yup.InferType<typeof schema>;
 
 export default function PageContent() {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const getEquipamentos = useGetEquipamentosService();
   const createSolicitacao = useCreateSolicitacaoEquipamentoService();
@@ -56,186 +68,160 @@ export default function PageContent() {
   const equipamentos =
     eqRes?.status === HTTP_CODES_ENUM.OK ? eqRes.data.data : [];
 
-  const { register, handleSubmit, control } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: yupResolver(schema) as never,
   });
-  const { errors } = useFormState({ control });
 
-  const mutation = useMutation({
-    mutationFn: (data: CreateSolicitacaoEquipamentoRequest) =>
-      createSolicitacao(data),
-    onSuccess: (res) => {
-      if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-        setErrorMessage(res.data.message || "Erro de validação");
-      } else if (res.status === HTTP_CODES_ENUM.CREATED) {
-        queryClient.invalidateQueries({
-          queryKey: ["minhas-solicitacoes-equipamento"],
-        });
+  const onSubmit = async (data: FormData) => {
+    setSubmitting(true);
+    try {
+      const res = await createSolicitacao({
+        equipamento: { id: data.equipamentoId },
+        quantidade: data.quantidade,
+        dataInicio: data.dataInicio,
+        dataFim: data.dataFim,
+        finalidade: data.finalidade,
+      });
+
+      if (res.status === HTTP_CODES_ENUM.CREATED) {
+        toast.success("Solicitação enviada com sucesso!");
         router.push("/professor/equipamentos");
+        return;
       }
-    },
-  });
-
-  const onSubmit = handleSubmit((data) => {
-    setErrorMessage(null);
-    mutation.mutate({
-      equipamento: { id: data.equipamentoId },
-      quantidade: data.quantidade,
-      dataInicio: data.dataInicio,
-      dataFim: data.dataFim,
-      finalidade: data.finalidade,
-    });
-  });
+      applyApiFormErrors(res as never, form.setError);
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível enviar a solicitação. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <Link
-          href="/professor/equipamentos"
-          className="inline-flex items-center text-sm text-[#6f767b] hover:text-[#1c1f21] mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Voltar
-        </Link>
-        <h1 className="text-3xl font-bold text-[#1c1f21] font-public-sans tracking-tight">
-          Solicitar equipamento
-        </h1>
-      </div>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <Link
+        href="/professor/equipamentos"
+        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Voltar
+      </Link>
 
-      <div className="bg-white rounded-xl border border-[#e6e5e0] p-6 shadow-sm">
-        <form onSubmit={onSubmit} className="space-y-6">
-          {errorMessage && (
-            <div className="bg-[#f7e7e2] text-[#a8442f] p-4 rounded-md text-sm mb-4">
-              {errorMessage}
-            </div>
-          )}
+      <Card>
+        <CardHeader className="border-b pb-6">
+          <CardTitle className="text-xl">Solicitar equipamento</CardTitle>
+        </CardHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="equipamentoId">Equipamento</Label>
-            <Controller
-              name="equipamentoId"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger
-                    className={
-                      errors.equipamentoId
-                        ? "border-[#a8442f]"
-                        : "border-[#e6e5e0]"
-                    }
-                  >
-                    <SelectValue placeholder="Selecione um equipamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {isLoadingEq ? (
-                      <div className="p-2 flex justify-center">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#1a4f8a]" />
-                      </div>
-                    ) : (
-                      equipamentos.map((eq) => (
-                        <SelectItem key={eq.id} value={eq.id}>
-                          {eq.nome} ({eq.quantidadeDisponivel} disponíveis)
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.equipamentoId && (
-              <p className="text-sm text-[#a8442f]">
-                {errors.equipamentoId.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="quantidade">Quantidade</Label>
-              <Input
-                id="quantidade"
-                type="number"
-                min="1"
-                {...register("quantidade")}
-                className={`bg-[#fbfaf7] ${
-                  errors.quantidade ? "border-[#a8442f]" : "border-[#e6e5e0]"
-                }`}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6 pt-6">
+              <FormField
+                control={form.control}
+                name="equipamentoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Equipamento *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isLoadingEq}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione um equipamento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {equipamentos.map((eq) => (
+                          <SelectItem key={eq.id} value={eq.id}>
+                            {eq.nome} ({eq.quantidadeDisponivel} disponíveis)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.quantidade && (
-                <p className="text-sm text-[#a8442f]">
-                  {errors.quantidade.message}
-                </p>
-              )}
-            </div>
-            <div></div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dataInicio">Data Início</Label>
-              <Input
-                id="dataInicio"
-                type="date"
-                {...register("dataInicio")}
-                className={`bg-[#fbfaf7] ${
-                  errors.dataInicio ? "border-[#a8442f]" : "border-[#e6e5e0]"
-                }`}
+              <FormField
+                control={form.control}
+                name="quantidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantidade *</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.dataInicio && (
-                <p className="text-sm text-[#a8442f]">
-                  {errors.dataInicio.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dataFim">Data Fim</Label>
-              <Input
-                id="dataFim"
-                type="date"
-                {...register("dataFim")}
-                className={`bg-[#fbfaf7] ${
-                  errors.dataFim ? "border-[#a8442f]" : "border-[#e6e5e0]"
-                }`}
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="dataInicio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data início *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dataFim"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data fim *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="finalidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Finalidade *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descreva para que o equipamento será utilizado"
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.dataFim && (
-                <p className="text-sm text-[#a8442f]">
-                  {errors.dataFim.message}
-                </p>
-              )}
-            </div>
-          </div>
+            </CardContent>
 
-          <div className="space-y-2">
-            <Label htmlFor="finalidade">Finalidade</Label>
-            <Textarea
-              id="finalidade"
-              placeholder="Descreva para que o equipamento será utilizado"
-              {...register("finalidade")}
-              className={`bg-[#fbfaf7] min-h-[100px] ${
-                errors.finalidade ? "border-[#a8442f]" : "border-[#e6e5e0]"
-              }`}
-            />
-            {errors.finalidade && (
-              <p className="text-sm text-[#a8442f]">
-                {errors.finalidade.message}
-              </p>
-            )}
-          </div>
-
-          <div className="pt-4 flex justify-end">
-            <Button
-              type="submit"
-              className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white w-full sm:w-auto"
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending && (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              )}
-              Enviar solicitação
-            </Button>
-          </div>
-        </form>
-      </div>
+            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
+              <Link href="/professor/equipamentos">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+              <Button type="submit" disabled={submitting}>
+                {submitting && (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                )}
+                Enviar solicitação
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
     </div>
   );
 }
