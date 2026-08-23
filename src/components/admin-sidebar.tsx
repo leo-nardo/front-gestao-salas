@@ -20,6 +20,7 @@ import LogOut from "lucide-react/dist/esm/icons/log-out";
 import Tags from "lucide-react/dist/esm/icons/tags";
 import Building from "lucide-react/dist/esm/icons/building";
 import Layers3 from "lucide-react/dist/esm/icons/layers-3";
+import School from "lucide-react/dist/esm/icons/school";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ const navGroups = [
   {
     title: "Acadêmico",
     items: [
+      { name: "Cursos", href: "/admin/cursos", icon: School },
       { name: "Disciplinas", href: "/admin/disciplinas", icon: BookOpen },
       { name: "Turmas", href: "/admin/turmas", icon: Layers },
       { name: "Aulas", href: "/admin/aulas", icon: GraduationCap },
