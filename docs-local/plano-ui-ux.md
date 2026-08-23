@@ -73,6 +73,28 @@ Tela de referência (interação boa, cores cruas mas será corrigida junto):
 
 ---
 
+## Correção de rota (achada ao iniciar a Fase 1)
+
+Os templates hygen (`.hygen/generate/resource/*.ejs.t`) geram telas em
+`/admin-panel/<recurso>` seguindo o padrão genérico do boilerplate
+(`TableVirtuoso`, `useConfirmDialog` do próprio boilerplate, i18n via
+`useTranslation`). **Só `/admin-panel/users` usa esse padrão.** Todas as 12
+telas de domínio reais (`blocos`, `ambientes`, `disciplinas`, `turmas`,
+`aulas`, etc., em `/admin/<recurso>`) foram escritas à mão desde o início,
+sem passar pelo gerador — não seguem o template nem usam os componentes que
+ele importa.
+
+**Consequência:** consertar os templates do gerador teria efeito zero nas
+telas que o usuário realmente usa. Cancelo a antiga "Fase 1" como prioridade
+e vou direto pro retrofit das telas reais. Só vale a pena mexer no gerador
+depois, se algum dia for criado um recurso novo por ele — não é o caso agora.
+
+**Bônus descoberto:** o boilerplate já tem um `useConfirmDialog()` pronto
+(`src/components/confirm-dialog/`, Provider já montado no layout raiz,
+API baseada em Promise: `await confirmDialog({ title, message })`). Removi
+o `ConfirmDialog` que eu tinha criado do zero na Fase 0 — era redundante.
+Todo retrofit usa o hook existente, não um componente novo.
+
 ## Estratégia: consertar a origem, depois propagar
 
 Como a maioria das telas simples vem do **gerador hygen**
@@ -151,12 +173,34 @@ de teste, conferir visualmente, depois descartar) antes de considerar pronto.
 ## Fase 2 — Retrofit das 12 telas de recurso admin (lista + criar + editar)
 
 Ordem sugerida (mais simples → mais complexa, pra validar o padrão cedo):
-1. `blocos`, `andares`, `tipos-ambiente` (já vistas, são as mais simples)
+1. ~~`blocos`~~ ✅ **feito** — referência do padrão novo (ver abaixo)
+   , `andares`, `tipos-ambiente` (mesmíssima estrutura de `blocos`)
 2. `disciplinas`, `turmas`, `equipamentos`
 3. `ambientes` (formulário com mais campos relacionados)
 4. `patrimonio`, `reservas`, `solicitacoes`, `aulas`
 5. `usuarios` (mais sensível — tem o fluxo de convite/primeiro acesso, mexer
    com cuidado pra não regredir isso)
+
+### Padrão de referência (`blocos`, 18/08)
+
+- `blocos/bloco-form.tsx`: componente de formulário compartilhado entre
+  `novo` e `[id]/editar` (evita duplicar os mesmos campos duas vezes). Usa
+  `Card` + `Form`/`FormField` do shadcn, `applyApiFormErrors` no catch,
+  chama `onSave` (a service function específica de create/update) e cuida
+  do resto (loading do botão, toast, redirect) — a página só passa o quê
+  chamar, não como.
+- `page-content.tsx` (lista): `DataTable` novo + `useConfirmDialog()` do
+  boilerplate em vez de `window.confirm()`.
+- `[id]/editar/page-content.tsx`: `Skeleton` em vez de spinner enquanto
+  carrega os dados existentes.
+- Zero hex cru — só tokens (`bg-card`, `text-muted-foreground`,
+  `border-destructive`, etc.).
+- Para recursos com mais campos relacionados (select de outra entidade),
+  trocar o `useEffect`+`useState` manual por `useQuery` (já é o padrão nas
+  telas de lista, só falta nos formulários).
+
+`andares` e `tipos-ambiente` são idênticos a `blocos` em estrutura (mesmos
+2 campos, mesmo CRUD) — retrofit é replicar o mesmo arquivo trocando nomes.
 
 ## Fase 3 — Retrofit das telas por papel
 
