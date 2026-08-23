@@ -172,7 +172,7 @@ de teste, conferir visualmente, depois descartar) antes de considerar pronto.
 
 ## Fase 2 — Retrofit das 12 telas de recurso admin (lista + criar + editar)
 
-Progresso: **11 de 12 concluídos** (23/08).
+Progresso: **12 de 12 concluídos** (23/08). Fase 2 encerrada.
 
 1. ✅ `blocos` — referência do padrão novo (ver abaixo)
 2. ✅ `andares`, ✅ `tipos-ambiente` (mesma estrutura de `blocos`)
@@ -197,8 +197,16 @@ Progresso: **11 de 12 concluídos** (23/08).
    maioria sem cor. Removido `<StatusBadge status="confirmada" />`: `Aula`
    não tem campo de status real, o badge sempre mostrava "Confirmada" pra
    todas as linhas independente do estado real.
-10. **Falta**: `usuarios` — o mais sensível (fluxo de convite/primeiro
-    acesso já implementado — mexer com cuidado pra não regredir isso).
+10. ✅ `usuarios` — o mais sensível. Criado `usuario-form.tsx` compartilhado
+    (nome, sobrenome, email, papel). Fluxo de convite/primeiro acesso
+    preservado 100%: criação continua sem campo de senha (via
+    `useAuthInviteUserService`, usuário nasce com status `inactive`), aviso
+    "ainda não terá senha definida" mantido só na tela de criação
+    (`showInviteNotice`), botão "Enviar convite" e badge Pendente/Ativo
+    intactos na listagem (agora em `DataTable`). Erro de e-mail duplicado
+    (`emailAlreadyExists`, chave crua do backend) tratado com mensagem
+    humana no campo, em vez de cair sem tradução pelo `applyApiFormErrors`
+    genérico.
 
 ### Padrão de referência (`blocos`, 18/08)
 
