@@ -8,6 +8,7 @@ import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import {
   useGetSolicitacaoEquipamentosService,
   useResponderSolicitacaoEquipamentoService,
@@ -16,10 +17,16 @@ import {
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 const statusBadge: Record<string, { label: string; className: string }> = {
-  pendente: { label: "Pendente", className: "bg-[#f6eede] text-[#b26a12]" },
-  aprovada: { label: "Aprovada", className: "bg-[#e6f2ea] text-[#2f7d4f]" },
-  rejeitada: { label: "Rejeitada", className: "bg-[#f7e7e2] text-[#a8442f]" },
-  devolvida: { label: "Devolvida", className: "bg-[#f0efea] text-[#6f767b]" },
+  pendente: { label: "Pendente", className: "bg-warning-bg text-warning" },
+  aprovada: { label: "Aprovada", className: "bg-success-bg text-success" },
+  rejeitada: {
+    label: "Rejeitada",
+    className: "bg-destructive-bg text-destructive",
+  },
+  devolvida: {
+    label: "Devolvida",
+    className: "bg-secondary text-muted-foreground",
+  },
 };
 
 export default function PageContent() {
@@ -64,14 +71,14 @@ export default function PageContent() {
       <div className="p-6 max-w-[900px] mx-auto w-full">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-[#1a4f8a]" />
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
         ) : solicitacoes.length === 0 ? (
-          <div className="border-2 border-dashed border-[#dddbd3] rounded-xl p-12 flex flex-col items-center justify-center text-center bg-white/50">
-            <div className="w-16 h-16 rounded-full bg-[#f0efea] flex items-center justify-center mb-4">
-              <Package className="w-8 h-8 text-[#6f767b]" />
+          <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
+              <Package className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1c1f21] mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               Nenhuma solicitação
             </h3>
           </div>
@@ -80,17 +87,14 @@ export default function PageContent() {
             {solicitacoes.map((s) => {
               const badge = statusBadge[s.status];
               return (
-                <div
-                  key={s.id}
-                  className="bg-white rounded-xl border border-[#e6e5e0] p-5 shadow-sm"
-                >
+                <Card key={s.id} className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="font-semibold text-[#1c1f21]">
+                      <p className="font-semibold text-foreground">
                         {s.equipamento.nome} ({s.quantidade}{" "}
                         {s.quantidade === 1 ? "unidade" : "unidades"})
                       </p>
-                      <p className="text-sm text-[#6f767b]">
+                      <p className="text-sm text-muted-foreground">
                         Solicitante: {s.solicitante.firstName}{" "}
                         {s.solicitante.lastName}
                       </p>
@@ -100,21 +104,21 @@ export default function PageContent() {
                     </Badge>
                   </div>
 
-                  <div className="text-sm text-[#1c1f21] mb-2">
-                    <span className="text-[#6f767b]">Período:</span>{" "}
+                  <div className="text-sm text-foreground mb-2">
+                    <span className="text-muted-foreground">Período:</span>{" "}
                     {s.dataInicio} até {s.dataFim}
                   </div>
 
-                  <p className="text-sm text-[#6f767b] mb-4">
-                    <span className="text-[#6f767b]">Finalidade:</span> &ldquo;
-                    {s.finalidade}&rdquo;
+                  <p className="text-sm text-muted-foreground mb-4">
+                    <span className="text-muted-foreground">Finalidade:</span>{" "}
+                    &ldquo;{s.finalidade}&rdquo;
                   </p>
 
                   {s.status === "pendente" ? (
-                    <div className="space-y-3 pt-3 border-t border-[#f0efea]">
+                    <div className="space-y-3 pt-3 border-t">
                       <Textarea
                         placeholder="Comentário opcional (motivo da resposta)"
-                        className="bg-[#fbfaf7] border-[#dddbd3] text-sm"
+                        className="text-sm"
                         value={motivos[s.id] || ""}
                         onChange={(e) =>
                           setMotivos((prev) => ({
@@ -126,7 +130,7 @@ export default function PageContent() {
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="outline"
-                          className="border-[#dddbd3] text-[#a8442f]"
+                          className="text-destructive"
                           disabled={responderMutation.isPending}
                           onClick={() =>
                             responderMutation.mutate({
@@ -138,7 +142,6 @@ export default function PageContent() {
                           Rejeitar
                         </Button>
                         <Button
-                          className="bg-[#1a4f8a] hover:bg-[#123c6e] text-white"
                           disabled={responderMutation.isPending}
                           onClick={() =>
                             responderMutation.mutate({
@@ -152,10 +155,9 @@ export default function PageContent() {
                       </div>
                     </div>
                   ) : s.status === "aprovada" ? (
-                    <div className="flex justify-end pt-3 border-t border-[#f0efea]">
+                    <div className="flex justify-end pt-3 border-t">
                       <Button
                         variant="outline"
-                        className="border-[#dddbd3] text-[#1c1f21]"
                         disabled={devolverMutation.isPending}
                         onClick={() => devolverMutation.mutate(s.id)}
                       >
@@ -164,12 +166,12 @@ export default function PageContent() {
                     </div>
                   ) : (
                     s.motivoResposta && (
-                      <p className="text-sm text-[#6f767b] pt-3 border-t border-[#f0efea]">
+                      <p className="text-sm text-muted-foreground pt-3 border-t">
                         Resposta: {s.motivoResposta}
                       </p>
                     )
                   )}
-                </div>
+                </Card>
               );
             })}
           </div>
