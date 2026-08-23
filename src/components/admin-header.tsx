@@ -8,25 +8,23 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
   return (
-    <header className="h-[62px] sticky top-0 z-10 flex items-center justify-between px-6 bg-[#fbfaf7] border-b border-[#e6e5e0] shrink-0">
+    <header className="h-[62px] sticky top-0 z-10 flex items-center justify-between px-6 bg-surface-4 border-b border-border shrink-0">
       <div className="flex flex-col justify-center">
-        <h1 className="text-lg font-semibold text-[#1c1f21] leading-tight">
+        <h1 className="text-lg font-semibold text-foreground leading-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-xs text-[#6f767b] leading-tight">{subtitle}</p>
+          <p className="text-xs text-muted-foreground leading-tight">
+            {subtitle}
+          </p>
         )}
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="text-sm font-medium text-[#6f767b] font-mono bg-[#f0efea] px-3 py-1 rounded-md border border-[#e6e5e0]">
+        <div className="text-sm font-medium text-muted-foreground font-mono bg-surface-1 px-3 py-1 rounded-md border border-border">
           2º sem · 2026
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-[#6f767b] hover:text-[#1c1f21] hover:bg-[#f0efea]"
-        >
+        <Button variant="ghost" size="icon">
           <Bell className="w-5 h-5" />
         </Button>
       </div>
