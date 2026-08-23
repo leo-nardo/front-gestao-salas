@@ -19,7 +19,7 @@ import { DataTable, DataTableColumn } from "@/components/data-table";
 import { useGetAulasService, Aula } from "@/services/api/services/aulas";
 import { useGetCursosService } from "@/services/api/services/cursos";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
-import { getCursoBorderColor } from "@/lib/curso-colors";
+import { getCourseColor } from "@/lib/course-colors";
 
 export default function AulasPageContent() {
   const [cursoFilter, setCursoFilter] = useState<string>("all");
@@ -52,7 +52,8 @@ export default function AulasPageContent() {
           <div
             className="absolute left-0 top-0.5 bottom-0.5 w-1 rounded-full"
             style={{
-              backgroundColor: getCursoBorderColor(aula.disciplina.curso.nome),
+              backgroundColor: getCourseColor(aula.disciplina.curso.nome)
+                .border,
             }}
           />
           <div className="font-medium text-foreground">

@@ -1,5 +1,5 @@
 import { Aula, DiaSemana } from "@/services/api/services/aulas";
-import { getCursoColors } from "@/lib/curso-colors";
+import { getCourseColor } from "@/lib/course-colors";
 
 const diasSemana: DiaSemana[] = [
   "Segunda",
@@ -71,7 +71,7 @@ export function WeekScheduleGrid({ aulas }: WeekScheduleGridProps) {
           const height = duration * 60;
           const dayIndex = days.indexOf(aula.diaSemana);
           const left = 16.666 + dayIndex * 16.666;
-          const courseColor = getCursoColors(aula.disciplina.curso.nome);
+          const courseColor = getCourseColor(aula.disciplina.curso.nome);
 
           return (
             <div
