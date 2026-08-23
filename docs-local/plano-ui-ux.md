@@ -172,7 +172,7 @@ de teste, conferir visualmente, depois descartar) antes de considerar pronto.
 
 ## Fase 2 — Retrofit das 12 telas de recurso admin (lista + criar + editar)
 
-Progresso: **7 de 12 concluídos** (18/08).
+Progresso: **11 de 12 concluídos** (23/08).
 
 1. ✅ `blocos` — referência do padrão novo (ver abaixo)
 2. ✅ `andares`, ✅ `tipos-ambiente` (mesma estrutura de `blocos`)
@@ -181,11 +181,24 @@ Progresso: **7 de 12 concluídos** (18/08).
 5. ✅ `ambientes` — form mais complexo até agora (8 campos, select
    condicional, sentinels "none" pra bloco/andar opcionais). Corrigido de
    quebra um bug de texto real no `AmbienteCard` ("1ºº andar").
-6. **Faltam**: `patrimonio`, `reservas`, `solicitacoes`, `aulas`, `usuarios`
-   — esses têm workflows de status (aprovar/rejeitar) em vez de só
-   CRUD simples, então vão exigir mais atenção individual.
-   `usuarios` é o mais sensível (fluxo de convite/primeiro acesso já
-   implementado — mexer com cuidado pra não regredir isso).
+6. ✅ `patrimonio` — form com `backHref`/`onSaved` (preserva `?ambiente=` da
+   listagem), `DataTable` + `useConfirmDialog()`.
+7. ✅ `reservas` — sem form compartilhado (único consumidor), conflito 409
+   tratado inline com banner próprio; listagem em `Card`s (somente leitura).
+8. ✅ `solicitacoes` — fluxo de aprovar/rejeitar mantido intacto, só
+   badges/skeleton retrofitados pra tokens.
+9. ✅ `aulas` — o mais complexo: `aula-form.tsx` compartilhado com filtros em
+   cascata (curso → disciplina/turma), professor filtrado por
+   `RoleEnum.PROFESSOR`, injeção de horário fora da grade (ex: "22:30") pra
+   edição, `ConflictBanner` retrofitado pra tokens (estava com hex direto).
+   Criado `src/lib/curso-colors.ts` (mesmo padrão hash de
+   `tipo-ambiente-colors.ts`) pra colorir a faixa lateral por curso — o mapa
+   antigo (`courseColors`) só cobria 5 dos 16 cursos reais, deixando a
+   maioria sem cor. Removido `<StatusBadge status="confirmada" />`: `Aula`
+   não tem campo de status real, o badge sempre mostrava "Confirmada" pra
+   todas as linhas independente do estado real.
+10. **Falta**: `usuarios` — o mais sensível (fluxo de convite/primeiro
+    acesso já implementado — mexer com cuidado pra não regredir isso).
 
 ### Padrão de referência (`blocos`, 18/08)
 
