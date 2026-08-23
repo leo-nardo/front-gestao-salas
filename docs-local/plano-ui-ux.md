@@ -259,12 +259,27 @@ faziam a mesma coisa com paletas e hashes diferentes. Consolidado no
 `course-colors.ts` existente (mais completo: paleta maior, cache,
 trata nome undefined/null).
 
-## Fase 5 — Revisão final
+## Fase 5 — Revisão final ✅ concluída (23/08)
 
-- Testar visualmente cada tela (rodar local, navegar por todas).
-- Rodar `npm run lint` / build de produção pra garantir que nada quebrou.
-- Conferir que os toasts de erro/sucesso continuam consistentes em todo
-  lugar.
+- `npm run build` (produção) limpo: 0 erros, 0 warnings, todas as rotas do
+  app (admin, aluno, professor, auxiliar, limpeza, tecnico, login, etc.)
+  compiladas/prerenderizadas com sucesso.
+- `npm run lint` limpo em todo commit desta fase (só 3 warnings
+  pre-existentes e não relacionados: useMemo em equipamentos, `<img>` sem
+  next/image nos pickers de imagem — fora do escopo deste plano).
+- Todas as rotas tocadas neste plano testadas uma a uma via dev server
+  (`curl` retornando 200 + log do servidor sem erros) ao longo de cada
+  commit, não só no final.
+- Varredura final de hex cru em todo `src/`: só sobra hex intencional
+  (paletas categóricas por curso/papel/tipo, cor fixa de reserva avulsa,
+  badge de tipo aula/reserva, gradiente do hero de login) — a mesma
+  exceção documentada desde o Diagnóstico.
+- Toasts de sucesso/erro (`sonner`) consistentes em todas as 12 telas de
+  recurso + 13 telas por papel + Ensalamento: sempre `toast.success`/
+  `toast.error`, nunca mensagem de erro genérica escondendo um 422 de
+  validação de campo (que agora usa `applyApiFormErrors`).
+
+**Plano encerrado. Todas as 5 fases concluídas.**
 
 ---
 
