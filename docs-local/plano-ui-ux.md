@@ -306,3 +306,60 @@ Plano fechado. Início pela Fase 0 (fundação): `ConfirmDialog`, `DataTable`,
 instalar `form`/`card`/`tabs` do shadcn, helper de erro 422→campo, e a
 troca de cores por token nos componentes compartilhados primeiro
 (`AdminHeader`, etc.) antes de tocar tela por tela.
+
+---
+
+## Evolução — novo kit de componentes e layout ajustável (branch `feat/keven.rodrigues/novo-kit-componentes-layout`)
+
+Objetivo: layout dinâmico/ajustável e componentes mais completos, usando apenas
+bibliotecas públicas (shadcn/Radix, TanStack Table, cmdk). Nenhum código ou
+dado de projetos externos foi copiado; só se usou a ideia de quais recursos
+oferecer.
+
+### Feito
+
+| Fase | O que entrou | Commit |
+|---|---|---|
+| 1. Tema | Modo escuro (antes só havia `@custom-variant dark`, sem valores), 4 cores de destaque, 3 raios, 3 densidades, barra lateral clara. Store em `src/stores/theme-store.ts` (chave `gestao-salas-theme`) e painel "Aparência" em `theme-settings-sheet.tsx` | `bc877c0` |
+| 2. Primitivos | `alert`, `accordion`, `progress`, `scroll-area`, `resizable` (CLI do shadcn, ajustados às regras de lint do projeto) | `5fed395` |
+| 3. Shell | `AppShell` + `ShellSidebar` em `src/components/layout/`, com largura ajustável (arraste, teclado, duplo clique), recolhimento e persistência (`gestao-salas-layout`). Os 6 layouts por papel usam o shell; sidebars antigas e `app-bar`/`app-sidebar` removidos | `762b8a9` |
+| 4. Tabela | `DataTable` sobre `@tanstack/react-table` 8.21.3, mesma API. Opcionais: `sortValue`, `enableColumnToggle`, `selectable`/`onSelectionChange`, `defaultHidden`. Espaçamento segue `--density-row-y` | `fc2e15f` |
+| 5. Campos | `Combobox`, `MultiCombobox` (`ui/combobox.tsx`) e `FilterBar` (`components/filter-bar.tsx`) | `bddd46c` |
+| 6. Cores | `lib/tipo-ambiente-colors.ts` passou a usar tokens (inclui `--category-purple*` e `--category-cyan*`, novos, com variante escura) | (esta etapa) |
+
+### Decisões que mudaram em relação ao plano acima
+
+- A decisão 2 ("não instalar `@tanstack/react-table`") foi **revertida** a
+  pedido: a tabela nova usa TanStack Table, fixado em 8.21.3 (o `latest` do npm
+  já é a 9.x, com API diferente).
+- O item "padronizar ícones" foi **descartado**: a regra de ESLint do projeto
+  exige `lucide-react/dist/esm/icons/...` e foi mantida.
+- Os wrappers `form-select-extended`, `form-multiple-select-extended` e
+  `form-autocomplete` **não foram trocados**: já usam Popover + Command e quase
+  nenhuma tela os consome. Os componentes novos estão disponíveis para adoção.
+- O seletor "Faculdade Horizonte" da sidebar do admin (botão sem função, texto
+  fixo) foi removido junto com a sidebar antiga.
+
+### Pendências conhecidas
+
+- **Adoção nas telas:** nenhuma lista usa ainda `sortValue`, `selectable`,
+  `FilterBar` ou `Combobox`. Os formulários de domínio continuam carregando
+  opções com `useEffect`; migrar para `Combobox` + react-query exige teste
+  contra a API real.
+- **`AdminHeader`** continua dentro de cada página (38 arquivos). Mover para o
+  `AppShell` é uma etapa separada.
+- **Telas estreitas:** a sidebar não vira gaveta; só recolhe para 68px.
+- **Ensalamento:** ainda tem 11 hex fixos (legendas e chips aula/reserva em
+  `day-view`, `week-view`, `grade-view`, `block-detail-sheet`). Eles são pares
+  fundo+texto claros que continuam legíveis no escuro, mas não acompanham o
+  tema. Trocar só um lado do par pioraria o escuro; migrar tudo junto, junto
+  com as cores de curso.
+- **Tela de login:** o gradiente do painel usa `to-[#123c6e]` fixo.
+- **Primeiro carregamento:** as preferências de tema só são aplicadas após a
+  hidratação, o que pode causar um breve piscar do tema padrão. Se incomodar,
+  aplicar por script inline no layout.
+- `ui/sidebar.tsx` ficou sem uso (era usado só por `app-sidebar`); mantido por
+  ser primitivo genérico do shadcn.
+- Validação feita em rotas temporárias (já removidas) por causa da exigência
+  de login; as telas reais de cada papel ainda precisam de um passe manual com
+  a API rodando.
