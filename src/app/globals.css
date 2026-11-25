@@ -221,7 +221,7 @@
    --density-row-y: espaçamento vertical de linhas de tabela e listas.
    --density-control-h: altura base sugerida para controles compactos. */
 :root {
-  --density-row-y: 0.625rem;
+  --density-row-y: 0.5rem;
   --density-control-h: 2.25rem;
 }
 :root[data-theme-density="compact"] {
@@ -229,7 +229,7 @@
   --density-control-h: 2rem;
 }
 :root[data-theme-density="comfortable"] {
-  --density-row-y: 0.875rem;
+  --density-row-y: 0.75rem;
   --density-control-h: 2.5rem;
 }
 
