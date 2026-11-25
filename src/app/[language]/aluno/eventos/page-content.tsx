@@ -1,10 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import { useGetEventosAbertosService } from "@/services/api/services/reservas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -17,7 +15,7 @@ export default function PageContent() {
   const eventos = res?.status === HTTP_CODES_ENUM.OK ? res.data : [];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Eventos
@@ -27,41 +25,57 @@ export default function PageContent() {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : eventos.length === 0 ? (
-        <Card className="p-12 text-center">
-          <CalendarDays className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Nenhum evento aberto no momento.
-          </p>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {eventos.map((e) => (
-            <Card key={e.id} className="p-5">
-              <p className="font-semibold text-foreground mb-1">{e.titulo}</p>
-              {e.descricao && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  {e.descricao}
-                </p>
-              )}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <CalendarDays className="w-3.5 h-3.5" />
-                  {e.data} · {e.horarioInicio}-{e.horarioFim}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {e.ambiente.nome}
-                </span>
+      <DataTable
+        data={eventos}
+        isLoading={isLoading}
+        getRowKey={(e) => e.id}
+        searchValue={(e) =>
+          `${e.titulo} ${e.ambiente.nome} ${e.descricao ?? ""}`
+        }
+        searchPlaceholder="Buscar por evento ou local..."
+        enableColumnToggle
+        emptyState={{
+          icon: <CalendarDays className="w-8 h-8" />,
+          title: "Nenhum evento aberto",
+          description: "Nenhum evento aberto no momento.",
+        }}
+        columns={[
+          {
+            header: "Evento",
+            sortValue: (e) => e.titulo,
+            hideable: false,
+            cell: (e) => (
+              <div>
+                <p className="font-medium">{e.titulo}</p>
+                {e.descricao && (
+                  <p className="line-clamp-1 text-xs text-muted-foreground">
+                    {e.descricao}
+                  </p>
+                )}
               </div>
-            </Card>
-          ))}
-        </div>
-      )}
+            ),
+          },
+          {
+            header: "Data",
+            sortValue: (e) => e.data,
+            cell: (e) => <span className="font-mono text-sm">{e.data}</span>,
+          },
+          {
+            header: "Horário",
+            sortValue: (e) => e.horarioInicio,
+            cell: (e) => (
+              <span className="font-mono text-sm">
+                {e.horarioInicio} - {e.horarioFim}
+              </span>
+            ),
+          },
+          {
+            header: "Local",
+            sortValue: (e) => e.ambiente.nome,
+            cell: (e) => e.ambiente.nome,
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -4,10 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Package from "lucide-react/dist/esm/icons/package";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import { useGetMinhasSolicitacaoEquipamentosService } from "@/services/api/services/solicitacao-equipamentos";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -33,7 +32,7 @@ export default function PageContent() {
   const solicitacoes = res?.status === HTTP_CODES_ENUM.OK ? res.data : [];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas solicitações de equipamento
@@ -46,50 +45,81 @@ export default function PageContent() {
         </Link>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : solicitacoes.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Package className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Você ainda não solicitou nenhum equipamento.
-          </p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {solicitacoes.map((s) => {
-            const badge = statusBadge[s.status];
-            return (
-              <Card key={s.id} className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-semibold text-foreground">
-                      {s.equipamento.nome} ({s.quantidade}{" "}
-                      {s.quantidade === 1 ? "unidade" : "unidades"})
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      De {s.dataInicio} até {s.dataFim}
-                    </p>
-                  </div>
-                  <Badge className={`${badge.className} border-transparent`}>
-                    {badge.label}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  &ldquo;{s.finalidade}&rdquo;
-                </p>
-                {s.motivoResposta && (
-                  <p className="text-sm text-muted-foreground pt-2 mt-2 border-t">
-                    Resposta: {s.motivoResposta}
-                  </p>
-                )}
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      <DataTable
+        data={solicitacoes}
+        isLoading={isLoading}
+        getRowKey={(s) => s.id}
+        searchValue={(s) => `${s.equipamento.nome} ${s.finalidade}`}
+        searchPlaceholder="Buscar por equipamento ou finalidade..."
+        enableColumnToggle
+        emptyState={{
+          icon: <Package className="w-8 h-8" />,
+          title: "Nenhuma solicitação",
+          description: "Você ainda não solicitou nenhum equipamento.",
+          action: (
+            <Link href="/professor/equipamentos/nova">
+              <Button>Solicitar equipamento</Button>
+            </Link>
+          ),
+        }}
+        columns={[
+          {
+            header: "Equipamento",
+            sortValue: (s) => s.equipamento.nome,
+            hideable: false,
+            cell: (s) => (
+              <span className="font-medium">{s.equipamento.nome}</span>
+            ),
+          },
+          {
+            header: "Quantidade",
+            sortValue: (s) => s.quantidade,
+            cell: (s) =>
+              `${s.quantidade} ${s.quantidade === 1 ? "unidade" : "unidades"}`,
+          },
+          {
+            header: "Período",
+            sortValue: (s) => s.dataInicio,
+            cell: (s) => (
+              <span className="font-mono text-sm">
+                {s.dataInicio} até {s.dataFim}
+              </span>
+            ),
+          },
+          {
+            header: "Finalidade",
+            className: "max-w-[260px]",
+            cell: (s) => (
+              <span
+                className="line-clamp-2 text-sm text-muted-foreground"
+                title={s.finalidade}
+              >
+                {s.finalidade}
+              </span>
+            ),
+          },
+          {
+            header: "Status",
+            sortValue: (s) => s.status,
+            cell: (s) => {
+              const badge = statusBadge[s.status];
+              return (
+                <Badge className={`${badge.className} border-transparent`}>
+                  {badge.label}
+                </Badge>
+              );
+            },
+          },
+          {
+            header: "Resposta",
+            cell: (s) => (
+              <span className="text-sm text-muted-foreground">
+                {s.motivoResposta || "—"}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

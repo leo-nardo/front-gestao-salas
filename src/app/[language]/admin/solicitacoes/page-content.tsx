@@ -3,12 +3,17 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
+import MessageSquareReply from "lucide-react/dist/esm/icons/message-square-reply";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DataTable } from "@/components/data-table";
 import {
   useGetSolicitacaoTrocaSalasService,
   useResponderSolicitacaoService,
@@ -29,6 +34,7 @@ export default function PageContent() {
   const getSolicitacoes = useGetSolicitacaoTrocaSalasService();
   const responder = useResponderSolicitacaoService();
   const [motivos, setMotivos] = useState<Record<string, string>>({});
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const { data: res, isLoading } = useQuery({
     queryKey: ["solicitacoes-troca-sala"],
@@ -44,6 +50,7 @@ export default function PageContent() {
         motivoResposta: motivos[vars.id],
       }),
     onSuccess: () => {
+      setOpenId(null);
       queryClient.invalidateQueries({ queryKey: ["solicitacoes-troca-sala"] });
     },
   });
@@ -55,64 +62,111 @@ export default function PageContent() {
         subtitle="Aprove ou rejeite pedidos de troca feitos pelos auxiliares"
       />
 
-      <div className="p-6 max-w-[900px] mx-auto w-full">
-        {isLoading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-40 w-full rounded-xl" />
-            ))}
-          </div>
-        ) : solicitacoes.length === 0 ? (
-          <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-              <ArrowLeftRight className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Nenhuma solicitação
-            </h3>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {solicitacoes.map((s) => {
-              const badge = statusBadge[s.status];
-              return (
-                <Card key={s.id} className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        {s.aula.disciplina.nome} · {s.aula.turma.codigo}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {s.aula.diaSemana} {s.aula.horarioInicio}-
-                        {s.aula.horarioFim}
-                      </p>
-                    </div>
-                    <Badge className={`${badge.className} border-transparent`}>
-                      {badge.label}
-                    </Badge>
-                  </div>
-
-                  <div className="text-sm text-foreground mb-2">
-                    <span className="text-muted-foreground">De:</span>{" "}
-                    {s.ambienteAtual.nome}
-                    {s.ambienteSugerido && (
-                      <>
-                        {" "}
-                        <span className="text-muted-foreground">
-                          → Sugestão:
-                        </span>{" "}
-                        {s.ambienteSugerido.nome}
-                      </>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-4">
-                    &ldquo;{s.justificativa}&rdquo; — {s.solicitante.firstName}{" "}
-                    {s.solicitante.lastName}
+      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+        <DataTable
+          data={solicitacoes}
+          isLoading={isLoading}
+          getRowKey={(s) => s.id}
+          searchValue={(s) =>
+            `${s.aula.disciplina.nome} ${s.aula.turma.codigo} ${s.ambienteAtual.nome} ${s.solicitante.firstName} ${s.solicitante.lastName} ${s.justificativa}`
+          }
+          searchPlaceholder="Buscar por disciplina, turma, ambiente ou solicitante..."
+          enableColumnToggle
+          emptyState={{
+            icon: <ArrowLeftRight className="w-8 h-8" />,
+            title: "Nenhuma solicitação",
+            description: "Os pedidos de troca dos auxiliares aparecem aqui.",
+          }}
+          columns={[
+            {
+              header: "Aula",
+              sortValue: (s) => s.aula.disciplina.nome,
+              hideable: false,
+              cell: (s) => (
+                <div>
+                  <p className="font-medium">
+                    {s.aula.disciplina.nome} · {s.aula.turma.codigo}
                   </p>
-
-                  {s.status === "pendente" ? (
-                    <div className="space-y-3 pt-3 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {s.aula.diaSemana} {s.aula.horarioInicio}-
+                    {s.aula.horarioFim}
+                  </p>
+                </div>
+              ),
+            },
+            {
+              header: "Ambiente",
+              sortValue: (s) => s.ambienteAtual.nome,
+              cell: (s) => (
+                <div className="text-sm">
+                  <span>{s.ambienteAtual.nome}</span>
+                  {s.ambienteSugerido && (
+                    <p className="text-xs text-muted-foreground">
+                      → Sugestão: {s.ambienteSugerido.nome}
+                    </p>
+                  )}
+                </div>
+              ),
+            },
+            {
+              header: "Solicitante",
+              sortValue: (s) =>
+                `${s.solicitante.firstName} ${s.solicitante.lastName}`,
+              cell: (s) => (
+                <span className="text-muted-foreground">
+                  {s.solicitante.firstName} {s.solicitante.lastName}
+                </span>
+              ),
+            },
+            {
+              header: "Justificativa",
+              className: "max-w-[260px]",
+              cell: (s) => (
+                <span
+                  className="line-clamp-2 text-sm text-muted-foreground"
+                  title={s.justificativa}
+                >
+                  {s.justificativa}
+                </span>
+              ),
+            },
+            {
+              header: "Status",
+              sortValue: (s) => s.status,
+              cell: (s) => {
+                const badge = statusBadge[s.status];
+                return (
+                  <Badge className={`${badge.className} border-transparent`}>
+                    {badge.label}
+                  </Badge>
+                );
+              },
+            },
+            {
+              header: "Resposta",
+              defaultHidden: true,
+              cell: (s) => (
+                <span className="text-sm text-muted-foreground">
+                  {s.motivoResposta || "—"}
+                </span>
+              ),
+            },
+            {
+              header: "Ações",
+              hideable: false,
+              cell: (s) =>
+                s.status === "pendente" ? (
+                  <Popover
+                    open={openId === s.id}
+                    onOpenChange={(open) => setOpenId(open ? s.id : null)}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <MessageSquareReply className="w-3.5 h-3.5 mr-1" />
+                        Responder
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-80 space-y-3">
                       <Textarea
                         placeholder="Comentário opcional (motivo da resposta)"
                         className="text-sm"
@@ -127,6 +181,7 @@ export default function PageContent() {
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="outline"
+                          size="sm"
                           className="text-destructive"
                           disabled={responderMutation.isPending}
                           onClick={() =>
@@ -139,6 +194,7 @@ export default function PageContent() {
                           Rejeitar
                         </Button>
                         <Button
+                          size="sm"
                           disabled={responderMutation.isPending}
                           onClick={() =>
                             responderMutation.mutate({
@@ -150,19 +206,14 @@ export default function PageContent() {
                           Aprovar
                         </Button>
                       </div>
-                    </div>
-                  ) : (
-                    s.motivoResposta && (
-                      <p className="text-sm text-muted-foreground pt-3 border-t">
-                        Resposta: {s.motivoResposta}
-                      </p>
-                    )
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <span className="text-sm text-muted-foreground">—</span>
+                ),
+            },
+          ]}
+        />
       </div>
     </>
   );

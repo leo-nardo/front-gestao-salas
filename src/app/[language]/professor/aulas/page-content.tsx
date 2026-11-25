@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
 import { useGetAulasService } from "@/services/api/services/aulas";
 import { WeekScheduleGrid } from "@/components/week-schedule-grid";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import useAuth from "@/services/auth/use-auth";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -41,40 +41,58 @@ export default function PageContent() {
         </p>
       </div>
 
-      {minhasAulas.length === 0 ? (
-        <Card className="p-12 text-center">
-          <p className="text-muted-foreground">
-            Nenhuma aula atribuída a você ainda.
-          </p>
-        </Card>
-      ) : (
-        <>
-          <WeekScheduleGrid aulas={minhasAulas} />
+      {minhasAulas.length > 0 && <WeekScheduleGrid aulas={minhasAulas} />}
 
-          <div className="space-y-3">
-            {minhasAulas.map((aula) => (
-              <Card key={aula.id} className="p-4 flex-row items-center gap-4">
-                <div className="font-ibm-plex-mono text-sm font-bold text-foreground w-32">
-                  <div>{aula.diaSemana}</div>
-                  <div className="text-muted-foreground text-xs font-normal">
-                    {aula.horarioInicio} - {aula.horarioFim}
-                  </div>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground truncate">
-                    {aula.disciplina.nome}
-                  </p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3" />
-                    {aula.ambiente.nome} · Turma {aula.turma.codigo}
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
+      <DataTable
+        data={minhasAulas}
+        getRowKey={(aula) => aula.id}
+        searchValue={(aula) =>
+          `${aula.disciplina.nome} ${aula.ambiente.nome} ${aula.turma.codigo}`
+        }
+        searchPlaceholder="Buscar por disciplina, ambiente ou turma..."
+        emptyState={{
+          icon: <GraduationCap className="w-8 h-8" />,
+          title: "Nenhuma aula atribuída",
+          description: "Nenhuma aula atribuída a você ainda.",
+        }}
+        columns={[
+          {
+            header: "Dia",
+            sortValue: (aula) => aula.diaSemana,
+            cell: (aula) => (
+              <span className="font-ibm-plex-mono text-sm font-bold">
+                {aula.diaSemana}
+              </span>
+            ),
+          },
+          {
+            header: "Horário",
+            sortValue: (aula) => aula.horarioInicio,
+            cell: (aula) => (
+              <span className="font-mono text-sm">
+                {aula.horarioInicio} - {aula.horarioFim}
+              </span>
+            ),
+          },
+          {
+            header: "Disciplina",
+            sortValue: (aula) => aula.disciplina.nome,
+            cell: (aula) => (
+              <span className="font-medium">{aula.disciplina.nome}</span>
+            ),
+          },
+          {
+            header: "Ambiente",
+            sortValue: (aula) => aula.ambiente.nome,
+            cell: (aula) => aula.ambiente.nome,
+          },
+          {
+            header: "Turma",
+            sortValue: (aula) => aula.turma.codigo,
+            cell: (aula) => aula.turma.codigo,
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AmbienteCard } from "@/components/ambiente-card";
+import { AmbienteEditDrawer } from "./ambiente-edit-drawer";
 import { useGetAmbientesService } from "@/services/api/services/ambientes";
 import { useGetTipoAmbientesService } from "@/services/api/services/tipo-ambientes";
 import { useGetUnidadesService } from "@/services/api/services/unidades";
@@ -32,6 +33,7 @@ export default function PageContent({ language }: { language: string }) {
   const [search, setSearch] = useState("");
   const [unidadeFilter, setUnidadeFilter] = useState("all");
   const [tipoFilter, setTipoFilter] = useState("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: ambientesRes, isLoading: isLoadingAmbientes } = useQuery({
     queryKey: ["ambientes"],
@@ -132,6 +134,7 @@ export default function PageContent({ language }: { language: string }) {
                 key={ambiente.id}
                 ambiente={ambiente}
                 language={language}
+                onEdit={setEditingId}
               />
             ))}
           </div>
@@ -159,6 +162,11 @@ export default function PageContent({ language }: { language: string }) {
           </div>
         )}
       </div>
+
+      <AmbienteEditDrawer
+        ambienteId={editingId}
+        onClose={() => setEditingId(null)}
+      />
     </>
   );
 }

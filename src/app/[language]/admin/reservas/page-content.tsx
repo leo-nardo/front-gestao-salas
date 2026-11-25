@@ -7,8 +7,7 @@ import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/data-table";
 import { useGetReservasService } from "@/services/api/services/reservas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -27,8 +26,8 @@ export default function PageContent() {
         subtitle="Reservas pontuais de ambientes e eventos abertos"
       />
 
-      <div className="p-6 max-w-[1000px] mx-auto w-full">
-        <div className="flex justify-end mb-6">
+      <div className="p-6 max-w-[1100px] mx-auto w-full space-y-6">
+        <div className="flex justify-end">
           <Link href="/admin/reservas/nova">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -37,59 +36,77 @@ export default function PageContent() {
           </Link>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-xl" />
-            ))}
-          </div>
-        ) : reservas.length > 0 ? (
-          <div className="space-y-3">
-            {reservas.map((r) => (
-              <Card key={r.id} className="p-4 flex-row items-center gap-4">
-                <div className="bg-accent p-2.5 rounded-lg text-accent-foreground shrink-0">
-                  <CalendarClock className="w-5 h-5" />
+        <DataTable
+          data={reservas}
+          isLoading={isLoading}
+          getRowKey={(r) => r.id}
+          searchValue={(r) =>
+            `${r.titulo} ${r.ambiente.nome} ${r.solicitante.firstName} ${r.solicitante.lastName}`
+          }
+          searchPlaceholder="Buscar por título, ambiente ou solicitante..."
+          enableColumnToggle
+          emptyState={{
+            icon: <CalendarClock className="w-8 h-8" />,
+            title: "Nenhuma reserva cadastrada",
+            description: "Cadastre a primeira reserva pra começar.",
+            action: (
+              <Link href="/admin/reservas/nova">
+                <Button>Cadastrar primeira reserva</Button>
+              </Link>
+            ),
+          }}
+          columns={[
+            {
+              header: "Título",
+              sortValue: (r) => r.titulo,
+              hideable: false,
+              cell: (r) => (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{r.titulo}</span>
+                  {r.eventoAberto && (
+                    <Badge className="bg-success-bg text-success border-transparent">
+                      Evento aberto
+                    </Badge>
+                  )}
+                  {r.status === "cancelada" && (
+                    <Badge className="bg-destructive-bg text-destructive border-transparent">
+                      Cancelada
+                    </Badge>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-foreground truncate">
-                      {r.titulo}
-                    </p>
-                    {r.eventoAberto && (
-                      <Badge className="bg-success-bg text-success border-transparent">
-                        Evento aberto
-                      </Badge>
-                    )}
-                    {r.status === "cancelada" && (
-                      <Badge className="bg-destructive-bg text-destructive border-transparent">
-                        Cancelada
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {r.ambiente.nome} · {r.data} · {r.horarioInicio} -{" "}
-                    {r.horarioFim}
-                  </p>
-                </div>
-                <div className="text-sm text-muted-foreground text-right shrink-0">
+              ),
+            },
+            {
+              header: "Ambiente",
+              sortValue: (r) => r.ambiente.nome,
+              cell: (r) => r.ambiente.nome,
+            },
+            {
+              header: "Data",
+              sortValue: (r) => r.data,
+              cell: (r) => <span className="font-mono text-sm">{r.data}</span>,
+            },
+            {
+              header: "Horário",
+              sortValue: (r) => r.horarioInicio,
+              cell: (r) => (
+                <span className="font-mono text-sm">
+                  {r.horarioInicio} - {r.horarioFim}
+                </span>
+              ),
+            },
+            {
+              header: "Solicitante",
+              sortValue: (r) =>
+                `${r.solicitante.firstName} ${r.solicitante.lastName}`,
+              cell: (r) => (
+                <span className="text-muted-foreground">
                   {r.solicitante.firstName} {r.solicitante.lastName}
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30 mt-8">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-              <CalendarClock className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Nenhuma reserva cadastrada
-            </h3>
-            <Link href="/admin/reservas/nova">
-              <Button>Cadastrar primeira reserva</Button>
-            </Link>
-          </div>
-        )}
+                </span>
+              ),
+            },
+          ]}
+        />
       </div>
     </>
   );
