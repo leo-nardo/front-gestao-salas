@@ -1,3 +1,7 @@
+import { pageMetadata } from "@/lib/page-metadata";
+
+export const metadata = pageMetadata("Editar tipo de ambiente");
+
 export default async function Page(props: {
   params: Promise<{ id: string; language: string }>;
 }) {

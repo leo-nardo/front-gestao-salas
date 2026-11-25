@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { routes, withLanguage } from "@/routes";
 
 type Props = {
   params: Promise<{ language: string }>;
@@ -6,5 +7,5 @@ type Props = {
 
 export default async function AdminDashboardPage({ params }: Props) {
   const { language } = await params;
-  redirect(`/${language}/admin/ambientes`);
+  redirect(withLanguage(language, routes.ambientes.admin.list()));
 }

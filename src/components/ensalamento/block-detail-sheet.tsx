@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -257,7 +258,7 @@ export function BlockDetailSheet({
 
               {aula && (
                 <Link
-                  href={`/admin/aulas/${aula.id}/editar`}
+                  href={routes.aulas.admin.edit(aula.id)}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   Editar disciplina, turma e professor

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -65,7 +66,7 @@ export default function PageContent() {
 
       <div className="p-6 max-w-[1000px] mx-auto w-full space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/cursos/novo">
+          <Link href={routes.cursos.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo curso
@@ -84,7 +85,7 @@ export default function PageContent() {
             title: "Nenhum curso encontrado",
             description: "Cadastre o primeiro curso pra começar.",
             action: (
-              <Link href="/admin/cursos/novo">
+              <Link href={routes.cursos.admin.create()}>
                 <Button>Cadastrar curso</Button>
               </Link>
             ),
@@ -98,7 +99,7 @@ export default function PageContent() {
               header: "Ações",
               cell: (c) => (
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/cursos/${c.id}/editar`}>
+                  <Link href={routes.cursos.admin.edit(c.id)}>
                     <Button variant="ghost" size="sm">
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Editar

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -138,7 +139,7 @@ export function UsuarioForm({
   return (
     <div className="p-6 max-w-[600px] mx-auto w-full">
       <Link
-        href="/admin/usuarios"
+        href={routes.usuarios.admin.list()}
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -237,7 +238,7 @@ export function UsuarioForm({
             </CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/usuarios">
+              <Link href={routes.usuarios.admin.list()}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>

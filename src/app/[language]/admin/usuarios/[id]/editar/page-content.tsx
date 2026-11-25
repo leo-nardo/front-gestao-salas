@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
@@ -61,7 +62,7 @@ export default function PageContent({ id }: { id: string }) {
             },
           })
         }
-        onSaved={() => router.push("/admin/usuarios")}
+        onSaved={() => router.push(routes.usuarios.admin.list())}
       />
     </>
   );

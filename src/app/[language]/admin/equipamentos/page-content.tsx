@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -56,7 +57,7 @@ export default function PageContent() {
               />
             </div>
           )}
-          <Link href="/admin/equipamentos/novo" className="ml-auto">
+          <Link href={routes.equipamentos.admin.create()} className="ml-auto">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo equipamento
@@ -78,7 +79,7 @@ export default function PageContent() {
             <h3 className="text-xl font-semibold text-foreground mb-2">
               Nenhum equipamento cadastrado
             </h3>
-            <Link href="/admin/equipamentos/novo">
+            <Link href={routes.equipamentos.admin.create()}>
               <Button>Cadastrar primeiro equipamento</Button>
             </Link>
           </div>
@@ -116,7 +117,7 @@ export default function PageContent() {
                       {eq.quantidadeDisponivel} / {eq.quantidadeTotal}
                     </span>
                   </div>
-                  <Link href={`/admin/equipamentos/${eq.id}/editar`}>
+                  <Link href={routes.equipamentos.admin.edit(eq.id)}>
                     <Button variant="outline" size="sm" className="w-full">
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Editar

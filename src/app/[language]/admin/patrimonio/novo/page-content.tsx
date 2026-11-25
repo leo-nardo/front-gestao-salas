@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { AdminHeader } from "@/components/admin-header";
+import { routes, withQuery } from "@/routes";
 import { useCreateItemPatrimonialService } from "@/services/api/services/item-patrimonials";
 import { PatrimonioForm } from "../patrimonio-form";
 
@@ -9,7 +10,9 @@ export default function PageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultAmbiente = searchParams.get("ambiente");
-  const backHref = `/admin/patrimonio${defaultAmbiente ? `?ambiente=${defaultAmbiente}` : ""}`;
+  const backHref = withQuery(routes.patrimonio.admin.list(), {
+    ambiente: defaultAmbiente,
+  });
 
   const createItem = useCreateItemPatrimonialService();
 

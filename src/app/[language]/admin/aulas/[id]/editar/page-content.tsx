@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
@@ -66,7 +67,7 @@ export default function EditAulaPageContent({ id }: { id: string }) {
             horarioFim: data.horarioFim,
           })
         }
-        onSaved={() => router.push("/admin/aulas")}
+        onSaved={() => router.push(routes.aulas.admin.list())}
       />
     </>
   );

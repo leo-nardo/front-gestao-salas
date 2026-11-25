@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AdminHeader } from "@/components/admin-header";
@@ -38,7 +39,7 @@ export default function PageContent({ id }: { id: string }) {
           submitLabel="Salvar alterações"
           submittingLabel="Salvando..."
           successMessage="Item patrimonial atualizado com sucesso!"
-          backHref="/admin/patrimonio"
+          backHref={routes.patrimonio.admin.list()}
           defaultValues={{
             nome: item.nome,
             tipo: item.tipo,
@@ -56,7 +57,7 @@ export default function PageContent({ id }: { id: string }) {
               estado: data.estado,
             })
           }
-          onSaved={() => router.push("/admin/patrimonio")}
+          onSaved={() => router.push(routes.patrimonio.admin.list())}
         />
       )}
     </>

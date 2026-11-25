@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { ReactNode } from "react";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import { AppShell } from "@/components/layout/app-shell";
@@ -13,7 +14,7 @@ const groups: NavGroup[] = [
     items: [
       {
         name: "Itens patrimoniais",
-        href: "/tecnico/patrimonio",
+        href: routes.patrimonio.tecnico.list(),
         icon: FlaskConical,
       },
     ],

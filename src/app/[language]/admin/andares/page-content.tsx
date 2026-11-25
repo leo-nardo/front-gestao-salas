@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -66,7 +67,7 @@ export default function PageContent() {
 
       <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/andares/novo">
+          <Link href={routes.andares.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo andar
@@ -86,7 +87,7 @@ export default function PageContent() {
             description:
               "Cadastre o primeiro andar pra começar a organizar os ambientes por pavimento.",
             action: (
-              <Link href="/admin/andares/novo">
+              <Link href={routes.andares.admin.create()}>
                 <Button>Cadastrar andar</Button>
               </Link>
             ),
@@ -108,7 +109,7 @@ export default function PageContent() {
               header: "Ações",
               cell: (b) => (
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/andares/${b.id}/editar`}>
+                  <Link href={routes.andares.admin.edit(b.id)}>
                     <Button variant="ghost" size="sm">
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Editar

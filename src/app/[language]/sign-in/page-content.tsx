@@ -1,4 +1,5 @@
 "use client";
+import { routes } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
@@ -121,7 +122,7 @@ function Form() {
             </div>
             <div className="col-span-12">
               <Link
-                href="/forgot-password"
+                href={routes.auth.forgotPassword()}
                 data-testid="forgot-password"
                 className="text-sm text-primary underline-offset-4 underline"
               >
@@ -139,7 +140,7 @@ function Form() {
                     variant="secondary"
                     data-testid="create-account"
                   >
-                    <Link href="/sign-up">
+                    <Link href={routes.auth.signUp()}>
                       {t("sign-in:actions.createAccount")}
                     </Link>
                   </Button>

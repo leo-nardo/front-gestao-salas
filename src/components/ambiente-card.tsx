@@ -1,3 +1,4 @@
+import { routes, withQuery } from "@/routes";
 import Edit from "lucide-react/dist/esm/icons/edit";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
@@ -85,7 +86,7 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
 
       <div className="flex flex-wrap items-center gap-2 pt-4 border-t mt-auto">
         <Link
-          href={`/admin/ambientes/${ambiente.id}/editar`}
+          href={routes.ambientes.admin.edit(ambiente.id)}
           className="flex-1 min-w-[25%]"
         >
           <Button variant="outline" size="sm" className="w-full h-9 px-2">
@@ -94,7 +95,9 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
           </Button>
         </Link>
         <Link
-          href={`/admin/ensalamento?ambiente=${ambiente.id}`}
+          href={withQuery(routes.ensalamento.admin.list(), {
+            ambiente: ambiente.id,
+          })}
           className="flex-1 min-w-[25%]"
         >
           <Button

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { ReactNode } from "react";
 import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
@@ -12,8 +13,16 @@ const groups: NavGroup[] = [
   {
     title: "Menu da Limpeza",
     items: [
-      { name: "Ambientes", href: "/limpeza/ambientes", icon: Sparkles },
-      { name: "Agenda", href: "/limpeza/agenda", icon: CalendarDays },
+      {
+        name: "Ambientes",
+        href: routes.ambientes.limpeza.list(),
+        icon: Sparkles,
+      },
+      {
+        name: "Agenda",
+        href: routes.agenda.limpeza.list(),
+        icon: CalendarDays,
+      },
     ],
   },
 ];

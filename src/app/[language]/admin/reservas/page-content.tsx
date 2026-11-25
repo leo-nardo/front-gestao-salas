@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -29,7 +30,7 @@ export default function PageContent() {
 
       <div className="p-6 max-w-[1000px] mx-auto w-full">
         <div className="flex justify-end mb-6">
-          <Link href="/admin/reservas/nova">
+          <Link href={routes.reservas.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Nova reserva
@@ -85,7 +86,7 @@ export default function PageContent() {
             <h3 className="text-xl font-semibold text-foreground mb-2">
               Nenhuma reserva cadastrada
             </h3>
-            <Link href="/admin/reservas/nova">
+            <Link href={routes.reservas.admin.create()}>
               <Button>Cadastrar primeira reserva</Button>
             </Link>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { ReactNode } from "react";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
@@ -12,8 +13,12 @@ const groups: NavGroup[] = [
   {
     title: "Menu do Aluno",
     items: [
-      { name: "Minha Grade", href: "/aluno/grade", icon: Calendar },
-      { name: "Eventos", href: "/aluno/eventos", icon: CalendarDays },
+      { name: "Minha Grade", href: routes.grade.aluno.list(), icon: Calendar },
+      {
+        name: "Eventos",
+        href: routes.eventos.aluno.list(),
+        icon: CalendarDays,
+      },
     ],
   },
 ];

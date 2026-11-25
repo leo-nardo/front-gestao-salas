@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useEffect } from "react";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { useAuthConfirmEmailService } from "@/services/api/services/auth";
@@ -28,7 +29,7 @@ export default function ConfirmEmail() {
           enqueueSnackbar(t("confirm-email:emailConfirmed"), {
             variant: "success",
           });
-          router.replace("/profile");
+          router.replace(routes.profile.view());
         } else {
           enqueueSnackbar(t("confirm-email:emailConfirmFailed"), {
             variant: "error",

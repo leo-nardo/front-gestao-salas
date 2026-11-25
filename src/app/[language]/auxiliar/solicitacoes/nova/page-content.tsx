@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -88,7 +89,7 @@ export default function PageContent() {
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success("Solicitação enviada!");
-        router.push("/auxiliar/solicitacoes");
+        router.push(routes.solicitacoes.auxiliar.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -103,7 +104,7 @@ export default function PageContent() {
   return (
     <div className="max-w-[700px] mx-auto">
       <Link
-        href="/auxiliar/solicitacoes"
+        href={routes.solicitacoes.auxiliar.list()}
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -198,7 +199,7 @@ export default function PageContent() {
             </CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/auxiliar/solicitacoes">
+              <Link href={routes.solicitacoes.auxiliar.list()}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>

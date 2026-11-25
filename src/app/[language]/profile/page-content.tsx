@@ -1,6 +1,6 @@
 "use client";
+import { routes } from "@/routes";
 import useAuth from "@/services/auth/use-auth";
-import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "@/components/link";
@@ -35,7 +35,9 @@ function Profile() {
           </p>
           <div>
             <Button asChild data-testid="edit-profile">
-              <Link href="/profile/edit">{t("profile:actions.edit")}</Link>
+              <Link href={routes.profile.edit()}>
+                {t("profile:actions.edit")}
+              </Link>
             </Button>
           </div>
         </div>
@@ -44,4 +46,4 @@ function Profile() {
   );
 }
 
-export default withPageRequiredAuth(Profile);
+export default Profile;

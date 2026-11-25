@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -82,7 +83,7 @@ export function AndarForm({
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success(successMessage);
-        router.push("/admin/andares");
+        router.push(routes.andares.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -97,7 +98,7 @@ export function AndarForm({
   return (
     <div className="p-6 max-w-[600px] mx-auto w-full">
       <Link
-        href="/admin/andares"
+        href={routes.andares.admin.list()}
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -146,7 +147,7 @@ export function AndarForm({
             </CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/andares">
+              <Link href={routes.andares.admin.list()}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>

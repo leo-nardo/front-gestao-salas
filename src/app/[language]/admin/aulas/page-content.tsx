@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -93,7 +94,7 @@ export default function AulasPageContent() {
     {
       header: "Ações",
       cell: (aula) => (
-        <Link href={`/admin/aulas/${aula.id}/editar`}>
+        <Link href={routes.aulas.admin.edit(aula.id)}>
           <Button variant="ghost" size="sm" className="h-8 px-2">
             <Edit className="w-3.5 h-3.5 mr-1" />
             Editar
@@ -127,7 +128,7 @@ export default function AulasPageContent() {
               </SelectContent>
             </Select>
           </div>
-          <Link href="/admin/aulas/nova">
+          <Link href={routes.aulas.admin.create()}>
             <Button className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Nova aula
@@ -148,7 +149,7 @@ export default function AulasPageContent() {
             icon: <CalendarClock className="w-8 h-8" />,
             title: "Nenhuma aula encontrada",
             action: (
-              <Link href="/admin/aulas/nova">
+              <Link href={routes.aulas.admin.create()}>
                 <Button>Montar primeira aula</Button>
               </Link>
             ),

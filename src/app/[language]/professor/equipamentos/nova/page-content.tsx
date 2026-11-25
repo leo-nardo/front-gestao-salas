@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -85,7 +86,7 @@ export default function PageContent() {
 
       if (res.status === HTTP_CODES_ENUM.CREATED) {
         toast.success("Solicitação enviada com sucesso!");
-        router.push("/professor/equipamentos");
+        router.push(routes.equipamentos.professor.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -100,7 +101,7 @@ export default function PageContent() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <Link
-        href="/professor/equipamentos"
+        href={routes.equipamentos.professor.list()}
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -207,7 +208,7 @@ export default function PageContent() {
             </CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/professor/equipamentos">
+              <Link href={routes.equipamentos.professor.list()}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>

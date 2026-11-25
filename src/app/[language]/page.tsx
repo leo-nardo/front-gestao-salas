@@ -1,3 +1,4 @@
+import { routes } from "@/routes";
 import type { Metadata } from "next";
 import { getServerTranslation } from "@/services/i18n";
 import Link from "@/components/link";
@@ -47,7 +48,7 @@ export default async function Home(props: Props) {
         </div>
         <div className="mx-auto">
           <Link
-            href="/privacy-policy"
+            href={routes.public.privacyPolicy()}
             className="text-primary underline-offset-4 underline"
           >
             {t("privacyPolicy")}

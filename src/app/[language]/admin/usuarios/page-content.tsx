@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Link from "@/components/link";
@@ -118,7 +119,7 @@ export default function PageContent() {
       header: "Ações",
       cell: (u) => (
         <div className="flex items-center">
-          <Link href={`/admin/usuarios/${u.id}/editar`}>
+          <Link href={routes.usuarios.admin.edit(u.id)}>
             <Button variant="ghost" size="sm" className="h-8 px-2">
               <Edit className="w-3.5 h-3.5 mr-1" />
               Editar
@@ -141,7 +142,7 @@ export default function PageContent() {
 
       <div className="p-6 max-w-[1000px] mx-auto w-full space-y-4">
         <div className="flex justify-end">
-          <Link href="/admin/usuarios/novo">
+          <Link href={routes.usuarios.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo usuário

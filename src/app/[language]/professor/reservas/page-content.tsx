@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -36,7 +37,7 @@ export default function PageContent() {
             Reservas sob demanda de salas e ambientes
           </p>
         </div>
-        <Link href="/professor/reservas/nova">
+        <Link href={routes.reservas.professor.create()}>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Nova reserva
@@ -89,7 +90,7 @@ export default function PageContent() {
           <p className="text-sm text-muted-foreground mb-6 max-w-sm">
             Você ainda não solicitou nenhuma reserva de sala.
           </p>
-          <Link href="/professor/reservas/nova">
+          <Link href={routes.reservas.professor.create()}>
             <Button>Nova reserva</Button>
           </Link>
         </div>

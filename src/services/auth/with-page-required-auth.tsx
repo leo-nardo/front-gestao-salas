@@ -4,6 +4,7 @@ import useAuth from "./use-auth";
 import React, { FunctionComponent, useEffect } from "react";
 import useLanguage from "../i18n/use-language";
 import { RoleEnum } from "../api/types/role";
+import { routes, withLanguage, withQuery } from "@/routes";
 
 type PropsType = {
   params?: { [key: string]: string | string[] | undefined };
@@ -48,10 +49,13 @@ function withPageRequiredAuth<P extends PropsType = PropsType>(
           returnTo: returnToPath,
         });
 
-        let redirectTo = `/${language}/login?${params.toString()}`;
+        let redirectTo = withQuery(
+          withLanguage(language, routes.auth.login()),
+          Object.fromEntries(params)
+        );
 
         if (user) {
-          redirectTo = `/${language}`;
+          redirectTo = withLanguage(language, "/");
         }
 
         router.replace(redirectTo);

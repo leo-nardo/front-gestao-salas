@@ -1,5 +1,6 @@
 "use client";
 
+import { routes, withQuery } from "@/routes";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -125,7 +126,9 @@ export default function PageContent() {
             </Select>
           </div>
           <Link
-            href={`/admin/patrimonio/novo${ambienteFiltro !== "todos" ? `?ambiente=${ambienteFiltro}` : ""}`}
+            href={withQuery(routes.patrimonio.admin.create(), {
+              ambiente: ambienteFiltro !== "todos" ? ambienteFiltro : null,
+            })}
           >
             <Button className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
@@ -146,7 +149,7 @@ export default function PageContent() {
             icon: <ClipboardList className="w-8 h-8" />,
             title: "Nenhum item patrimonial encontrado",
             action: (
-              <Link href="/admin/patrimonio/novo">
+              <Link href={routes.patrimonio.admin.create()}>
                 <Button>Cadastrar item</Button>
               </Link>
             ),
@@ -194,7 +197,7 @@ export default function PageContent() {
               header: "Ações",
               cell: (item) => (
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/patrimonio/${item.id}/editar`}>
+                  <Link href={routes.patrimonio.admin.edit(item.id)}>
                     <Button variant="ghost" size="sm">
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Editar

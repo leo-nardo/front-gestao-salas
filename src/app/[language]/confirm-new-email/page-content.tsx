@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useEffect } from "react";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import {
@@ -47,7 +48,7 @@ export default function ConfirmNewEmail() {
             setUser(data);
           }
 
-          router.replace("/profile");
+          router.replace(routes.profile.view());
         } else {
           router.replace("/");
         }

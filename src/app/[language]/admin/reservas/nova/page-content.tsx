@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -97,7 +98,7 @@ export default function PageContent() {
 
       if (res.status === HTTP_CODES_ENUM.CREATED) {
         toast.success("Reserva criada com sucesso!");
-        router.push("/admin/reservas");
+        router.push(routes.reservas.admin.list());
         return;
       }
       if (res.status === HTTP_CODES_ENUM.CONFLICT) {
@@ -120,7 +121,7 @@ export default function PageContent() {
 
       <div className="p-6 max-w-[700px] mx-auto w-full">
         <Link
-          href="/admin/reservas"
+          href={routes.reservas.admin.list()}
           className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
@@ -293,7 +294,7 @@ export default function PageContent() {
               </CardContent>
 
               <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-                <Link href="/admin/reservas">
+                <Link href={routes.reservas.admin.list()}>
                   <Button type="button" variant="outline">
                     Cancelar
                   </Button>

@@ -1,8 +1,11 @@
+import { pageMetadata } from "@/lib/page-metadata";
 import PageContent from "./page-content";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+export const metadata = pageMetadata("Editar Curso");
 
 export default async function Page(props: Props) {
   const params = await props.params;

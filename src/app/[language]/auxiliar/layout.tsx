@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { ReactNode } from "react";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
 import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
@@ -15,17 +16,17 @@ const groups: NavGroup[] = [
     items: [
       {
         name: "Solicitações de troca",
-        href: "/auxiliar/solicitacoes",
+        href: routes.solicitacoes.auxiliar.list(),
         icon: ArrowLeftRight,
       },
       {
         name: "Equipamentos",
-        href: "/auxiliar/equipamentos",
+        href: routes.equipamentos.auxiliar.list(),
         icon: MonitorPlay,
       },
       {
         name: "Solicitações de Equip.",
-        href: "/auxiliar/solicitacoes-equipamento",
+        href: routes.solicitacoesEquipamento.auxiliar.list(),
         icon: PackageCheck,
       },
     ],

@@ -108,6 +108,12 @@ const eslintConfig = defineConfig([
           message:
             'Do not use "condition ? true : false". Simplify "someVariable === 42 ? true : false " to "someVariable === 42"',
         },
+        {
+          selector:
+            "Literal[value=/^\\x2f(admin|aluno|professor|auxiliar|limpeza|tecnico)(\\x2f|$)/], TemplateElement[value.raw=/^\\x2f(admin|aluno|professor|auxiliar|limpeza|tecnico)(\\x2f|$)/]",
+          message:
+            'Não escreva paths de tela à mão. Use o registro de rotas: import { routes } from "@/routes" (ex.: routes.blocos.admin.list()).',
+        },
       ],
 
       // Import restrictions
@@ -133,6 +139,15 @@ const eslintConfig = defineConfig([
           ],
         },
       ],
+    },
+  },
+
+  // O registro de rotas é o único lugar onde os paths literais são permitidos
+  // (os testes e2e também navegam por URL literal)
+  {
+    files: ["src/routes/**", "playwright-tests/**"],
+    rules: {
+      "no-restricted-syntax": "off",
     },
   },
 ]);
