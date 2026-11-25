@@ -1,9 +1,14 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import type { PropsWithChildren } from "react";
+import { useEffect, type PropsWithChildren } from "react";
+import { hydrateThemeSettings } from "@/stores/theme-store";
 
 function ThemeProvider(props: PropsWithChildren) {
+  useEffect(() => {
+    hydrateThemeSettings();
+  }, []);
+
   return (
     <NextThemesProvider
       attribute="class"

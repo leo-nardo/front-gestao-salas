@@ -1,5 +1,6 @@
 import Bell from "lucide-react/dist/esm/icons/bell";
 import { Button } from "@/components/ui/button";
+import { ThemeSettingsSheet } from "@/components/theme/theme-settings-sheet";
 
 interface AdminHeaderProps {
   title: string;
@@ -24,6 +25,7 @@ export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
         <div className="text-sm font-medium text-muted-foreground font-mono bg-surface-1 px-3 py-1 rounded-md border border-border">
           2º sem · 2026
         </div>
+        <ThemeSettingsSheet />
         <Button variant="ghost" size="icon">
           <Bell className="w-5 h-5" />
         </Button>
