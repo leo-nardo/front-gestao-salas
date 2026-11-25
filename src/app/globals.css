@@ -44,6 +44,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
+  --color-category-purple: var(--category-purple);
+  --color-category-purple-bg: var(--category-purple-bg);
+  --color-category-cyan: var(--category-cyan);
+  --color-category-cyan-bg: var(--category-cyan-bg);
+
   --color-surface-1: var(--surface-1);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
@@ -94,6 +99,10 @@
   --destructive-bg: #f7e7e2;
   --info: #3a4a99;
   --info-bg: #e7edf8;
+  --category-purple: #5b53a6;
+  --category-purple-bg: #efedf7;
+  --category-cyan: #0e7490;
+  --category-cyan-bg: #e0f2fe;
   --surface-1: #f0efea;
   --surface-2: #f2f1ec;
   --surface-3: #faf9f5;
@@ -139,6 +148,10 @@
   --destructive-bg: #2e1a16;
   --info: #9fb5f0;
   --info-bg: #1e2a40;
+  --category-purple: #b3acf0;
+  --category-purple-bg: #26233f;
+  --category-cyan: #67d4ee;
+  --category-cyan-bg: #0f2c36;
   --surface-1: #1a1f26;
   --surface-2: #1d232a;
   --surface-3: #232a32;
