@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
@@ -30,7 +31,7 @@ export default function PageContent() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas aulas
@@ -93,6 +94,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

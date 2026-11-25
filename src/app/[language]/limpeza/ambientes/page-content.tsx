@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import { DataTable } from "@/components/data-table";
@@ -15,7 +16,7 @@ export default function PageContent() {
   const ambientes = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Ambientes
@@ -54,6 +55,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

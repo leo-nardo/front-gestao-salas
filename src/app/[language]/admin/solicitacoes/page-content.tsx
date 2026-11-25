@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
@@ -62,7 +63,7 @@ export default function PageContent() {
         subtitle="Aprove ou rejeite pedidos de troca feitos pelos auxiliares"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <DataTable
           data={solicitacoes}
           isLoading={isLoading}
@@ -153,6 +154,7 @@ export default function PageContent() {
             },
             {
               header: "Ações",
+              align: "right",
               hideable: false,
               cell: (s) =>
                 s.status === "pendente" ? (
@@ -214,7 +216,7 @@ export default function PageContent() {
             },
           ]}
         />
-      </div>
+      </PageContainer>
     </>
   );
 }

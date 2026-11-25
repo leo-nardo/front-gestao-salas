@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Package from "lucide-react/dist/esm/icons/package";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ export default function PageContent() {
   const equipamentos = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Equipamentos
@@ -80,6 +81,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

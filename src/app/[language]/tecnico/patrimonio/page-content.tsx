@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
@@ -76,7 +77,7 @@ export default function PageContent() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Itens patrimoniais
@@ -161,6 +162,7 @@ export default function PageContent() {
           },
           {
             header: "Ações",
+            align: "right",
             hideable: false,
             cell: (item) => {
               if (item.estado === "funcionando") {
@@ -253,6 +255,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

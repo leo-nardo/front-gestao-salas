@@ -1,11 +1,13 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
+import { PatrimonioEditDrawer } from "./patrimonio-edit-drawer";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import { AdminHeader } from "@/components/admin-header";
@@ -45,6 +47,7 @@ const estadoBadge: Record<string, { label: string; className: string }> = {
 };
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { confirmDialog } = useConfirmDialog();
   const searchParams = useSearchParams();
@@ -107,7 +110,7 @@ export default function PageContent() {
         subtitle="Gerencie os itens patrimoniais e equipamentos das salas"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="w-full md:w-[300px]">
             <Select value={ambienteFiltro} onValueChange={setAmbienteFiltro}>
@@ -151,19 +154,36 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(item) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(item.id)),
+            },
+            {
+              label: "Excluir",
+              icon: <Trash2 className="size-4" />,
+              destructive: true,
+              disabled: deleteMutation.isPending,
+              onSelect: () => handleDelete(item),
+            },
+          ]}
           columns={[
             {
               header: "Nome",
+              sortValue: (item) => item.nome,
               cell: (item) => <span className="font-medium">{item.nome}</span>,
             },
             {
               header: "Tipo",
+              sortValue: (item) => item.tipo,
               cell: (item) => (
                 <span className="text-muted-foreground">{item.tipo}</span>
               ),
             },
             {
               header: "Ambiente",
+              sortValue: (item) => item.ambiente?.nome,
               cell: (item) => (
                 <span className="text-muted-foreground">
                   {item.ambiente.nome}
@@ -172,6 +192,7 @@ export default function PageContent() {
             },
             {
               header: "Nº Patrimônio",
+              sortValue: (item) => item.numeroPatrimonio,
               cell: (item) => (
                 <span className="text-muted-foreground">
                   {item.numeroPatrimonio || "-"}
@@ -180,6 +201,7 @@ export default function PageContent() {
             },
             {
               header: "Estado",
+              sortValue: (item) => item.estado,
               cell: (item) => {
                 const badge =
                   estadoBadge[item.estado] || estadoBadge.funcionando;
@@ -190,32 +212,11 @@ export default function PageContent() {
                 );
               },
             },
-            {
-              header: "Ações",
-              cell: (item) => (
-                <div className="flex items-center gap-2">
-                  <Link href={`/admin/patrimonio/${item.id}/editar`}>
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-3.5 h-3.5 mr-1" />
-                      Editar
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(item)}
-                    disabled={deleteMutation.isPending}
-                    className="text-destructive hover:bg-destructive-bg hover:text-destructive"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" />
-                    Excluir
-                  </Button>
-                </div>
-              ),
-            },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <PatrimonioEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

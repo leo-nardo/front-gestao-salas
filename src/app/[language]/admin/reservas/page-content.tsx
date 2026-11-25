@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -26,7 +27,7 @@ export default function PageContent() {
         subtitle="Reservas pontuais de ambientes e eventos abertos"
       />
 
-      <div className="p-6 max-w-[1100px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href="/admin/reservas/nova">
             <Button>
@@ -107,7 +108,7 @@ export default function PageContent() {
             },
           ]}
         />
-      </div>
+      </PageContainer>
     </>
   );
 }

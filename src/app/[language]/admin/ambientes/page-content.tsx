@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -71,7 +72,7 @@ export default function PageContent({ language }: { language: string }) {
         subtitle="Gerencie as salas e laboratórios da instituição"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full">
+      <PageContainer>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -161,12 +162,9 @@ export default function PageContent({ language }: { language: string }) {
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
 
-      <AmbienteEditDrawer
-        ambienteId={editingId}
-        onClose={() => setEditingId(null)}
-      />
+      <AmbienteEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

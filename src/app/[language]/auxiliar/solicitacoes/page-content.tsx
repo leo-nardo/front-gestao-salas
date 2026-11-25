@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -28,7 +29,7 @@ export default function PageContent() {
   const solicitacoes = res?.status === HTTP_CODES_ENUM.OK ? res.data : [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas solicitações de troca
@@ -125,6 +126,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

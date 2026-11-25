@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AulaEditDrawer } from "@/app/[language]/admin/aulas/aula-edit-drawer";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import Link from "@/components/link";
 import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
@@ -70,6 +70,7 @@ export function BlockDetailSheet({
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [conflictMsg, setConflictMsg] = useState<string | null>(null);
+  const [editingAulaId, setEditingAulaId] = useState<string | null>(null);
 
   const getAmbientes = useGetAmbientesService();
   const { data: ambientesRes } = useQuery({
@@ -184,252 +185,259 @@ export function BlockDetailSheet({
       : null;
 
   return (
-    <Sheet open={!!block} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent
-        side="right"
-        className="w-[420px] sm:max-w-[420px] p-0 gap-0"
-      >
-        <SheetHeader className="p-5 border-b border-secondary">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
-                block.kind === "aula"
-                  ? "bg-[#eceef8] text-[#3a4a99]"
-                  : "bg-[#ecebf7] text-[#5b53a6]"
-              }`}
-            >
-              {block.kind === "aula" ? "Aula fixa" : "Reserva avulsa"}
-            </span>
-          </div>
-          <SheetTitle className="text-lg">{block.titulo}</SheetTitle>
-          <SheetDescription>{block.subtitulo}</SheetDescription>
-        </SheetHeader>
+    <>
+      <Sheet open={!!block} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent
+          side="right"
+          className="w-[420px] sm:max-w-[420px] p-0 gap-0"
+        >
+          <SheetHeader className="p-5 border-b border-secondary">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                  block.kind === "aula"
+                    ? "bg-[#eceef8] text-[#3a4a99]"
+                    : "bg-[#ecebf7] text-[#5b53a6]"
+                }`}
+              >
+                {block.kind === "aula" ? "Aula fixa" : "Reserva avulsa"}
+              </span>
+            </div>
+            <SheetTitle className="text-lg">{block.titulo}</SheetTitle>
+            <SheetDescription>{block.subtitulo}</SheetDescription>
+          </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {!editing ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
-                    Ambiente
-                  </div>
-                  <div className="font-medium">
-                    {ambientes.find((a) => a.id === block.ambienteId)?.nome ||
-                      "—"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
-                    {block.kind === "aula" ? "Dia da semana" : "Data"}
-                  </div>
-                  <div className="font-medium">
-                    {block.kind === "aula" ? block.diaSemana : reserva?.data}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
-                    Horário
-                  </div>
-                  <div className="font-medium font-ibm-plex-mono">
-                    {block.horarioInicio} – {block.horarioFim}
-                  </div>
-                </div>
-                {aula && (
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            {!editing ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
-                      Turma
+                      Ambiente
                     </div>
-                    <div className="font-medium">{aula.turma.codigo}</div>
+                    <div className="font-medium">
+                      {ambientes.find((a) => a.id === block.ambienteId)?.nome ||
+                        "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
+                      {block.kind === "aula" ? "Dia da semana" : "Data"}
+                    </div>
+                    <div className="font-medium">
+                      {block.kind === "aula" ? block.diaSemana : reserva?.data}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
+                      Horário
+                    </div>
+                    <div className="font-medium font-ibm-plex-mono">
+                      {block.horarioInicio} – {block.horarioFim}
+                    </div>
+                  </div>
+                  {aula && (
+                    <div>
+                      <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
+                        Turma
+                      </div>
+                      <div className="font-medium">{aula.turma.codigo}</div>
+                    </div>
+                  )}
+                </div>
+
+                {reserva?.descricao && (
+                  <div>
+                    <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
+                      Descrição
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {reserva.descricao}
+                    </p>
+                  </div>
+                )}
+
+                {aula && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingAulaId(String(aula.id))}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                  >
+                    Editar disciplina, turma e professor
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {block.kind === "reserva" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sheet-titulo">Título</Label>
+                    <Input
+                      id="sheet-titulo"
+                      value={titulo}
+                      onChange={(e) => setTitulo(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Ambiente</Label>
+                  <Select value={ambienteId} onValueChange={setAmbienteId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o ambiente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ambientes.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {block.kind === "aula" ? (
+                  <div className="space-y-2">
+                    <Label>Dia da semana</Label>
+                    <Select
+                      value={diaSemana}
+                      onValueChange={(v) => setDiaSemana(v as DiaSemana)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DIAS_SEMANA.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {d}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="sheet-data">Data</Label>
+                    <Input
+                      id="sheet-data"
+                      type="date"
+                      value={data}
+                      onChange={(e) => setData(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Início</Label>
+                    <Select
+                      value={horarioInicio}
+                      onValueChange={setHorarioInicio}
+                    >
+                      <SelectTrigger className="font-ibm-plex-mono">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(horarioInicio && !TIME_OPTIONS.includes(horarioInicio)
+                          ? [horarioInicio, ...TIME_OPTIONS]
+                          : TIME_OPTIONS
+                        ).map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fim</Label>
+                    <Select value={horarioFim} onValueChange={setHorarioFim}>
+                      <SelectTrigger className="font-ibm-plex-mono">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(horarioFim && !TIME_OPTIONS.includes(horarioFim)
+                          ? [horarioFim, ...TIME_OPTIONS]
+                          : TIME_OPTIONS
+                        ).map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {block.kind === "reserva" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sheet-desc">Descrição</Label>
+                    <Input
+                      id="sheet-desc"
+                      value={descricao}
+                      onChange={(e) => setDescricao(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {conflictMsg && (
+                  <div className="p-3 rounded-lg bg-destructive-bg border border-destructive/30 text-sm text-destructive">
+                    {conflictMsg}
                   </div>
                 )}
               </div>
+            )}
+          </div>
 
-              {reserva?.descricao && (
-                <div>
-                  <div className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wide mb-1">
-                    Descrição
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {reserva.descricao}
-                  </p>
-                </div>
-              )}
-
-              {aula && (
-                <Link
-                  href={`/admin/aulas/${aula.id}/editar`}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          <SheetFooter className="p-4 border-t border-secondary bg-surface-3 flex-row gap-2">
+            {editing ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setEditing(false);
+                    setConflictMsg(null);
+                  }}
                 >
-                  Editar disciplina, turma e professor
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {block.kind === "reserva" && (
-                <div className="space-y-2">
-                  <Label htmlFor="sheet-titulo">Título</Label>
-                  <Input
-                    id="sheet-titulo"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>Ambiente</Label>
-                <Select value={ambienteId} onValueChange={setAmbienteId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o ambiente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ambientes.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {block.kind === "aula" ? (
-                <div className="space-y-2">
-                  <Label>Dia da semana</Label>
-                  <Select
-                    value={diaSemana}
-                    onValueChange={(v) => setDiaSemana(v as DiaSemana)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIAS_SEMANA.map((d) => (
-                        <SelectItem key={d} value={d}>
-                          {d}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="sheet-data">Data</Label>
-                  <Input
-                    id="sheet-data"
-                    type="date"
-                    value={data}
-                    onChange={(e) => setData(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Início</Label>
-                  <Select
-                    value={horarioInicio}
-                    onValueChange={setHorarioInicio}
-                  >
-                    <SelectTrigger className="font-ibm-plex-mono">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(horarioInicio && !TIME_OPTIONS.includes(horarioInicio)
-                        ? [horarioInicio, ...TIME_OPTIONS]
-                        : TIME_OPTIONS
-                      ).map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Fim</Label>
-                  <Select value={horarioFim} onValueChange={setHorarioFim}>
-                    <SelectTrigger className="font-ibm-plex-mono">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(horarioFim && !TIME_OPTIONS.includes(horarioFim)
-                        ? [horarioFim, ...TIME_OPTIONS]
-                        : TIME_OPTIONS
-                      ).map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {block.kind === "reserva" && (
-                <div className="space-y-2">
-                  <Label htmlFor="sheet-desc">Descrição</Label>
-                  <Input
-                    id="sheet-desc"
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {conflictMsg && (
-                <div className="p-3 rounded-lg bg-destructive-bg border border-destructive/30 text-sm text-destructive">
-                  {conflictMsg}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <SheetFooter className="p-4 border-t border-secondary bg-surface-3 flex-row gap-2">
-          {editing ? (
-            <>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setEditing(false);
-                  setConflictMsg(null);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="flex-1 bg-primary text-white"
-                disabled={saveMutation.isPending}
-                onClick={() => saveMutation.mutate()}
-              >
-                {saveMutation.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                className="text-destructive hover:text-destructive"
-                disabled={deleteMutation.isPending}
-                onClick={handleDelete}
-              >
-                <Trash2 className="w-4 h-4 mr-1.5" />
-                {block.kind === "aula" ? "Remover" : "Cancelar"}
-              </Button>
-              <Button
-                className="flex-1 bg-primary text-white"
-                onClick={() => setEditing(true)}
-              >
-                <Pencil className="w-4 h-4 mr-1.5" />
-                Editar horário / sala
-              </Button>
-            </>
-          )}
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-primary text-white"
+                  disabled={saveMutation.isPending}
+                  onClick={() => saveMutation.mutate()}
+                >
+                  {saveMutation.isPending ? "Salvando..." : "Salvar"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="text-destructive hover:text-destructive"
+                  disabled={deleteMutation.isPending}
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="w-4 h-4 mr-1.5" />
+                  {block.kind === "aula" ? "Remover" : "Cancelar"}
+                </Button>
+                <Button
+                  className="flex-1 bg-primary text-white"
+                  onClick={() => setEditing(true)}
+                >
+                  <Pencil className="w-4 h-4 mr-1.5" />
+                  Editar horário / sala
+                </Button>
+              </>
+            )}
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+      <AulaEditDrawer
+        id={editingAulaId}
+        onClose={() => setEditingAulaId(null)}
+      />
+    </>
   );
 }

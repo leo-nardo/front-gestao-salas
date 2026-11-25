@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -25,7 +26,7 @@ export default function PageContent() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
@@ -100,6 +101,6 @@ export default function PageContent() {
           },
         ]}
       />
-    </div>
+    </PageContainer>
   );
 }

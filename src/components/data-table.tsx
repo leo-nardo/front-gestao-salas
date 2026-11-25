@@ -18,8 +18,12 @@ import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
 import ArrowUpDown from "lucide-react/dist/esm/icons/arrow-up-down";
 import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronsLeft from "lucide-react/dist/esm/icons/chevrons-left";
+import ChevronsRight from "lucide-react/dist/esm/icons/chevrons-right";
 import Columns3 from "lucide-react/dist/esm/icons/columns-3";
+import Ellipsis from "lucide-react/dist/esm/icons/ellipsis";
 import Search from "lucide-react/dist/esm/icons/search";
+import Link from "@/components/link";
 import {
   Table,
   TableBody,
@@ -35,17 +39,40 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+/** Ação do menu "⋯" de cada linha. Use `href` para navegar ou `onSelect` para executar. */
+export type DataTableRowAction = {
+  label: string;
+  icon?: ReactNode;
+  href?: string;
+  onSelect?: () => void;
+  /** Estilo de ação destrutiva (ex.: Excluir). */
+  destructive?: boolean;
+  disabled?: boolean;
+  /** `data-testid` do item do menu. */
+  testId?: string;
+};
 
 export type DataTableColumn<T> = {
   header: string;
   cell: (row: T) => ReactNode;
   className?: string;
+  /** Alinhamento do cabeçalho e das células. Padrão: esquerda. */
+  align?: "left" | "right";
   /** Identificador estável da coluna. Por padrão usa o `header`. */
   id?: string;
   /** Se informado, a coluna passa a poder ser ordenada por este valor. */
@@ -64,8 +91,19 @@ type DataTableProps<T> = {
   /** Text to match against when the user types in the search box. */
   searchValue?: (row: T) => string;
   searchPlaceholder?: string;
+  /** Linhas por página iniciais. Padrão: 20. */
   pageSize?: number;
-  /** Mostra o menu "Colunas" para ocultar/exibir colunas. */
+  /** Opções do seletor "Linhas por página". */
+  pageSizeOptions?: number[];
+  /**
+   * Ações de cada linha, exibidas num menu "⋯" alinhado à direita
+   * (padrão do Data Table do shadcn). Itens falsy são ignorados.
+   */
+  rowActions?: (row: T) => (DataTableRowAction | false | null | undefined)[];
+  /**
+   * Mostra o menu "Colunas" para ocultar/exibir colunas. Padrão: `true`
+   * (o menu só aparece se houver pelo menos 2 colunas ocultáveis).
+   */
   enableColumnToggle?: boolean;
   /** Adiciona uma coluna de checkboxes para selecionar linhas. */
   selectable?: boolean;
@@ -80,6 +118,69 @@ type DataTableProps<T> = {
 };
 
 const SELECT_COLUMN_ID = "__select";
+const ACTIONS_COLUMN_ID = "__actions";
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+function RowActionsMenu({
+  actions,
+}: {
+  actions: (DataTableRowAction | false | null | undefined)[];
+}) {
+  const items = actions.filter(Boolean) as DataTableRowAction[];
+  if (items.length === 0) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 text-muted-foreground data-[state=open]:bg-muted"
+          aria-label="Abrir menu de ações"
+        >
+          <Ellipsis className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-40">
+        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        {items.map((action) => {
+          const content = (
+            <>
+              {action.icon}
+              {action.label}
+            </>
+          );
+          const className = cn(
+            action.destructive &&
+              "text-destructive focus:bg-destructive-bg focus:text-destructive [&_svg]:!text-destructive"
+          );
+
+          return action.href ? (
+            <DropdownMenuItem
+              key={action.label}
+              asChild
+              disabled={action.disabled}
+              data-testid={action.testId}
+              className={className}
+            >
+              <Link href={action.href}>{content}</Link>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              key={action.label}
+              disabled={action.disabled}
+              data-testid={action.testId}
+              onSelect={action.onSelect}
+              className={className}
+            >
+              {content}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function compareValues(a: unknown, b: unknown): number {
   const aEmpty = a === null || a === undefined || a === "";
@@ -110,7 +211,9 @@ export function DataTable<T>({
   searchValue,
   searchPlaceholder = "Buscar...",
   pageSize = 20,
-  enableColumnToggle = false,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  rowActions,
+  enableColumnToggle = true,
   selectable = false,
   onSelectionChange,
   emptyState,
@@ -139,16 +242,25 @@ export function DataTable<T>({
     );
   }, [data, search, searchValue]);
 
-  const columnMeta = useMemo(
-    () =>
-      new Map(
-        columns.map((col) => [
-          col.id ?? col.header,
-          { className: col.className, hideable: col.hideable !== false },
-        ])
-      ),
-    [columns]
-  );
+  const hasRowActions = !!rowActions;
+  const columnMeta = useMemo(() => {
+    const meta = new Map<string, { className?: string; hideable: boolean }>(
+      columns.map((col) => [
+        col.id ?? col.header,
+        {
+          className: cn(col.align === "right" && "text-right", col.className),
+          hideable: col.hideable !== false,
+        },
+      ])
+    );
+    if (hasRowActions) {
+      meta.set(ACTIONS_COLUMN_ID, {
+        className: "w-12 text-right",
+        hideable: false,
+      });
+    }
+    return meta;
+  }, [columns, hasRowActions]);
 
   const columnDefs = useMemo(() => {
     const defs: ColumnDef<T>[] = [];
@@ -195,8 +307,20 @@ export function DataTable<T>({
       });
     }
 
+    if (rowActions) {
+      defs.push({
+        id: ACTIONS_COLUMN_ID,
+        enableSorting: false,
+        enableHiding: false,
+        header: () => <span className="sr-only">Ações</span>,
+        cell: ({ row }) => (
+          <RowActionsMenu actions={rowActions(row.original)} />
+        ),
+      });
+    }
+
     return defs;
-  }, [columns, selectable]);
+  }, [columns, selectable, rowActions]);
 
   // O projeto não usa o React Compiler, então o aviso de memoização é só ruído.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -282,10 +406,10 @@ export function DataTable<T>({
   const hideableColumns = table
     .getAllLeafColumns()
     .filter((column) => column.getCanHide());
-  const showToolbar =
-    !!searchValue || (enableColumnToggle && hideableColumns.length > 0);
+  // Com menos de 2 colunas ocultáveis o menu não serve para nada.
+  const showColumnToggle = enableColumnToggle && hideableColumns.length >= 2;
+  const showToolbar = !!searchValue || showColumnToggle;
   const selectedCount = Object.keys(rowSelection).length;
-  const showFooter = pageCount > 1 || (selectable && selectedCount > 0);
   const visibleColumnCount = table.getVisibleLeafColumns().length;
   const rows = table.getRowModel().rows;
 
@@ -310,7 +434,7 @@ export function DataTable<T>({
             <span />
           )}
 
-          {enableColumnToggle && hideableColumns.length > 0 && (
+          {showColumnToggle && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -341,9 +465,9 @@ export function DataTable<T>({
         </div>
       )}
 
-      <div className="rounded-xl border bg-card overflow-hidden">
+      <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted/50">
+          <TableHeader className="bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -360,13 +484,16 @@ export function DataTable<T>({
                             ? "descending"
                             : undefined
                       }
-                      className={cn("font-semibold text-foreground", className)}
+                      className={cn(
+                        "h-11 font-medium text-muted-foreground",
+                        className
+                      )}
                     >
                       {header.isPlaceholder ? null : canSort ? (
                         <button
                           type="button"
                           onClick={header.column.getToggleSortingHandler()}
-                          className="-mx-1 inline-flex items-center gap-1 rounded px-1 py-0.5 font-semibold hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -429,43 +556,91 @@ export function DataTable<T>({
         </Table>
       </div>
 
-      {showFooter && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            {selectable && selectedCount > 0 && (
-              <>
-                {selectedCount} selecionado{selectedCount === 1 ? "" : "s"}{" "}
-                ·{" "}
-              </>
-            )}
-            Página {Math.min(pageIndex + 1, Math.max(1, pageCount))} de{" "}
-            {Math.max(1, pageCount)} · {filtered.length} registro
-            {filtered.length === 1 ? "" : "s"}
-          </span>
-          {pageCount > 1 && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-1 text-sm text-muted-foreground">
+        <span>
+          {selectable && selectedCount > 0 && (
+            <>
+              {selectedCount} selecionado{selectedCount === 1 ? "" : "s"} ·{" "}
+            </>
+          )}
+          {filtered.length} registro{filtered.length === 1 ? "" : "s"}
+        </span>
+
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {data.length > Math.min(...pageSizeOptions) && (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline">Linhas por página</span>
+              <Select
+                value={String(pagination.pageSize)}
+                onValueChange={(value) => table.setPageSize(Number(value))}
               >
-                <ChevronLeft className="size-4" />
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!table.getCanNextPage()}
-                onClick={() => table.nextPage()}
-              >
-                Próxima
-                <ChevronRight className="size-4" />
-              </Button>
+                <SelectTrigger
+                  size="sm"
+                  className="w-[4.5rem]"
+                  aria-label="Linhas por página"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {pageSizeOptions.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
+
+          <span className="font-medium text-foreground">
+            Página {Math.min(pageIndex + 1, Math.max(1, pageCount))} de{" "}
+            {Math.max(1, pageCount)}
+          </span>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              aria-label="Primeira página"
+              disabled={!table.getCanPreviousPage()}
+              onClick={() => table.setPageIndex(0)}
+            >
+              <ChevronsLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              aria-label="Página anterior"
+              disabled={!table.getCanPreviousPage()}
+              onClick={() => table.previousPage()}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              aria-label="Próxima página"
+              disabled={!table.getCanNextPage()}
+              onClick={() => table.nextPage()}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              aria-label="Última página"
+              disabled={!table.getCanNextPage()}
+              onClick={() => table.setPageIndex(pageCount - 1)}
+            >
+              <ChevronsRight className="size-4" />
+            </Button>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

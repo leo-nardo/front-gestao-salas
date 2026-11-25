@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Package from "lucide-react/dist/esm/icons/package";
@@ -75,7 +76,7 @@ export default function PageContent() {
         subtitle="Gerencie pedidos de empréstimo de equipamentos"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <DataTable
           data={solicitacoes}
           isLoading={isLoading}
@@ -158,6 +159,7 @@ export default function PageContent() {
             },
             {
               header: "Ações",
+              align: "right",
               hideable: false,
               cell: (s) => {
                 if (s.status === "pendente") {
@@ -233,7 +235,7 @@ export default function PageContent() {
             },
           ]}
         />
-      </div>
+      </PageContainer>
     </>
   );
 }

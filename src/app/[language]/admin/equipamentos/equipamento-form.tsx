@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,14 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -63,6 +53,12 @@ type ApiResult =
     };
 
 type EquipamentoFormProps = {
+  /** `page` (padrão): tela própria. `drawer`: campos + rodapé dentro de um Sheet. */
+  variant?: "page" | "drawer";
+  /** Cancelar na variante `drawer`. */
+  onCancel?: () => void;
+  /** Chamado após salvar. Sem ele, volta para a lista. */
+  onSuccess?: () => void;
   title: string;
   submitLabel: string;
   submittingLabel: string;
@@ -72,6 +68,9 @@ type EquipamentoFormProps = {
 };
 
 export function EquipamentoForm({
+  variant = "page",
+  onCancel,
+  onSuccess,
   title,
   submitLabel,
   submittingLabel,
@@ -111,7 +110,8 @@ export function EquipamentoForm({
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success(successMessage);
-        router.push("/admin/equipamentos");
+        if (onSuccess) onSuccess();
+        else router.push("/admin/equipamentos");
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -124,130 +124,108 @@ export function EquipamentoForm({
   };
 
   return (
-    <div className="p-6 max-w-[700px] mx-auto w-full">
-      <Link
-        href="/admin/equipamentos"
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Voltar para equipamentos
-      </Link>
+    <FormShell
+      variant={variant}
+      title={title}
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitting={submitting}
+      submitLabel={submitLabel}
+      submittingLabel={submittingLabel}
+      backHref="/admin/equipamentos"
+      backLabel="Voltar para equipamentos"
+      onCancel={onCancel}
+      width="max-w-[700px]"
+    >
+      <FormField
+        control={form.control}
+        name="nome"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: Projetor portátil EPSON" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <Card>
-        <CardHeader className="border-b pb-6">
-          <CardTitle className="text-xl">{title}</CardTitle>
-        </CardHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6 pt-6">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Projetor portátil EPSON"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <FormField
+        control={form.control}
+        name="tipo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo *</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Ex: Projetor, Caixa de som, Notebook"
+                {...field}
               />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-              <FormField
-                control={form.control}
-                name="tipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Projetor, Caixa de som, Notebook"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <div className="grid grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="unidadeId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidade *</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={isLoadingUnidades}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {unidades.map((un) => (
+                    <SelectItem key={un.id} value={un.id}>
+                      {un.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              <div className="grid grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="unidadeId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Unidade *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isLoadingUnidades}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {unidades.map((un) => (
-                            <SelectItem key={un.id} value={un.id}>
-                              {un.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <FormField
+          control={form.control}
+          name="quantidadeTotal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Quantidade total *</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="0" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
-                <FormField
-                  control={form.control}
-                  name="quantidadeTotal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantidade total *</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="descricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Observações opcionais" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/equipamentos">
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? submittingLabel : submitLabel}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+      <FormField
+        control={form.control}
+        name="descricao"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição</FormLabel>
+            <FormControl>
+              <Input placeholder="Observações opcionais" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormShell>
   );
 }

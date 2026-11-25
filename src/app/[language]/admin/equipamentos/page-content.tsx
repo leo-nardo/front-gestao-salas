@@ -1,8 +1,11 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
+import { EquipamentoEditDrawer } from "./equipamento-edit-drawer";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Package from "lucide-react/dist/esm/icons/package";
 import { AdminHeader } from "@/components/admin-header";
@@ -13,6 +16,7 @@ import { useGetEquipamentosService } from "@/services/api/services/equipamentos"
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const getEquipamentos = useGetEquipamentosService();
   const { data: res, isLoading } = useQuery({
     queryKey: ["equipamentos"],
@@ -27,7 +31,7 @@ export default function PageContent() {
         subtitle="Gerencie o acervo de equipamentos emprestáveis"
       />
 
-      <div className="p-6 max-w-[1100px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href="/admin/equipamentos/novo">
             <Button>
@@ -56,6 +60,13 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(eq) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(eq.id)),
+            },
+          ]}
           columns={[
             {
               header: "Nome",
@@ -82,21 +93,14 @@ export default function PageContent() {
                 </span>
               ),
             },
-            {
-              header: "Ações",
-              hideable: false,
-              cell: (eq) => (
-                <Link href={`/admin/equipamentos/${eq.id}/editar`}>
-                  <Button variant="ghost" size="sm">
-                    <Edit className="w-3.5 h-3.5 mr-1" />
-                    Editar
-                  </Button>
-                </Link>
-              ),
-            },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <EquipamentoEditDrawer
+        id={editingId}
+        onClose={() => setEditingId(null)}
+      />
     </>
   );
 }
