@@ -18,3 +18,13 @@ Os paths de tela ficam em `src/routes/`, um arquivo por módulo (`blocos.ts`, `r
 Novo módulo = novo arquivo em `src/routes/` (use `crudRoutes`/`listRoutes` de `crud.ts`) + uma linha em `src/routes/index.ts`. Os paths não levam o prefixo de idioma. Páginas novas usam `pageMetadata("Título")` (`@/lib/page-metadata`) no `page.tsx`.
 
 Guards ficam no `layout.tsx` do perfil (`withPageRequiredAuth` com `roles`), não nos `page-content.tsx`.
+
+## E2E (Playwright)
+
+Os testes ficam em `playwright-tests/<modulo>/` (uma pasta por módulo, ex.: `cursos/`, `rotas/`), com os helpers compartilhados em `playwright-tests/helpers/`. `1-auth/` é o legado do boilerplate (ainda aponta para `/sign-in`).
+
+- `npm run test:e2e` roda tudo; `npm run test:e2e:cursos` / `test:e2e:rotas` rodam um módulo.
+- Precisa do back em `localhost:3001` (com a seed: `admin@example.com`) e do front em `localhost:3000` (o config sobe o `npm run dev` se não houver).
+- Login via API + cookie com `loginAsAdmin(page)` (`helpers/session.ts`), sem passar pela tela. Navegue com `routes.*` de `src/routes`.
+- Teste que cria dados deve limpar via API no `afterAll` (ver `helpers/cursos-api.ts`).
+- Novo módulo = nova pasta `playwright-tests/<modulo>/` com `<modulo>.crud.spec.ts` seguindo `cursos/`.

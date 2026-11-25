@@ -14,5 +14,7 @@ export const profileRoutes = {
 };
 
 export const publicRoutes = {
+  /** Raiz do app: decide entre login e a página inicial do perfil. */
+  home: () => "/",
   privacyPolicy: () => "/privacy-policy",
 };

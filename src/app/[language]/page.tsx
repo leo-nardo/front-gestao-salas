@@ -1,60 +1,24 @@
-import { routes } from "@/routes";
-import type { Metadata } from "next";
-import { getServerTranslation } from "@/services/i18n";
-import Link from "@/components/link";
-import { Trans } from "react-i18next/TransWithoutContext";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { routes, withLanguage } from "@/routes";
+import { AUTH_TOKEN_KEY } from "@/services/auth/config";
+import HomeRedirect from "./home-redirect";
 
 type Props = {
   params: Promise<{ language: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
-  const { t } = await getServerTranslation(params.language, "home");
+/**
+ * Raiz do app: sem sessão vai direto ao login (redirect no servidor, sem
+ * piscar tela); com sessão, o cliente resolve a página inicial do perfil.
+ */
+export default async function Home({ params }: Props) {
+  const { language } = await params;
+  const hasSession = (await cookies()).has(AUTH_TOKEN_KEY);
 
-  return {
-    title: t("title"),
-  };
-}
+  if (!hasSession) {
+    redirect(withLanguage(language, routes.auth.login()));
+  }
 
-export default async function Home(props: Props) {
-  const params = await props.params;
-  const { t } = await getServerTranslation(params.language, "home");
-
-  return (
-    <div className="mx-auto w-full max-w-3xl px-4">
-      <div className="flex h-[90vh] flex-col justify-between gap-6 pt-6">
-        <div className="flex-grow">
-          <h1 className="mb-4 text-3xl font-semibold" data-testid="home-title">
-            {t("title")}
-          </h1>
-          <p>
-            <Trans
-              i18nKey={`description`}
-              t={t}
-              components={[
-                <a
-                  key="1"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline-offset-4 underline"
-                  href="https://github.com/brocoders/extensive-react-boilerplate/blob/main/docs/README.md"
-                >
-                  {}
-                </a>,
-              ]}
-            />
-          </p>
-        </div>
-        <div className="mx-auto">
-          <Link
-            href={routes.public.privacyPolicy()}
-            className="text-primary underline-offset-4 underline"
-          >
-            {t("privacyPolicy")}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  return <HomeRedirect />;
 }

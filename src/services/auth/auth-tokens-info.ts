@@ -13,3 +13,6 @@ export function setTokensInfo(tokens: TokensInfo) {
     Cookies.remove(AUTH_TOKEN_KEY);
   }
 }
+
+/** Evento disparado quando uma chamada autenticada volta 401 (sessão inválida). */
+export const SESSION_EXPIRED_EVENT = "auth:session-expired";
