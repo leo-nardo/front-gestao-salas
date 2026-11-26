@@ -1,11 +1,14 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { TurmaEditDrawer } from "./turma-edit-drawer";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Layers from "lucide-react/dist/esm/icons/layers";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
@@ -13,6 +16,7 @@ import { useGetTurmasService } from "@/services/api/services/turmas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const getTurmas = useGetTurmasService();
   const { data: res, isLoading } = useQuery({
     queryKey: ["turmas"],
@@ -27,7 +31,7 @@ export default function PageContent() {
         subtitle="Turmas cadastradas por curso e período"
       />
 
-      <div className="p-6 max-w-[1000px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href={routes.turmas.admin.create()}>
             <Button>
@@ -54,9 +58,17 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(t) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(t.id)),
+            },
+          ]}
           columns={[
             {
               header: "Código",
+              sortValue: (t) => t.codigo,
               cell: (t) => (
                 <span className="font-medium font-ibm-plex-mono">
                   {t.codigo}
@@ -65,30 +77,23 @@ export default function PageContent() {
             },
             {
               header: "Curso",
+              sortValue: (t) => t.curso?.nome,
               cell: (t) => (
                 <span className="text-muted-foreground">{t.curso?.nome}</span>
               ),
             },
             {
               header: "Período",
+              sortValue: (t) => t.periodo,
               cell: (t) => (
                 <span className="text-muted-foreground">{t.periodo}</span>
               ),
             },
-            {
-              header: "Ações",
-              cell: (t) => (
-                <Link href={routes.turmas.admin.edit(t.id)}>
-                  <Button variant="ghost" size="sm">
-                    <Edit className="w-3.5 h-3.5 mr-1" />
-                    Editar
-                  </Button>
-                </Link>
-              ),
-            },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <TurmaEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

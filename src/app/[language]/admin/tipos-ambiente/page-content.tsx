@@ -1,10 +1,13 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { TipoAmbienteEditDrawer } from "./tipoambiente-edit-drawer";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Tags from "lucide-react/dist/esm/icons/tags";
 import { toast } from "sonner";
@@ -20,6 +23,7 @@ import {
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { confirmDialog } = useConfirmDialog();
   const getTipoAmbientes = useGetTipoAmbientesService();
@@ -67,7 +71,7 @@ export default function PageContent() {
         subtitle="Gerencie os tipos de ambiente disponíveis pra classificar os ambientes"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href={routes.tiposAmbiente.admin.create()}>
             <Button>
@@ -94,45 +98,43 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(b) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(b.id)),
+            },
+            {
+              label: "Excluir",
+              icon: <Trash2 className="size-4" />,
+              destructive: true,
+              disabled: deleteMutation.isPending,
+              onSelect: () => handleDelete(b),
+            },
+          ]}
           columns={[
             {
               header: "Nome",
+              sortValue: (b) => b.nome,
               cell: (b) => <span className="font-medium">{b.nome}</span>,
             },
             {
               header: "Descrição",
+              sortValue: (b) => b.descricao,
               cell: (b) => (
                 <span className="text-muted-foreground">
                   {b.descricao || "-"}
                 </span>
               ),
             },
-            {
-              header: "Ações",
-              cell: (b) => (
-                <div className="flex items-center gap-2">
-                  <Link href={routes.tiposAmbiente.admin.edit(b.id)}>
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-3.5 h-3.5 mr-1" />
-                      Editar
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(b)}
-                    disabled={deleteMutation.isPending}
-                    className="text-destructive hover:bg-destructive-bg hover:text-destructive"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" />
-                    Excluir
-                  </Button>
-                </div>
-              ),
-            },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <TipoAmbienteEditDrawer
+        id={editingId}
+        onClose={() => setEditingId(null)}
+      />
     </>
   );
 }

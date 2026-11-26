@@ -12,6 +12,7 @@ import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SheetFooter } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -76,6 +77,15 @@ type AmbienteFormProps = {
   successMessage: string;
   defaultValues?: Partial<AmbienteFormData>;
   onSave: (data: AmbienteFormData) => Promise<ApiResult>;
+  /**
+   * `page` (padrão): tela própria, com Card e navegação de volta à lista.
+   * `drawer`: só os campos e o rodapé, para uso dentro de um Sheet.
+   */
+  variant?: "page" | "drawer";
+  /** Chamado após salvar com sucesso. Sem ele, volta para a lista. */
+  onSuccess?: () => void;
+  /** Botão Cancelar da variante `drawer`. */
+  onCancel?: () => void;
 };
 
 export function AmbienteForm({
@@ -85,7 +95,11 @@ export function AmbienteForm({
   successMessage,
   defaultValues,
   onSave,
+  variant = "page",
+  onSuccess,
+  onCancel,
 }: AmbienteFormProps) {
+  const isDrawer = variant === "drawer";
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -149,7 +163,8 @@ export function AmbienteForm({
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success(successMessage);
-        router.push(routes.ambientes.admin.list());
+        if (onSuccess) onSuccess();
+        else router.push(routes.ambientes.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -160,6 +175,214 @@ export function AmbienteForm({
       setSubmitting(false);
     }
   };
+
+  const fields = (
+    <div
+      className={
+        isDrawer
+          ? "grid grid-cols-1 gap-5"
+          : "grid grid-cols-1 md:grid-cols-2 gap-6"
+      }
+    >
+      <FormField
+        control={form.control}
+        name="nome"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome / identificação *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: Sala 302" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="tipoAmbienteId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de ambiente *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {tipoAmbientes.map((tipo) => (
+                  <SelectItem key={tipo.id} value={tipo.id}>
+                    {tipo.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="tipo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Disponibilidade *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Grade fixa">
+                  Uso fixo semanal (grade)
+                </SelectItem>
+                <SelectItem value="Reservável">
+                  Reservável sob demanda
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="capacidade"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Capacidade *</FormLabel>
+            <FormControl>
+              <Input type="number" placeholder="0" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="unidadeId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Unidade / campus *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {unidades.map((un) => (
+                  <SelectItem key={un.id} value={un.id}>
+                    {un.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="blocoId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Bloco</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o bloco" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {blocos.map((bloco) => (
+                  <SelectItem key={bloco.id} value={bloco.id}>
+                    {bloco.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="andarId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Andar</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o andar" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {andares.map((andar) => (
+                  <SelectItem key={andar.id} value={andar.id}>
+                    {andar.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {tipoAmbienteSelecionado?.nome.includes("Laboratório") && (
+        <FormField
+          control={form.control}
+          name="estacoesTrabalho"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estações de trabalho</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+    </div>
+  );
+
+  if (isDrawer) {
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex-1 overflow-y-auto px-4 pb-4">{fields}</div>
+          <SheetFooter className="flex-row justify-end gap-3 border-t">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? submittingLabel : submitLabel}
+            </Button>
+          </SheetFooter>
+        </form>
+      </Form>
+    );
+  }
 
   return (
     <div className="p-6 max-w-[800px] mx-auto w-full">
@@ -182,201 +405,7 @@ export function AmbienteForm({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome / identificação *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Sala 302" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tipoAmbienteId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de ambiente *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {tipoAmbientes.map((tipo) => (
-                            <SelectItem key={tipo.id} value={tipo.id}>
-                              {tipo.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Disponibilidade *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Grade fixa">
-                            Uso fixo semanal (grade)
-                          </SelectItem>
-                          <SelectItem value="Reservável">
-                            Reservável sob demanda
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="capacidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Capacidade *</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="unidadeId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Unidade / campus *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {unidades.map((un) => (
-                            <SelectItem key={un.id} value={un.id}>
-                              {un.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="blocoId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bloco</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione o bloco" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Nenhum</SelectItem>
-                          {blocos.map((bloco) => (
-                            <SelectItem key={bloco.id} value={bloco.id}>
-                              {bloco.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="andarId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Andar</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione o andar" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Nenhum</SelectItem>
-                          {andares.map((andar) => (
-                            <SelectItem key={andar.id} value={andar.id}>
-                              {andar.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {tipoAmbienteSelecionado?.nome.includes("Laboratório") && (
-                  <FormField
-                    control={form.control}
-                    name="estacoesTrabalho"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estações de trabalho</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </CardContent>
+            <CardContent className="pt-6">{fields}</CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
               <Link href={routes.ambientes.admin.list()}>

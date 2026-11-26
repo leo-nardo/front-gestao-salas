@@ -1,14 +1,14 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import { useGetReservasService } from "@/services/api/services/reservas";
 import useAuth from "@/services/auth/use-auth";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
@@ -27,7 +27,7 @@ export default function PageContent() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
@@ -45,56 +45,63 @@ export default function PageContent() {
         </Link>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : minhasReservas.length > 0 ? (
-        <div className="space-y-3">
-          {minhasReservas.map((r) => (
-            <Card key={r.id} className="p-4 flex-row items-center gap-4">
-              <div className="bg-accent p-2.5 rounded-lg text-accent-foreground shrink-0">
-                <CalendarClock className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground truncate">
-                    {r.titulo}
-                  </p>
-                  {r.status === "cancelada" ? (
-                    <Badge className="bg-destructive-bg text-destructive border-transparent">
-                      Cancelada
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-success-bg text-success border-transparent">
-                      Confirmada
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {r.ambiente.nome} · {r.data} · {r.horarioInicio} -{" "}
-                  {r.horarioFim}
-                </p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-            <CalendarClock className="w-8 h-8" />
-          </div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">
-            Nenhuma reserva solicitada
-          </h3>
-          <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-            Você ainda não solicitou nenhuma reserva de sala.
-          </p>
-          <Link href={routes.reservas.professor.create()}>
-            <Button>Nova reserva</Button>
-          </Link>
-        </div>
-      )}
-    </div>
+      <DataTable
+        data={minhasReservas}
+        isLoading={isLoading}
+        getRowKey={(r) => r.id}
+        searchValue={(r) => `${r.titulo} ${r.ambiente.nome}`}
+        searchPlaceholder="Buscar por título ou ambiente..."
+        emptyState={{
+          icon: <CalendarClock className="w-8 h-8" />,
+          title: "Nenhuma reserva solicitada",
+          description: "Você ainda não solicitou nenhuma reserva de sala.",
+          action: (
+            <Link href={routes.reservas.professor.create()}>
+              <Button>Nova reserva</Button>
+            </Link>
+          ),
+        }}
+        columns={[
+          {
+            header: "Título",
+            sortValue: (r) => r.titulo,
+            cell: (r) => <span className="font-medium">{r.titulo}</span>,
+          },
+          {
+            header: "Ambiente",
+            sortValue: (r) => r.ambiente.nome,
+            cell: (r) => r.ambiente.nome,
+          },
+          {
+            header: "Data",
+            sortValue: (r) => r.data,
+            cell: (r) => <span className="font-mono text-sm">{r.data}</span>,
+          },
+          {
+            header: "Horário",
+            sortValue: (r) => r.horarioInicio,
+            cell: (r) => (
+              <span className="font-mono text-sm">
+                {r.horarioInicio} - {r.horarioFim}
+              </span>
+            ),
+          },
+          {
+            header: "Status",
+            sortValue: (r) => r.status,
+            cell: (r) =>
+              r.status === "cancelada" ? (
+                <Badge className="bg-destructive-bg text-destructive border-transparent">
+                  Cancelada
+                </Badge>
+              ) : (
+                <Badge className="bg-success-bg text-success border-transparent">
+                  Confirmada
+                </Badge>
+              ),
+          },
+        ]}
+      />
+    </PageContainer>
   );
 }

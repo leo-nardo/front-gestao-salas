@@ -1,13 +1,15 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { UsuarioEditDrawer } from "./usuario-edit-drawer";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import UsersIcon from "lucide-react/dist/esm/icons/users";
-import Edit from "lucide-react/dist/esm/icons/edit";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Send from "lucide-react/dist/esm/icons/send";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
@@ -20,13 +22,13 @@ import { StatusEnum } from "@/services/api/types/status";
 import { SortEnum } from "@/services/api/types/sort-type";
 import { User } from "@/services/api/types/user";
 
-function SendInviteButton({ user }: { user: User }) {
+function useSendInvite() {
   const queryClient = useQueryClient();
   const sendFirstAccessInvite = useAuthSendFirstAccessInviteService();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: () => sendFirstAccessInvite({ userId: user.id }),
-    onSuccess: (res) => {
+  return useMutation({
+    mutationFn: (user: User) => sendFirstAccessInvite({ userId: user.id }),
+    onSuccess: (res, user) => {
       if (res.status === HTTP_CODES_ENUM.NO_CONTENT) {
         toast.success(`Convite enviado para ${user.email}.`);
         queryClient.invalidateQueries({ queryKey: ["users-list"] });
@@ -38,28 +40,12 @@ function SendInviteButton({ user }: { user: User }) {
       toast.error("Não foi possível enviar o convite. Tente novamente.");
     },
   });
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="h-8 px-2"
-      disabled={isPending}
-      onClick={() => mutate()}
-      data-testid={`send-invite-${user.email}`}
-    >
-      {isPending ? (
-        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-      ) : (
-        <Send className="w-3.5 h-3.5 mr-1" />
-      )}
-      Enviar convite
-    </Button>
-  );
 }
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const getUsers = useGetUsersService();
+  const sendInvite = useSendInvite();
   const { data: res, isLoading } = useQuery({
     queryKey: ["users-list"],
     queryFn: () =>
@@ -74,6 +60,7 @@ export default function PageContent() {
   const columns: DataTableColumn<User>[] = [
     {
       header: "Nome",
+      sortValue: (u) => `${u.firstName} ${u.lastName}`,
       cell: (u) => (
         <span className="font-medium text-foreground">
           {u.firstName} {u.lastName}
@@ -82,6 +69,7 @@ export default function PageContent() {
     },
     {
       header: "E-mail",
+      sortValue: (u) => u.email,
       cell: (u) => (
         <span className="text-muted-foreground font-mono text-sm">
           {u.email}
@@ -90,6 +78,7 @@ export default function PageContent() {
     },
     {
       header: "Papel",
+      sortValue: (u) => u.role?.name,
       cell: (u) => (
         <Badge variant="outline" className="font-normal">
           {u.role?.name || "Sem papel"}
@@ -115,22 +104,6 @@ export default function PageContent() {
           </Badge>
         ),
     },
-    {
-      header: "Ações",
-      cell: (u) => (
-        <div className="flex items-center">
-          <Link href={routes.usuarios.admin.edit(u.id)}>
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <Edit className="w-3.5 h-3.5 mr-1" />
-              Editar
-            </Button>
-          </Link>
-          {u.status?.id === StatusEnum.INACTIVE && (
-            <SendInviteButton user={u} />
-          )}
-        </div>
-      ),
-    },
   ];
 
   return (
@@ -140,7 +113,7 @@ export default function PageContent() {
         subtitle="Gestão de usuários e permissões do sistema"
       />
 
-      <div className="p-6 max-w-[1000px] mx-auto w-full space-y-4">
+      <PageContainer className="space-y-4">
         <div className="flex justify-end">
           <Link href={routes.usuarios.admin.create()}>
             <Button>
@@ -151,6 +124,20 @@ export default function PageContent() {
         </div>
 
         <DataTable
+          rowActions={(u) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(u.id)),
+            },
+            u.status?.id === StatusEnum.INACTIVE && {
+              label: "Enviar convite",
+              icon: <Send className="size-4" />,
+              disabled: sendInvite.isPending,
+              onSelect: () => sendInvite.mutate(u),
+              testId: `send-invite-${u.email}`,
+            },
+          ]}
           columns={columns}
           data={users}
           isLoading={isLoading}
@@ -162,7 +149,9 @@ export default function PageContent() {
             title: "Nenhum usuário encontrado",
           }}
         />
-      </div>
+      </PageContainer>
+
+      <UsuarioEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

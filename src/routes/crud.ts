@@ -12,7 +12,6 @@ export type ListRoutes = {
 
 export type CrudRoutes = ListRoutes & {
   create: () => string;
-  edit: (id: string | number) => string;
 };
 
 /** Segmento da tela de criação, concordando com o gênero do recurso. */
@@ -44,6 +43,5 @@ export function crudRoutes(
   return {
     list: () => base,
     create: () => `${base}/${create}`,
-    edit: (id) => `${base}/${id}/editar`,
   };
 }

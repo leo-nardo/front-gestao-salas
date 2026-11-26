@@ -1,11 +1,14 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { DisciplinaEditDrawer } from "./disciplina-edit-drawer";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
@@ -13,6 +16,7 @@ import { useGetDisciplinasService } from "@/services/api/services/disciplinas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const getDisciplinas = useGetDisciplinasService();
   const { data: res, isLoading } = useQuery({
     queryKey: ["disciplinas"],
@@ -27,7 +31,7 @@ export default function PageContent() {
         subtitle="Disciplinas cadastradas por curso"
       />
 
-      <div className="p-6 max-w-[1000px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href={routes.disciplinas.admin.create()}>
             <Button>
@@ -55,31 +59,31 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(d) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(d.id)),
+            },
+          ]}
           columns={[
             {
               header: "Disciplina",
+              sortValue: (d) => d.nome,
               cell: (d) => <span className="font-medium">{d.nome}</span>,
             },
             {
               header: "Curso",
+              sortValue: (d) => d.curso?.nome,
               cell: (d) => (
                 <span className="text-muted-foreground">{d.curso.nome}</span>
               ),
             },
-            {
-              header: "Ações",
-              cell: (d) => (
-                <Link href={routes.disciplinas.admin.edit(d.id)}>
-                  <Button variant="ghost" size="sm">
-                    <Edit className="w-3.5 h-3.5 mr-1" />
-                    Editar
-                  </Button>
-                </Link>
-              ),
-            },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <DisciplinaEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

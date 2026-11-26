@@ -1,9 +1,9 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import { useGetAmbientesService } from "@/services/api/services/ambientes";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -16,7 +16,7 @@ export default function PageContent() {
   const ambientes = res?.status === HTTP_CODES_ENUM.OK ? res.data.data : [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Ambientes
@@ -26,27 +26,35 @@ export default function PageContent() {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ambientes.map((a) => (
-            <Card key={a.id} className="p-4 flex-row items-center gap-3">
-              <div className="bg-accent p-2 rounded-lg text-accent-foreground shrink-0">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="font-medium text-foreground truncate">{a.nome}</p>
-                <p className="text-xs text-muted-foreground">
-                  {a.unidade?.nome} · {a.capacidade} lugares
-                </p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+      <DataTable
+        data={ambientes}
+        isLoading={isLoading}
+        getRowKey={(a) => a.id}
+        searchValue={(a) => `${a.nome} ${a.unidade?.nome ?? ""}`}
+        searchPlaceholder="Buscar por ambiente ou unidade..."
+        emptyState={{
+          icon: <MapPin className="w-8 h-8" />,
+          title: "Nenhum ambiente",
+          description: "Não há ambientes cadastrados.",
+        }}
+        columns={[
+          {
+            header: "Ambiente",
+            sortValue: (a) => a.nome,
+            cell: (a) => <span className="font-medium">{a.nome}</span>,
+          },
+          {
+            header: "Unidade",
+            sortValue: (a) => a.unidade?.nome,
+            cell: (a) => a.unidade?.nome ?? "—",
+          },
+          {
+            header: "Capacidade",
+            sortValue: (a) => a.capacidade,
+            cell: (a) => `${a.capacidade} lugares`,
+          },
+        ]}
+      />
+    </PageContainer>
   );
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { AulaEditDrawer } from "./aula-edit-drawer";
 import { useState } from "react";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import CalendarClock from "lucide-react/dist/esm/icons/calendar-clock";
 import { useQuery } from "@tanstack/react-query";
 import { AdminHeader } from "@/components/admin-header";
@@ -23,6 +25,7 @@ import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { getCourseColor } from "@/lib/course-colors";
 
 export default function AulasPageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [cursoFilter, setCursoFilter] = useState<string>("all");
 
   const getAulas = useGetAulasService();
@@ -48,6 +51,7 @@ export default function AulasPageContent() {
   const columns: DataTableColumn<Aula>[] = [
     {
       header: "Disciplina",
+      sortValue: (aula) => aula.disciplina.nome,
       cell: (aula) => (
         <div className="relative pl-3">
           <div
@@ -68,16 +72,20 @@ export default function AulasPageContent() {
     },
     {
       header: "Turma",
+      sortValue: (aula) => aula.turma.codigo,
       cell: (aula) => (
         <span className="font-ibm-plex-mono text-sm">{aula.turma.codigo}</span>
       ),
     },
     {
       header: "Professor",
+      sortValue: (aula) =>
+        `${aula.professor.firstName} ${aula.professor.lastName}`,
       cell: (aula) => `${aula.professor.firstName} ${aula.professor.lastName}`,
     },
     {
       header: "Dia · Horário",
+      sortValue: (aula) => `${aula.diaSemana} ${aula.horarioInicio}`,
       cell: (aula) => (
         <div>
           <div>{aula.diaSemana}</div>
@@ -89,18 +97,8 @@ export default function AulasPageContent() {
     },
     {
       header: "Ambiente",
+      sortValue: (aula) => aula.ambiente.nome,
       cell: (aula) => aula.ambiente.nome,
-    },
-    {
-      header: "Ações",
-      cell: (aula) => (
-        <Link href={routes.aulas.admin.edit(aula.id)}>
-          <Button variant="ghost" size="sm" className="h-8 px-2">
-            <Edit className="w-3.5 h-3.5 mr-1" />
-            Editar
-          </Button>
-        </Link>
-      ),
     },
   ];
 
@@ -111,7 +109,7 @@ export default function AulasPageContent() {
         subtitle="Grade de aulas por curso, turma e professor"
       />
 
-      <div className="p-6 max-w-[1100px] mx-auto w-full space-y-4">
+      <PageContainer className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="w-full md:w-[280px]">
             <Select value={cursoFilter} onValueChange={setCursoFilter}>
@@ -137,6 +135,13 @@ export default function AulasPageContent() {
         </div>
 
         <DataTable
+          rowActions={(aula) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(aula.id)),
+            },
+          ]}
           columns={columns}
           data={filteredAulas}
           isLoading={isLoading}
@@ -155,7 +160,9 @@ export default function AulasPageContent() {
             ),
           }}
         />
-      </div>
+      </PageContainer>
+
+      <AulaEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

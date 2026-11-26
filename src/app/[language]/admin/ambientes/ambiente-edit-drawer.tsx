@@ -1,14 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { AdminHeader } from "@/components/admin-header";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryClient } from "@tanstack/react-query";
+import { EditDrawer } from "@/components/edit-drawer";
 import {
   useGetAmbienteService,
   useUpdateAmbienteService,
+  type Ambiente,
 } from "@/services/api/services/ambientes";
-import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
-import { AmbienteForm } from "../../ambiente-form";
+import { AmbienteForm } from "./ambiente-form";
 
 function parseEstacoesTrabalho(descricao?: string | null): number | null {
   const rawDesc = descricao || "";
@@ -17,28 +16,29 @@ function parseEstacoesTrabalho(descricao?: string | null): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-export default function PageContent({ id }: { id: string }) {
+type AmbienteEditDrawerProps = {
+  /** Ambiente em edição. `null` mantém o drawer fechado. */
+  id: string | null;
+  onClose: () => void;
+};
+
+/** Edição de ambiente em um drawer, sem sair da lista. */
+export function AmbienteEditDrawer({ id, onClose }: AmbienteEditDrawerProps) {
+  const queryClient = useQueryClient();
   const getAmbiente = useGetAmbienteService();
   const updateAmbiente = useUpdateAmbienteService();
 
-  const { data: res, isLoading } = useQuery({
-    queryKey: ["ambientes", id],
-    queryFn: () => getAmbiente(id),
-  });
-
-  const ambiente = res?.status === HTTP_CODES_ENUM.OK ? res.data : null;
-
   return (
-    <>
-      <AdminHeader title="Editar Ambiente" />
-
-      {isLoading || !ambiente ? (
-        <div className="p-6 max-w-[800px] mx-auto w-full space-y-4">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-[420px] w-full rounded-xl" />
-        </div>
-      ) : (
+    <EditDrawer<Ambiente>
+      id={id}
+      onClose={onClose}
+      title="Editar ambiente"
+      queryKey={(id) => ["ambientes", id]}
+      load={getAmbiente}
+    >
+      {(ambiente, { close }) => (
         <AmbienteForm
+          variant="drawer"
           title="Editar ambiente"
           submitLabel="Salvar alterações"
           submittingLabel="Salvando..."
@@ -53,12 +53,17 @@ export default function PageContent({ id }: { id: string }) {
             andarId: ambiente.andar?.id || "none",
             estacoesTrabalho: parseEstacoesTrabalho(ambiente.descricao),
           }}
+          onCancel={close}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["ambientes"] });
+            close();
+          }}
           onSave={(data) => {
             const descricao = data.estacoesTrabalho
               ? `${data.estacoesTrabalho} estações de trabalho`
               : undefined;
 
-            return updateAmbiente(id, {
+            return updateAmbiente(ambiente.id, {
               nome: data.nome,
               tipoAmbiente: { id: data.tipoAmbienteId },
               tipo: data.tipo,
@@ -77,6 +82,6 @@ export default function PageContent({ id }: { id: string }) {
           }}
         />
       )}
-    </>
+    </EditDrawer>
   );
 }

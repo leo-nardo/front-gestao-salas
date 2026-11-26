@@ -1,10 +1,13 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
+import { CursoEditDrawer } from "./curso-edit-drawer";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
-import Edit from "lucide-react/dist/esm/icons/edit";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
 import { toast } from "sonner";
@@ -20,6 +23,7 @@ import {
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
 export default function PageContent() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { confirmDialog } = useConfirmDialog();
   const getCursos = useGetCursosService();
@@ -64,7 +68,7 @@ export default function PageContent() {
         subtitle="Gerencie os cursos oferecidos pela instituição"
       />
 
-      <div className="p-6 max-w-[1000px] mx-auto w-full space-y-6">
+      <PageContainer className="space-y-6">
         <div className="flex justify-end">
           <Link href={routes.cursos.admin.create()}>
             <Button>
@@ -90,37 +94,31 @@ export default function PageContent() {
               </Link>
             ),
           }}
+          rowActions={(c) => [
+            {
+              label: "Editar",
+              icon: <Pencil className="size-4" />,
+              onSelect: () => setEditingId(String(c.id)),
+            },
+            {
+              label: "Excluir",
+              icon: <Trash2 className="size-4" />,
+              destructive: true,
+              disabled: deleteMutation.isPending,
+              onSelect: () => handleDelete(c),
+            },
+          ]}
           columns={[
             {
               header: "Nome",
+              sortValue: (c) => c.nome,
               cell: (c) => <span className="font-medium">{c.nome}</span>,
-            },
-            {
-              header: "Ações",
-              cell: (c) => (
-                <div className="flex items-center gap-2">
-                  <Link href={routes.cursos.admin.edit(c.id)}>
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-3.5 h-3.5 mr-1" />
-                      Editar
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(c)}
-                    disabled={deleteMutation.isPending}
-                    className="text-destructive hover:bg-destructive-bg hover:text-destructive"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" />
-                    Excluir
-                  </Button>
-                </div>
-              ),
             },
           ]}
         />
-      </div>
+      </PageContainer>
+
+      <CursoEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

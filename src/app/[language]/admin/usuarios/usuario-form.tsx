@@ -2,14 +2,12 @@
 
 import { routes } from "@/routes";
 import { useState } from "react";
+import { FormShell } from "@/components/form-shell";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -18,15 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -69,6 +58,10 @@ type ApiResult =
     };
 
 type UsuarioFormProps = {
+  /** `page` (padrão): tela própria. `drawer`: campos + rodapé dentro de um Sheet. */
+  variant?: "page" | "drawer";
+  /** Cancelar na variante `drawer`. */
+  onCancel?: () => void;
   title: string;
   description?: string;
   submitLabel: string;
@@ -81,6 +74,8 @@ type UsuarioFormProps = {
 };
 
 export function UsuarioForm({
+  variant = "page",
+  onCancel,
   title,
   description,
   submitLabel,
@@ -137,119 +132,100 @@ export function UsuarioForm({
   };
 
   return (
-    <div className="p-6 max-w-[600px] mx-auto w-full">
-      <Link
-        href={routes.usuarios.admin.list()}
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Voltar para usuários
-      </Link>
+    <FormShell
+      variant={variant}
+      title={title}
+      description={description}
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitting={submitting}
+      submitLabel={submitLabel}
+      submittingLabel={submittingLabel}
+      backHref={routes.usuarios.admin.list()}
+      backLabel="Voltar para usuários"
+      onCancel={onCancel}
+      width="max-w-[600px]"
+    >
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome *</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: João" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Card>
-        <CardHeader className="border-b pb-6">
-          <CardTitle className="text-xl">{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sobrenome *</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: Silva" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6 pt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: João" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sobrenome *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Silva" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Ex: joao.silva@exemplo.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>E-mail *</FormLabel>
+            <FormControl>
+              <Input
+                type="email"
+                placeholder="Ex: joao.silva@exemplo.com"
+                {...field}
               />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-              {showInviteNotice && (
-                <div className="rounded-lg border bg-surface-4 p-4 text-sm text-muted-foreground">
-                  A pessoa ainda não terá senha definida. Depois de salvar,
-                  envie o convite de primeiro acesso na lista de usuários para
-                  que ela possa criar sua própria senha.
-                </div>
-              )}
+      {showInviteNotice && (
+        <div className="rounded-lg border bg-surface-4 p-4 text-sm text-muted-foreground">
+          A pessoa ainda não terá senha definida. Depois de salvar, envie o
+          convite de primeiro acesso na lista de usuários para que ela possa
+          criar sua própria senha.
+        </div>
+      )}
 
-              <FormField
-                control={form.control}
-                name="roleId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Papel *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o papel" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ROLE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.id} value={String(opt.id)}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href={routes.usuarios.admin.list()}>
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? submittingLabel : submitLabel}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+      <FormField
+        control={form.control}
+        name="roleId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Papel *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o papel" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {ROLE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.id} value={String(opt.id)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormShell>
   );
 }

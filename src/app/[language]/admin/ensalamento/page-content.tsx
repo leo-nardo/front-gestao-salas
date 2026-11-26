@@ -21,6 +21,7 @@ import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -786,7 +787,7 @@ export default function EnsalamentoPageContent() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="overflow-x-auto pb-2">
+          <ScrollArea scrollbars="horizontal" className="pb-2">
             {viewMode === "mapa" && (
               <MapaView
                 ambientes={ambientesFiltradas}
@@ -843,7 +844,7 @@ export default function EnsalamentoPageContent() {
                 }}
               />
             )}
-          </div>
+          </ScrollArea>
         )}
       </div>
 

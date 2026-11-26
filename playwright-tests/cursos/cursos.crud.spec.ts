@@ -59,14 +59,20 @@ test.describe("Cursos - CRUD", () => {
   test("edita o curso criado", async ({ page }) => {
     await page.goto(routes.cursos.admin.list());
     const linha = page.getByRole("row", { name: new RegExp(nome) });
-    await linha.getByRole("link", { name: "Editar" }).click();
-    await expect(page).toHaveURL(/\/admin\/cursos\/.+\/editar$/);
+    await linha.getByRole("button", { name: "Abrir menu de ações" }).click();
+    await page.getByRole("menuitem", { name: "Editar" }).click();
 
-    const campo = page.getByLabel("Nome *");
+    // A edição abre em um drawer, sem sair da lista
+    const drawer = page.getByRole("dialog", { name: "Editar curso" });
+    await expect(drawer).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/cursos$/);
+
+    const campo = drawer.getByLabel("Nome *");
     await expect(campo).toHaveValue(nome);
     await campo.fill(nomeEditado);
-    await page.getByRole("button", { name: /Salvar/ }).click();
+    await drawer.getByRole("button", { name: /Salvar/ }).click();
 
+    await expect(drawer).toBeHidden();
     await expect(page).toHaveURL(/\/admin\/cursos$/);
     await expect(
       page.getByRole("cell", { name: nomeEditado, exact: true })
@@ -90,11 +96,16 @@ test.describe("Cursos - CRUD", () => {
     const linha = page.getByRole("row", { name: nomeEditado });
     const dialogo = page.getByRole("alertdialog");
 
-    await linha.getByRole("button", { name: "Excluir" }).click();
+    const abrirExclusao = async () => {
+      await linha.getByRole("button", { name: "Abrir menu de ações" }).click();
+      await page.getByRole("menuitem", { name: "Excluir" }).click();
+    };
+
+    await abrirExclusao();
     await dialogo.getByRole("button", { name: "Cancelar" }).click();
     await expect(linha).toBeVisible();
 
-    await linha.getByRole("button", { name: "Excluir" }).click();
+    await abrirExclusao();
     await dialogo.getByRole("button", { name: "Excluir" }).click();
 
     await expect(page.getByText("Curso excluído com sucesso!")).toBeVisible();

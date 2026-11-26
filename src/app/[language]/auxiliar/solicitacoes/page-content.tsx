@@ -1,14 +1,14 @@
 "use client";
 
 import { routes } from "@/routes";
+import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import ArrowLeftRight from "lucide-react/dist/esm/icons/arrow-left-right";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-table";
 import { useGetMinhasSolicitacoesService } from "@/services/api/services/solicitacao-troca-salas";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 
@@ -30,7 +30,7 @@ export default function PageContent() {
   const solicitacoes = res?.status === HTTP_CODES_ENUM.OK ? res.data : [];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <PageContainer padded={false} className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas solicitações de troca
@@ -43,55 +43,90 @@ export default function PageContent() {
         </Link>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : solicitacoes.length === 0 ? (
-        <Card className="p-12 text-center">
-          <ArrowLeftRight className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Você ainda não fez nenhuma solicitação de troca de sala.
-          </p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {solicitacoes.map((s) => {
-            const badge = statusBadge[s.status];
-            return (
-              <Card key={s.id} className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-semibold text-foreground">
-                      {s.aula.disciplina.nome} · {s.aula.turma.codigo}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {s.aula.diaSemana} {s.aula.horarioInicio}-
-                      {s.aula.horarioFim}
-                    </p>
-                  </div>
-                  <Badge className={`${badge.className} border-transparent`}>
-                    {badge.label}
-                  </Badge>
-                </div>
-                <p className="text-sm text-foreground mb-1">
-                  De: {s.ambienteAtual.nome}
-                  {s.ambienteSugerido &&
-                    ` → Sugestão: ${s.ambienteSugerido.nome}`}
+      <DataTable
+        data={solicitacoes}
+        isLoading={isLoading}
+        getRowKey={(s) => s.id}
+        searchValue={(s) =>
+          `${s.aula.disciplina.nome} ${s.aula.turma.codigo} ${s.ambienteAtual.nome} ${s.justificativa}`
+        }
+        searchPlaceholder="Buscar por disciplina, turma ou ambiente..."
+        enableColumnToggle
+        emptyState={{
+          icon: <ArrowLeftRight className="w-8 h-8" />,
+          title: "Nenhuma solicitação",
+          description:
+            "Você ainda não fez nenhuma solicitação de troca de sala.",
+          action: (
+            <Link href={routes.solicitacoes.auxiliar.create()}>
+              <Button>Nova solicitação</Button>
+            </Link>
+          ),
+        }}
+        columns={[
+          {
+            header: "Aula",
+            sortValue: (s) => s.aula.disciplina.nome,
+            hideable: false,
+            cell: (s) => (
+              <div>
+                <p className="font-medium">
+                  {s.aula.disciplina.nome} · {s.aula.turma.codigo}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  &ldquo;{s.justificativa}&rdquo;
+                <p className="text-xs text-muted-foreground">
+                  {s.aula.diaSemana} {s.aula.horarioInicio}-{s.aula.horarioFim}
                 </p>
-                {s.motivoResposta && (
-                  <p className="text-sm text-muted-foreground pt-2 mt-2 border-t">
-                    Resposta: {s.motivoResposta}
+              </div>
+            ),
+          },
+          {
+            header: "Ambiente",
+            sortValue: (s) => s.ambienteAtual.nome,
+            cell: (s) => (
+              <div className="text-sm">
+                <span>{s.ambienteAtual.nome}</span>
+                {s.ambienteSugerido && (
+                  <p className="text-xs text-muted-foreground">
+                    → Sugestão: {s.ambienteSugerido.nome}
                   </p>
                 )}
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              </div>
+            ),
+          },
+          {
+            header: "Justificativa",
+            className: "max-w-[260px]",
+            cell: (s) => (
+              <span
+                className="line-clamp-2 text-sm text-muted-foreground"
+                title={s.justificativa}
+              >
+                {s.justificativa}
+              </span>
+            ),
+          },
+          {
+            header: "Status",
+            sortValue: (s) => s.status,
+            cell: (s) => {
+              const badge = statusBadge[s.status];
+              return (
+                <Badge className={`${badge.className} border-transparent`}>
+                  {badge.label}
+                </Badge>
+              );
+            },
+          },
+          {
+            header: "Resposta",
+            cell: (s) => (
+              <span className="text-sm text-muted-foreground">
+                {s.motivoResposta || "—"}
+              </span>
+            ),
+          },
+        ]}
+      />
+    </PageContainer>
   );
 }
