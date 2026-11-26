@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { TurmaEditDrawer } from "./turma-edit-drawer";
 import { useState } from "react";
@@ -32,7 +33,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/turmas/nova">
+          <Link href={routes.turmas.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Nova turma
@@ -52,7 +53,7 @@ export default function PageContent() {
             title: "Nenhuma turma cadastrada",
             description: "Cadastre a primeira turma pra vincular às aulas.",
             action: (
-              <Link href="/admin/turmas/nova">
+              <Link href={routes.turmas.admin.create()}>
                 <Button>Nova turma</Button>
               </Link>
             ),

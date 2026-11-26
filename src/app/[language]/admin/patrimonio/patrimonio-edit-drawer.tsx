@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditDrawer } from "@/components/edit-drawer";
 import {
@@ -39,7 +40,7 @@ export function PatrimonioEditDrawer({
           submitLabel="Salvar alterações"
           submittingLabel="Salvando..."
           successMessage="Item patrimonial atualizado com sucesso!"
-          backHref="/admin/patrimonio"
+          backHref={routes.patrimonio.admin.list()}
           defaultValues={{
             nome: e.nome,
             tipo: e.tipo,

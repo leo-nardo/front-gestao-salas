@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -80,7 +81,7 @@ export function CursoForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/cursos");
+        else router.push(routes.cursos.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -101,7 +102,7 @@ export function CursoForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/cursos"
+      backHref={routes.cursos.admin.list()}
       backLabel="Voltar para Cursos"
       onCancel={onCancel}
       width="max-w-[600px]"

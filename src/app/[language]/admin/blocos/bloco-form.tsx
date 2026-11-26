@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -82,7 +83,7 @@ export function BlocoForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/blocos");
+        else router.push(routes.blocos.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -103,7 +104,7 @@ export function BlocoForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/blocos"
+      backHref={routes.blocos.admin.list()}
       backLabel="Voltar para Blocos"
       onCancel={onCancel}
       width="max-w-[600px]"

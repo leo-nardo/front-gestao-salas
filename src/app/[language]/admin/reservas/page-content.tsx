@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -29,7 +30,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/reservas/nova">
+          <Link href={routes.reservas.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Nova reserva
@@ -51,7 +52,7 @@ export default function PageContent() {
             title: "Nenhuma reserva cadastrada",
             description: "Cadastre a primeira reserva pra começar.",
             action: (
-              <Link href="/admin/reservas/nova">
+              <Link href={routes.reservas.admin.create()}>
                 <Button>Cadastrar primeira reserva</Button>
               </Link>
             ),

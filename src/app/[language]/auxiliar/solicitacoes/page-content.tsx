@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -34,7 +35,7 @@ export default function PageContent() {
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas solicitações de troca
         </h1>
-        <Link href="/auxiliar/solicitacoes/nova">
+        <Link href={routes.solicitacoes.auxiliar.create()}>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Nova solicitação
@@ -57,7 +58,7 @@ export default function PageContent() {
           description:
             "Você ainda não fez nenhuma solicitação de troca de sala.",
           action: (
-            <Link href="/auxiliar/solicitacoes/nova">
+            <Link href={routes.solicitacoes.auxiliar.create()}>
               <Button>Nova solicitação</Button>
             </Link>
           ),

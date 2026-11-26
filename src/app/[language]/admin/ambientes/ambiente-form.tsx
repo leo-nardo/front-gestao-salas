@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
@@ -163,7 +164,7 @@ export function AmbienteForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/ambientes");
+        else router.push(routes.ambientes.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -386,7 +387,7 @@ export function AmbienteForm({
   return (
     <div className="p-6 max-w-[800px] mx-auto w-full">
       <Link
-        href="/admin/ambientes"
+        href={routes.ambientes.admin.list()}
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -407,7 +408,7 @@ export function AmbienteForm({
             <CardContent className="pt-6">{fields}</CardContent>
 
             <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/ambientes">
+              <Link href={routes.ambientes.admin.list()}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>

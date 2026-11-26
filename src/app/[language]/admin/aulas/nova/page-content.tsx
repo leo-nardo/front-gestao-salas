@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useRouter } from "next/navigation";
 import { AdminHeader } from "@/components/admin-header";
 import { AulaForm, AulaFormData } from "../aula-form";
@@ -28,7 +29,7 @@ export default function NovaAulaPageContent() {
             horarioFim: data.horarioFim,
           })
         }
-        onSaved={() => router.push("/admin/aulas")}
+        onSaved={() => router.push(routes.aulas.admin.list())}
       />
     </>
   );

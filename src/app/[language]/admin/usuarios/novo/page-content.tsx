@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useRouter } from "next/navigation";
 import { AdminHeader } from "@/components/admin-header";
 import { UsuarioForm, UsuarioFormData } from "../usuario-form";
@@ -27,7 +28,7 @@ export default function PageContent() {
             role: { id: Number(data.roleId) },
           })
         }
-        onSaved={() => router.push("/admin/usuarios")}
+        onSaved={() => router.push(routes.usuarios.admin.list())}
       />
     </>
   );

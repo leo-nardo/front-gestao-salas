@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useForm } from "react-hook-form";
@@ -140,7 +141,7 @@ export function UsuarioForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/usuarios"
+      backHref={routes.usuarios.admin.list()}
       backLabel="Voltar para usuários"
       onCancel={onCancel}
       width="max-w-[600px]"

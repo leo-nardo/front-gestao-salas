@@ -20,7 +20,10 @@
     "test:generators:static": "bash playwright-tests/generators/run-static.sh",
     "test:e2e:generators:crud": "bash playwright-tests/generators/run-crud.sh",
     "sb": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "test:e2e": "playwright test",
+    "test:e2e:cursos": "playwright test playwright-tests/cursos",
+    "test:e2e:rotas": "playwright test playwright-tests/rotas"
   },
   "dependencies": {
     "@faker-js/faker": "10.3.0",

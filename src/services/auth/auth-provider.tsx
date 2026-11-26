@@ -19,8 +19,10 @@ import { AUTH_LOGOUT_URL, AUTH_ME_URL } from "@/services/api/config";
 import HTTP_CODES_ENUM from "../api/types/http-codes";
 import {
   getTokensInfo,
+  SESSION_EXPIRED_EVENT,
   setTokensInfo as setTokensInfoToStorage,
 } from "./auth-tokens-info";
+import { toast } from "sonner";
 
 function AuthProvider(props: PropsWithChildren) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -71,6 +73,20 @@ function AuthProvider(props: PropsWithChildren) {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Uma chamada autenticada voltou 401: zera o usuário para os guards
+  // redirecionarem ao login (com returnTo da tela atual).
+  useEffect(() => {
+    const onSessionExpired = () => {
+      // O evento só é disparado quando havia sessão, então sempre avisa.
+      toast.error("Sua sessão expirou. Entre novamente.");
+      setUser(null);
+    };
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () =>
+      window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+  }, []);
 
   const contextValue = useMemo(
     () => ({

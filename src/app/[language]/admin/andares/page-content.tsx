@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { AndarEditDrawer } from "./andar-edit-drawer";
 import { useState } from "react";
@@ -70,7 +71,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/andares/novo">
+          <Link href={routes.andares.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo andar
@@ -90,7 +91,7 @@ export default function PageContent() {
             description:
               "Cadastre o primeiro andar pra começar a organizar os ambientes por pavimento.",
             action: (
-              <Link href="/admin/andares/novo">
+              <Link href={routes.andares.admin.create()}>
                 <Button>Cadastrar andar</Button>
               </Link>
             ),

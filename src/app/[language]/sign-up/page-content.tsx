@@ -1,4 +1,5 @@
 "use client";
+import { routes } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
@@ -183,7 +184,7 @@ function Form() {
                   <span>
                     {option.name}
                     <Link
-                      href="/privacy-policy"
+                      href={routes.public.privacyPolicy()}
                       target="_blank"
                       className="text-primary underline-offset-4 underline"
                     >
@@ -198,7 +199,7 @@ function Form() {
               <FormActions />
               <span className="ms-2">
                 <Button asChild variant="secondary" data-testid="login">
-                  <Link href="/sign-in">
+                  <Link href={routes.auth.login()}>
                     {t("sign-up:actions.accountAlreadyExists")}
                   </Link>
                 </Button>

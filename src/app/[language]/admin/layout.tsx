@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { ReactNode } from "react";
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
@@ -25,44 +26,79 @@ const groups: NavGroup[] = [
   {
     title: "Visão geral",
     items: [
-      { name: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
-      { name: "Ensalamento", href: "/admin/ensalamento", icon: LayoutGrid },
+      {
+        name: "Dashboard",
+        href: routes.home.admin(),
+        icon: LayoutDashboard,
+        exact: true,
+      },
+      {
+        name: "Ensalamento",
+        href: routes.ensalamento.admin.list(),
+        icon: LayoutGrid,
+      },
     ],
   },
   {
     title: "Espaços e recursos",
     items: [
-      { name: "Ambientes", href: "/admin/ambientes", icon: DoorOpen },
-      { name: "Tipos de Ambiente", href: "/admin/tipos-ambiente", icon: Tags },
-      { name: "Blocos", href: "/admin/blocos", icon: Building },
-      { name: "Andares", href: "/admin/andares", icon: Layers3 },
-      { name: "Patrimônio", href: "/admin/patrimonio", icon: ClipboardList },
-      { name: "Equipamentos", href: "/admin/equipamentos", icon: MonitorPlay },
+      {
+        name: "Ambientes",
+        href: routes.ambientes.admin.list(),
+        icon: DoorOpen,
+      },
+      {
+        name: "Tipos de Ambiente",
+        href: routes.tiposAmbiente.admin.list(),
+        icon: Tags,
+      },
+      { name: "Blocos", href: routes.blocos.admin.list(), icon: Building },
+      { name: "Andares", href: routes.andares.admin.list(), icon: Layers3 },
+      {
+        name: "Patrimônio",
+        href: routes.patrimonio.admin.list(),
+        icon: ClipboardList,
+      },
+      {
+        name: "Equipamentos",
+        href: routes.equipamentos.admin.list(),
+        icon: MonitorPlay,
+      },
     ],
   },
   {
     title: "Acadêmico",
     items: [
-      { name: "Cursos", href: "/admin/cursos", icon: School },
-      { name: "Disciplinas", href: "/admin/disciplinas", icon: BookOpen },
-      { name: "Turmas", href: "/admin/turmas", icon: Layers },
-      { name: "Aulas", href: "/admin/aulas", icon: GraduationCap },
+      { name: "Cursos", href: routes.cursos.admin.list(), icon: School },
+      {
+        name: "Disciplinas",
+        href: routes.disciplinas.admin.list(),
+        icon: BookOpen,
+      },
+      { name: "Turmas", href: routes.turmas.admin.list(), icon: Layers },
+      { name: "Aulas", href: routes.aulas.admin.list(), icon: GraduationCap },
     ],
   },
   {
     title: "Operação",
     items: [
-      { name: "Reservas", href: "/admin/reservas", icon: CalendarClock },
+      {
+        name: "Reservas",
+        href: routes.reservas.admin.list(),
+        icon: CalendarClock,
+      },
       {
         name: "Solicitações de troca",
-        href: "/admin/solicitacoes",
+        href: routes.solicitacoes.admin.list(),
         icon: ArrowLeftRight,
       },
     ],
   },
   {
     title: "Administração",
-    items: [{ name: "Usuários", href: "/admin/usuarios", icon: Users }],
+    items: [
+      { name: "Usuários", href: routes.usuarios.admin.list(), icon: Users },
+    ],
   },
 ];
 

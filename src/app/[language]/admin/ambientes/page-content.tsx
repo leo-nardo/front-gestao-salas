@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -113,7 +114,7 @@ export default function PageContent({ language }: { language: string }) {
               </SelectContent>
             </Select>
 
-            <Link href="/admin/ambientes/novo">
+            <Link href={routes.ambientes.admin.create()}>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo ambiente
@@ -152,7 +153,7 @@ export default function PageContent({ language }: { language: string }) {
               mudar a busca ou adicione um novo ambiente.
             </p>
             <div className="flex items-center gap-4">
-              <Link href="/admin/ambientes/novo">
+              <Link href={routes.ambientes.admin.create()}>
                 <Button>Cadastrar primeiro ambiente</Button>
               </Link>
               <Button variant="outline">

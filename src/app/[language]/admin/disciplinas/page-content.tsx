@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { DisciplinaEditDrawer } from "./disciplina-edit-drawer";
 import { useState } from "react";
@@ -32,7 +33,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/disciplinas/nova">
+          <Link href={routes.disciplinas.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Nova disciplina
@@ -53,7 +54,7 @@ export default function PageContent() {
             description:
               "Cadastre a primeira disciplina pra vincular às turmas e aulas.",
             action: (
-              <Link href="/admin/disciplinas/nova">
+              <Link href={routes.disciplinas.admin.create()}>
                 <Button>Nova disciplina</Button>
               </Link>
             ),

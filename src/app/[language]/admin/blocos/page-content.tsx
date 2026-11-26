@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { BlocoEditDrawer } from "./bloco-edit-drawer";
 import { useState } from "react";
@@ -70,7 +71,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/blocos/novo">
+          <Link href={routes.blocos.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo bloco
@@ -90,7 +91,7 @@ export default function PageContent() {
             description:
               "Cadastre o primeiro bloco pra começar a organizar os ambientes por prédio.",
             action: (
-              <Link href="/admin/blocos/novo">
+              <Link href={routes.blocos.admin.create()}>
                 <Button>Cadastrar bloco</Button>
               </Link>
             ),

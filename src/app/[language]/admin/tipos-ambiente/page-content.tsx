@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { TipoAmbienteEditDrawer } from "./tipoambiente-edit-drawer";
 import { useState } from "react";
@@ -72,7 +73,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/tipos-ambiente/novo">
+          <Link href={routes.tiposAmbiente.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo tipo
@@ -92,7 +93,7 @@ export default function PageContent() {
             description:
               "Cadastre o primeiro tipo de ambiente (ex: Sala comum, Laboratório).",
             action: (
-              <Link href="/admin/tipos-ambiente/novo">
+              <Link href={routes.tiposAmbiente.admin.create()}>
                 <Button>Cadastrar tipo</Button>
               </Link>
             ),

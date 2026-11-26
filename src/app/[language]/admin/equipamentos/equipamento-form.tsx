@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -111,7 +112,7 @@ export function EquipamentoForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/equipamentos");
+        else router.push(routes.equipamentos.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -132,7 +133,7 @@ export function EquipamentoForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/equipamentos"
+      backHref={routes.equipamentos.admin.list()}
       backLabel="Voltar para equipamentos"
       onCancel={onCancel}
       width="max-w-[700px]"

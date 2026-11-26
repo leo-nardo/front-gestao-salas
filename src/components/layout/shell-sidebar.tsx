@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { forwardRef } from "react";
 import { usePathname } from "next/navigation";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
@@ -142,7 +143,7 @@ export const ShellSidebar = forwardRef<HTMLElement, ShellSidebarProps>(
           )}
         >
           <Link
-            href="/profile"
+            href={routes.profile.view()}
             title={collapsed ? fullName || "Perfil" : undefined}
             className={cn(
               "mb-3 flex items-center gap-3 rounded-md p-1 transition-colors hover:bg-sidebar-accent/50",

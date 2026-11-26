@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { CursoEditDrawer } from "./curso-edit-drawer";
 import { useState } from "react";
@@ -69,7 +70,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/cursos/novo">
+          <Link href={routes.cursos.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo curso
@@ -88,7 +89,7 @@ export default function PageContent() {
             title: "Nenhum curso encontrado",
             description: "Cadastre o primeiro curso pra começar.",
             action: (
-              <Link href="/admin/cursos/novo">
+              <Link href={routes.cursos.admin.create()}>
                 <Button>Cadastrar curso</Button>
               </Link>
             ),

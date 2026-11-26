@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -202,7 +203,7 @@ function LoginPageContent() {
                   </label>
                 </div>
                 <Link
-                  href="/forgot-password"
+                  href={routes.auth.forgotPassword()}
                   className="text-sm font-medium text-primary hover:underline"
                 >
                   Esqueci a senha

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { UsuarioEditDrawer } from "./usuario-edit-drawer";
 import { useState } from "react";
@@ -114,7 +115,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-4">
         <div className="flex justify-end">
-          <Link href="/admin/usuarios/novo">
+          <Link href={routes.usuarios.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo usuário

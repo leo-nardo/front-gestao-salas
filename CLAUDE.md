@@ -4,4 +4,27 @@ Next.js 16 admin-panel boilerplate (React 19, TypeScript, shadcn, TanStack Query
 
 ## When adding resources or fields
 
-Use the `generate` skill (auto-loaded from [.claude/skills/generate/SKILL.md](.claude/skills/generate/SKILL.md)). It wraps the project's hygen generators (`npm run generate:resource`, `npm run generate:field`) which scaffold list/edit/create pages, queries, schemas, and i18n. Do not hand-write resource files.
+The `generate` skill (see [.claude/skills/generate/SKILL.md](.claude/skills/generate/SKILL.md)) wraps the hygen generators (`npm run generate:resource`, `npm run generate:field`), but they still target the removed `/admin-panel` boilerplate. For new screens, copy the `src/app/[language]/admin/blocos` pattern instead (see "Rotas" below).
+
+## Rotas
+
+Os paths de tela ficam em `src/routes/`, um arquivo por módulo (`blocos.ts`, `reservas.ts`, ...), reexportados em `routes` (`@/routes`). Nunca escreva paths de tela à mão (`"/admin/blocos"`): o ESLint bloqueia. Exemplos:
+
+- `routes.blocos.admin.list()`, `.create()`, `.edit(id)`
+- Recurso usado por mais de um perfil tem uma chave por perfil: `routes.reservas.professor.create()`
+- Query string: `withQuery(routes.patrimonio.admin.list(), { ambiente: id })`
+- Redirect de servidor (precisa do idioma): `withLanguage(language, routes.home.admin())`
+
+Novo módulo = novo arquivo em `src/routes/` (use `crudRoutes`/`listRoutes` de `crud.ts`) + uma linha em `src/routes/index.ts`. Os paths não levam o prefixo de idioma. Páginas novas usam `pageMetadata("Título")` (`@/lib/page-metadata`) no `page.tsx`.
+
+Guards ficam no `layout.tsx` do perfil (`withPageRequiredAuth` com `roles`), não nos `page-content.tsx`.
+
+## E2E (Playwright)
+
+Os testes ficam em `playwright-tests/<modulo>/` (uma pasta por módulo, ex.: `cursos/`, `rotas/`), com os helpers compartilhados em `playwright-tests/helpers/`. `1-auth/` é o legado do boilerplate (ainda aponta para `/sign-in`).
+
+- `npm run test:e2e` roda tudo; `npm run test:e2e:cursos` / `test:e2e:rotas` rodam um módulo.
+- Precisa do back em `localhost:3001` (com a seed: `admin@example.com`) e do front em `localhost:3000` (o config sobe o `npm run dev` se não houver).
+- Login via API + cookie com `loginAsAdmin(page)` (`helpers/session.ts`), sem passar pela tela. Navegue com `routes.*` de `src/routes`.
+- Teste que cria dados deve limpar via API no `afterAll` (ver `helpers/cursos-api.ts`).
+- Novo módulo = nova pasta `playwright-tests/<modulo>/` com `<modulo>.crud.spec.ts` seguindo `cursos/`.

@@ -1,4 +1,5 @@
 "use client";
+import { routes } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
 import { useAuthPatchMeService } from "@/services/api/services/auth";
@@ -6,7 +7,6 @@ import useAuthActions from "@/services/auth/use-auth-actions";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useEffect } from "react";
 import useAuth from "@/services/auth/use-auth";
 import { useSnackbar } from "@/hooks/use-snackbar";
@@ -222,7 +222,9 @@ function FormBasicInfo() {
                   variant="secondary"
                   data-testid="cancel-edit-profile"
                 >
-                  <Link href="/profile">{t("profile:actions.cancel")}</Link>
+                  <Link href={routes.profile.view()}>
+                    {t("profile:actions.cancel")}
+                  </Link>
                 </Button>
               </span>
             </div>
@@ -317,7 +319,9 @@ function FormChangeEmail() {
                   variant="secondary"
                   data-testid="cancel-edit-email"
                 >
-                  <Link href="/profile">{t("profile:actions.cancel")}</Link>
+                  <Link href={routes.profile.view()}>
+                    {t("profile:actions.cancel")}
+                  </Link>
                 </Button>
               </span>
             </div>
@@ -420,7 +424,9 @@ function FormChangePassword() {
                   variant="secondary"
                   data-testid="cancel-edit-password"
                 >
-                  <Link href="/profile">{t("profile:actions.cancel")}</Link>
+                  <Link href={routes.profile.view()}>
+                    {t("profile:actions.cancel")}
+                  </Link>
                 </Button>
               </span>
             </div>
@@ -455,4 +461,4 @@ function EditProfile() {
   );
 }
 
-export default withPageRequiredAuth(EditProfile);
+export default EditProfile;

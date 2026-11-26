@@ -1,3 +1,4 @@
+import { routes, withQuery } from "@/routes";
 import Edit from "lucide-react/dist/esm/icons/edit";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
@@ -96,7 +97,9 @@ export function AmbienteCard({ ambiente, onEdit }: AmbienteCardProps) {
           Editar
         </Button>
         <Link
-          href={`/admin/ensalamento?ambiente=${ambiente.id}`}
+          href={withQuery(routes.ensalamento.admin.list(), {
+            ambiente: ambiente.id,
+          })}
           className="flex-1 min-w-[25%]"
         >
           <Button

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { EquipamentoEditDrawer } from "./equipamento-edit-drawer";
 import { useState } from "react";
@@ -33,7 +34,7 @@ export default function PageContent() {
 
       <PageContainer className="space-y-6">
         <div className="flex justify-end">
-          <Link href="/admin/equipamentos/novo">
+          <Link href={routes.equipamentos.admin.create()}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Novo equipamento
@@ -55,7 +56,7 @@ export default function PageContent() {
             title: "Nenhum equipamento cadastrado",
             description: "Cadastre o primeiro equipamento pra começar.",
             action: (
-              <Link href="/admin/equipamentos/novo">
+              <Link href={routes.equipamentos.admin.create()}>
                 <Button>Cadastrar primeiro equipamento</Button>
               </Link>
             ),

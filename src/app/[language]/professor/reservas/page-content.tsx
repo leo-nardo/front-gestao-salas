@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -36,7 +37,7 @@ export default function PageContent() {
             Reservas sob demanda de salas e ambientes
           </p>
         </div>
-        <Link href="/professor/reservas/nova">
+        <Link href={routes.reservas.professor.create()}>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Nova reserva
@@ -55,7 +56,7 @@ export default function PageContent() {
           title: "Nenhuma reserva solicitada",
           description: "Você ainda não solicitou nenhuma reserva de sala.",
           action: (
-            <Link href="/professor/reservas/nova">
+            <Link href={routes.reservas.professor.create()}>
               <Button>Nova reserva</Button>
             </Link>
           ),

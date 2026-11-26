@@ -1,4 +1,5 @@
 "use client";
+import { routes } from "@/routes";
 import { Button } from "@/components/ui/button";
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
@@ -135,7 +136,7 @@ function Form() {
         variant: "success",
       });
 
-      router.replace("/sign-in");
+      router.replace(routes.auth.login());
     }
   });
 

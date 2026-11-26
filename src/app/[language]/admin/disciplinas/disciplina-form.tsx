@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -97,7 +98,7 @@ export function DisciplinaForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/disciplinas");
+        else router.push(routes.disciplinas.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -118,7 +119,7 @@ export function DisciplinaForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/disciplinas"
+      backHref={routes.disciplinas.admin.list()}
       backLabel="Voltar para disciplinas"
       onCancel={onCancel}
       width="max-w-[600px]"

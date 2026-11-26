@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -82,7 +83,7 @@ export function AndarForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/andares");
+        else router.push(routes.andares.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -103,7 +104,7 @@ export function AndarForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/andares"
+      backHref={routes.andares.admin.list()}
       backLabel="Voltar para Andares"
       onCancel={onCancel}
       width="max-w-[600px]"

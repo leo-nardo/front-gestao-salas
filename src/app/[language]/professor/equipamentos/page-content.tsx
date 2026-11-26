@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -38,7 +39,7 @@ export default function PageContent() {
         <h1 className="text-3xl font-bold text-foreground font-public-sans tracking-tight">
           Minhas solicitações de equipamento
         </h1>
-        <Link href="/professor/equipamentos/nova">
+        <Link href={routes.equipamentos.professor.create()}>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             Solicitar equipamento
@@ -58,7 +59,7 @@ export default function PageContent() {
           title: "Nenhuma solicitação",
           description: "Você ainda não solicitou nenhum equipamento.",
           action: (
-            <Link href="/professor/equipamentos/nova">
+            <Link href={routes.equipamentos.professor.create()}>
               <Button>Solicitar equipamento</Button>
             </Link>
           ),

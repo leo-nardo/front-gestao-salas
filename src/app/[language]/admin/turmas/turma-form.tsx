@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -98,7 +99,7 @@ export function TurmaForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/turmas");
+        else router.push(routes.turmas.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -119,7 +120,7 @@ export function TurmaForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/turmas"
+      backHref={routes.turmas.admin.list()}
       backLabel="Voltar para turmas"
       onCancel={onCancel}
       width="max-w-[600px]"

@@ -4,7 +4,11 @@ import { useCallback } from "react";
 import { AUTH_REFRESH_URL } from "./config";
 import { FetchInputType, FetchInitType } from "./types/fetch-params";
 import useLanguage from "../i18n/use-language";
-import { getTokensInfo, setTokensInfo } from "../auth/auth-tokens-info";
+import {
+  getTokensInfo,
+  setTokensInfo,
+  SESSION_EXPIRED_EVENT,
+} from "../auth/auth-tokens-info";
 
 let refreshPromise: Promise<void> | null = null;
 
@@ -77,13 +81,22 @@ function useFetch() {
         }
       }
 
-      return fetch(input, {
+      const response = await fetch(input, {
         ...init,
         headers: {
           ...headers,
           ...init?.headers,
         },
       });
+
+      // Havia sessão e o servidor a recusou: limpa os tokens e avisa o
+      // AuthProvider, que zera o usuário e os guards levam ao login.
+      if (response.status === 401 && getTokensInfo()?.token) {
+        setTokensInfo(null);
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+      }
+
+      return response;
     },
     [language]
   );

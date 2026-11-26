@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
@@ -82,7 +83,7 @@ export function TipoAmbienteForm({
       ) {
         toast.success(successMessage);
         if (onSuccess) onSuccess();
-        else router.push("/admin/tipos-ambiente");
+        else router.push(routes.tiposAmbiente.admin.list());
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -103,7 +104,7 @@ export function TipoAmbienteForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/tipos-ambiente"
+      backHref={routes.tiposAmbiente.admin.list()}
       backLabel="Voltar para Tipos de Ambiente"
       onCancel={onCancel}
       width="max-w-[600px]"

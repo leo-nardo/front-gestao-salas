@@ -1,4 +1,7 @@
+import { pageMetadata } from "@/lib/page-metadata";
 import PageContent from "./page-content";
+
+export const metadata = pageMetadata("Ambientes");
 
 export default function LimpezaAmbientesPage() {
   return <PageContent />;

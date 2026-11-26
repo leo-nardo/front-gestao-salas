@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { useState, useEffect } from "react";
 import { FormShell } from "@/components/form-shell";
 import { useForm, useWatch } from "react-hook-form";
@@ -216,7 +217,7 @@ export function AulaForm({
       submitting={submitting}
       submitLabel={submitLabel}
       submittingLabel={submittingLabel}
-      backHref="/admin/aulas"
+      backHref={routes.aulas.admin.list()}
       backLabel="Voltar para aulas"
       onCancel={onCancel}
       width="max-w-[700px]"

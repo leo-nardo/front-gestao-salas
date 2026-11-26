@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { AulaEditDrawer } from "./aula-edit-drawer";
 import { useState } from "react";
@@ -125,7 +126,7 @@ export default function AulasPageContent() {
               </SelectContent>
             </Select>
           </div>
-          <Link href="/admin/aulas/nova">
+          <Link href={routes.aulas.admin.create()}>
             <Button className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Nova aula
@@ -153,7 +154,7 @@ export default function AulasPageContent() {
             icon: <CalendarClock className="w-8 h-8" />,
             title: "Nenhuma aula encontrada",
             action: (
-              <Link href="/admin/aulas/nova">
+              <Link href={routes.aulas.admin.create()}>
                 <Button>Montar primeira aula</Button>
               </Link>
             ),

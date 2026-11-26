@@ -1,5 +1,6 @@
 "use client";
 
+import { routes, withQuery } from "@/routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { PatrimonioEditDrawer } from "./patrimonio-edit-drawer";
 import { useState } from "react";
@@ -128,7 +129,9 @@ export default function PageContent() {
             </Select>
           </div>
           <Link
-            href={`/admin/patrimonio/novo${ambienteFiltro !== "todos" ? `?ambiente=${ambienteFiltro}` : ""}`}
+            href={withQuery(routes.patrimonio.admin.create(), {
+              ambiente: ambienteFiltro !== "todos" ? ambienteFiltro : null,
+            })}
           >
             <Button className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
@@ -149,7 +152,7 @@ export default function PageContent() {
             icon: <ClipboardList className="w-8 h-8" />,
             title: "Nenhum item patrimonial encontrado",
             action: (
-              <Link href="/admin/patrimonio/novo">
+              <Link href={routes.patrimonio.admin.create()}>
                 <Button>Cadastrar item</Button>
               </Link>
             ),
