@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,14 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -57,6 +47,12 @@ type ApiResult =
     };
 
 type TurmaFormProps = {
+  /** `page` (padrão): tela própria. `drawer`: campos + rodapé dentro de um Sheet. */
+  variant?: "page" | "drawer";
+  /** Cancelar na variante `drawer`. */
+  onCancel?: () => void;
+  /** Chamado após salvar. Sem ele, volta para a lista. */
+  onSuccess?: () => void;
   title: string;
   submitLabel: string;
   submittingLabel: string;
@@ -66,6 +62,9 @@ type TurmaFormProps = {
 };
 
 export function TurmaForm({
+  variant = "page",
+  onCancel,
+  onSuccess,
   title,
   submitLabel,
   submittingLabel,
@@ -98,7 +97,8 @@ export function TurmaForm({
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success(successMessage);
-        router.push("/admin/turmas");
+        if (onSuccess) onSuccess();
+        else router.push("/admin/turmas");
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -111,100 +111,81 @@ export function TurmaForm({
   };
 
   return (
-    <div className="p-6 max-w-[600px] mx-auto w-full">
-      <Link
-        href="/admin/turmas"
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Voltar para turmas
-      </Link>
+    <FormShell
+      variant={variant}
+      title={title}
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitting={submitting}
+      submitLabel={submitLabel}
+      submittingLabel={submittingLabel}
+      backHref="/admin/turmas"
+      backLabel="Voltar para turmas"
+      onCancel={onCancel}
+      width="max-w-[600px]"
+    >
+      <FormField
+        control={form.control}
+        name="cursoId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Curso *</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              disabled={isLoadingCursos}
+            >
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      isLoadingCursos
+                        ? "Carregando cursos..."
+                        : "Selecione o curso"
+                    }
+                  />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {cursos.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <Card>
-        <CardHeader className="border-b pb-6">
-          <CardTitle className="text-xl">{title}</CardTitle>
-        </CardHeader>
+      <FormField
+        control={form.control}
+        name="codigo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Código *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: 201N2A" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6 pt-6">
-              <FormField
-                control={form.control}
-                name="cursoId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Curso *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={isLoadingCursos}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder={
-                              isLoadingCursos
-                                ? "Carregando cursos..."
-                                : "Selecione o curso"
-                            }
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {cursos.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="codigo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Código *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 201N2A" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="periodo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Período *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 2º" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/turmas">
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? submittingLabel : submitLabel}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+      <FormField
+        control={form.control}
+        name="periodo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Período *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: 2º" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormShell>
   );
 }

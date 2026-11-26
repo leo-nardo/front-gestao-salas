@@ -1,24 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { FormShell } from "@/components/form-shell";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -46,6 +36,12 @@ type ApiResult =
     };
 
 type CursoFormProps = {
+  /** `page` (padrão): tela própria. `drawer`: campos + rodapé dentro de um Sheet. */
+  variant?: "page" | "drawer";
+  /** Cancelar na variante `drawer`. */
+  onCancel?: () => void;
+  /** Chamado após salvar. Sem ele, volta para a lista. */
+  onSuccess?: () => void;
   title: string;
   submitLabel: string;
   submittingLabel: string;
@@ -55,6 +51,9 @@ type CursoFormProps = {
 };
 
 export function CursoForm({
+  variant = "page",
+  onCancel,
+  onSuccess,
   title,
   submitLabel,
   submittingLabel,
@@ -80,7 +79,8 @@ export function CursoForm({
         res.status === HTTP_CODES_ENUM.CREATED
       ) {
         toast.success(successMessage);
-        router.push("/admin/cursos");
+        if (onSuccess) onSuccess();
+        else router.push("/admin/cursos");
         return;
       }
       applyApiFormErrors(res as never, form.setError);
@@ -93,54 +93,32 @@ export function CursoForm({
   };
 
   return (
-    <div className="p-6 max-w-[600px] mx-auto w-full">
-      <Link
-        href="/admin/cursos"
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Voltar para Cursos
-      </Link>
-
-      <Card>
-        <CardHeader className="border-b pb-6">
-          <CardTitle className="text-xl">{title}</CardTitle>
-        </CardHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6 pt-6">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Engenharia de Software"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href="/admin/cursos">
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? submittingLabel : submitLabel}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+    <FormShell
+      variant={variant}
+      title={title}
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitting={submitting}
+      submitLabel={submitLabel}
+      submittingLabel={submittingLabel}
+      backHref="/admin/cursos"
+      backLabel="Voltar para Cursos"
+      onCancel={onCancel}
+      width="max-w-[600px]"
+    >
+      <FormField
+        control={form.control}
+        name="nome"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: Engenharia de Software" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormShell>
   );
 }

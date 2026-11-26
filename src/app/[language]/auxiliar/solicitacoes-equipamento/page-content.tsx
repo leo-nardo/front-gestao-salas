@@ -1,14 +1,20 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Package from "lucide-react/dist/esm/icons/package";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import MessageSquareReply from "lucide-react/dist/esm/icons/message-square-reply";
 import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DataTable } from "@/components/data-table";
 import {
   useGetSolicitacaoEquipamentosService,
   useResponderSolicitacaoEquipamentoService,
@@ -35,6 +41,7 @@ export default function PageContent() {
   const responder = useResponderSolicitacaoEquipamentoService();
   const devolver = useDevolverSolicitacaoEquipamentoService();
   const [motivos, setMotivos] = useState<Record<string, string>>({});
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const { data: res, isLoading } = useQuery({
     queryKey: ["solicitacoes-equipamento"],
@@ -50,6 +57,7 @@ export default function PageContent() {
         motivoResposta: motivos[vars.id],
       }),
     onSuccess: () => {
+      setOpenId(null);
       queryClient.invalidateQueries({ queryKey: ["solicitacoes-equipamento"] });
     },
   });
@@ -68,115 +76,166 @@ export default function PageContent() {
         subtitle="Gerencie pedidos de empréstimo de equipamentos"
       />
 
-      <div className="p-6 max-w-[900px] mx-auto w-full">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : solicitacoes.length === 0 ? (
-          <div className="border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/30">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-              <Package className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Nenhuma solicitação
-            </h3>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {solicitacoes.map((s) => {
-              const badge = statusBadge[s.status];
-              return (
-                <Card key={s.id} className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        {s.equipamento.nome} ({s.quantidade}{" "}
-                        {s.quantidade === 1 ? "unidade" : "unidades"})
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Solicitante: {s.solicitante.firstName}{" "}
-                        {s.solicitante.lastName}
-                      </p>
-                    </div>
-                    <Badge className={`${badge.className} border-transparent`}>
-                      {badge.label}
-                    </Badge>
-                  </div>
-
-                  <div className="text-sm text-foreground mb-2">
-                    <span className="text-muted-foreground">Período:</span>{" "}
-                    {s.dataInicio} até {s.dataFim}
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-4">
-                    <span className="text-muted-foreground">Finalidade:</span>{" "}
-                    &ldquo;{s.finalidade}&rdquo;
+      <PageContainer className="space-y-6">
+        <DataTable
+          data={solicitacoes}
+          isLoading={isLoading}
+          getRowKey={(s) => s.id}
+          searchValue={(s) =>
+            `${s.equipamento.nome} ${s.solicitante.firstName} ${s.solicitante.lastName} ${s.finalidade}`
+          }
+          searchPlaceholder="Buscar por equipamento, solicitante ou finalidade..."
+          enableColumnToggle
+          emptyState={{
+            icon: <Package className="w-8 h-8" />,
+            title: "Nenhuma solicitação",
+            description: "Os pedidos de empréstimo aparecem aqui.",
+          }}
+          columns={[
+            {
+              header: "Equipamento",
+              sortValue: (s) => s.equipamento.nome,
+              hideable: false,
+              cell: (s) => (
+                <div>
+                  <p className="font-medium">{s.equipamento.nome}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {s.quantidade} {s.quantidade === 1 ? "unidade" : "unidades"}
                   </p>
-
-                  {s.status === "pendente" ? (
-                    <div className="space-y-3 pt-3 border-t">
-                      <Textarea
-                        placeholder="Comentário opcional (motivo da resposta)"
-                        className="text-sm"
-                        value={motivos[s.id] || ""}
-                        onChange={(e) =>
-                          setMotivos((prev) => ({
-                            ...prev,
-                            [s.id]: e.target.value,
-                          }))
-                        }
-                      />
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          className="text-destructive"
-                          disabled={responderMutation.isPending}
-                          onClick={() =>
-                            responderMutation.mutate({
-                              id: s.id,
-                              status: "rejeitada",
-                            })
-                          }
-                        >
-                          Rejeitar
+                </div>
+              ),
+            },
+            {
+              header: "Solicitante",
+              sortValue: (s) =>
+                `${s.solicitante.firstName} ${s.solicitante.lastName}`,
+              cell: (s) => (
+                <span className="text-muted-foreground">
+                  {s.solicitante.firstName} {s.solicitante.lastName}
+                </span>
+              ),
+            },
+            {
+              header: "Período",
+              sortValue: (s) => s.dataInicio,
+              cell: (s) => (
+                <span className="font-mono text-sm">
+                  {s.dataInicio} até {s.dataFim}
+                </span>
+              ),
+            },
+            {
+              header: "Finalidade",
+              className: "max-w-[240px]",
+              cell: (s) => (
+                <span
+                  className="line-clamp-2 text-sm text-muted-foreground"
+                  title={s.finalidade}
+                >
+                  {s.finalidade}
+                </span>
+              ),
+            },
+            {
+              header: "Status",
+              sortValue: (s) => s.status,
+              cell: (s) => {
+                const badge = statusBadge[s.status];
+                return (
+                  <Badge className={`${badge.className} border-transparent`}>
+                    {badge.label}
+                  </Badge>
+                );
+              },
+            },
+            {
+              header: "Resposta",
+              defaultHidden: true,
+              cell: (s) => (
+                <span className="text-sm text-muted-foreground">
+                  {s.motivoResposta || "—"}
+                </span>
+              ),
+            },
+            {
+              header: "Ações",
+              align: "right",
+              hideable: false,
+              cell: (s) => {
+                if (s.status === "pendente") {
+                  return (
+                    <Popover
+                      open={openId === s.id}
+                      onOpenChange={(open) => setOpenId(open ? s.id : null)}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MessageSquareReply className="w-3.5 h-3.5 mr-1" />
+                          Responder
                         </Button>
-                        <Button
-                          disabled={responderMutation.isPending}
-                          onClick={() =>
-                            responderMutation.mutate({
-                              id: s.id,
-                              status: "aprovada",
-                            })
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-80 space-y-3">
+                        <Textarea
+                          placeholder="Comentário opcional (motivo da resposta)"
+                          className="text-sm"
+                          value={motivos[s.id] || ""}
+                          onChange={(e) =>
+                            setMotivos((prev) => ({
+                              ...prev,
+                              [s.id]: e.target.value,
+                            }))
                           }
-                        >
-                          Aprovar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : s.status === "aprovada" ? (
-                    <div className="flex justify-end pt-3 border-t">
-                      <Button
-                        variant="outline"
-                        disabled={devolverMutation.isPending}
-                        onClick={() => devolverMutation.mutate(s.id)}
-                      >
-                        Marcar como devolvida
-                      </Button>
-                    </div>
-                  ) : (
-                    s.motivoResposta && (
-                      <p className="text-sm text-muted-foreground pt-3 border-t">
-                        Resposta: {s.motivoResposta}
-                      </p>
-                    )
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                        />
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive"
+                            disabled={responderMutation.isPending}
+                            onClick={() =>
+                              responderMutation.mutate({
+                                id: s.id,
+                                status: "rejeitada",
+                              })
+                            }
+                          >
+                            Rejeitar
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={responderMutation.isPending}
+                            onClick={() =>
+                              responderMutation.mutate({
+                                id: s.id,
+                                status: "aprovada",
+                              })
+                            }
+                          >
+                            Aprovar
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  );
+                }
+                if (s.status === "aprovada") {
+                  return (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={devolverMutation.isPending}
+                      onClick={() => devolverMutation.mutate(s.id)}
+                    >
+                      Marcar como devolvida
+                    </Button>
+                  );
+                }
+                return <span className="text-sm text-muted-foreground">—</span>;
+              },
+            },
+          ]}
+        />
+      </PageContainer>
     </>
   );
 }

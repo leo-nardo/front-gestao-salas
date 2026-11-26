@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "@/components/link";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AmbienteCard } from "@/components/ambiente-card";
+import { AmbienteEditDrawer } from "./ambiente-edit-drawer";
 import { useGetAmbientesService } from "@/services/api/services/ambientes";
 import { useGetTipoAmbientesService } from "@/services/api/services/tipo-ambientes";
 import { useGetUnidadesService } from "@/services/api/services/unidades";
@@ -32,6 +34,7 @@ export default function PageContent({ language }: { language: string }) {
   const [search, setSearch] = useState("");
   const [unidadeFilter, setUnidadeFilter] = useState("all");
   const [tipoFilter, setTipoFilter] = useState("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: ambientesRes, isLoading: isLoadingAmbientes } = useQuery({
     queryKey: ["ambientes"],
@@ -69,7 +72,7 @@ export default function PageContent({ language }: { language: string }) {
         subtitle="Gerencie as salas e laboratórios da instituição"
       />
 
-      <div className="p-6 max-w-[1200px] mx-auto w-full">
+      <PageContainer>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -132,6 +135,7 @@ export default function PageContent({ language }: { language: string }) {
                 key={ambiente.id}
                 ambiente={ambiente}
                 language={language}
+                onEdit={setEditingId}
               />
             ))}
           </div>
@@ -158,7 +162,9 @@ export default function PageContent({ language }: { language: string }) {
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
+
+      <AmbienteEditDrawer id={editingId} onClose={() => setEditingId(null)} />
     </>
   );
 }

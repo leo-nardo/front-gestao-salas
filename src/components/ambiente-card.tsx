@@ -12,9 +12,11 @@ import { getTipoAmbienteBadgeClasses } from "@/lib/tipo-ambiente-colors";
 interface AmbienteCardProps {
   ambiente: Ambiente;
   language: string;
+  /** Chamado ao clicar em Editar (a edição abre em um drawer, sem trocar de rota). */
+  onEdit: (id: string) => void;
 }
 
-export function AmbienteCard({ ambiente }: AmbienteCardProps) {
+export function AmbienteCard({ ambiente, onEdit }: AmbienteCardProps) {
   const features = ambiente.descricao
     ? ambiente.descricao
         .split(",")
@@ -84,15 +86,15 @@ export function AmbienteCard({ ambiente }: AmbienteCardProps) {
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-4 border-t mt-auto">
-        <Link
-          href={`/admin/ambientes/${ambiente.id}/editar`}
-          className="flex-1 min-w-[25%]"
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 flex-1 min-w-[25%] px-2"
+          onClick={() => onEdit(ambiente.id)}
         >
-          <Button variant="outline" size="sm" className="w-full h-9 px-2">
-            <Edit className="w-3.5 h-3.5 mr-1.5" />
-            Editar
-          </Button>
-        </Link>
+          <Edit className="w-3.5 h-3.5 mr-1.5" />
+          Editar
+        </Button>
         <Link
           href={`/admin/ensalamento?ambiente=${ambiente.id}`}
           className="flex-1 min-w-[25%]"

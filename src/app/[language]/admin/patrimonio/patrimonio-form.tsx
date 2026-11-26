@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { FormShell } from "@/components/form-shell";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "sonner";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Link from "@/components/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -18,14 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -58,6 +48,10 @@ type ApiResult =
     };
 
 type PatrimonioFormProps = {
+  /** `page` (padrão): tela própria. `drawer`: campos + rodapé dentro de um Sheet. */
+  variant?: "page" | "drawer";
+  /** Cancelar na variante `drawer`. */
+  onCancel?: () => void;
   title: string;
   submitLabel: string;
   submittingLabel: string;
@@ -69,6 +63,8 @@ type PatrimonioFormProps = {
 };
 
 export function PatrimonioForm({
+  variant = "page",
+  onCancel,
   title,
   submitLabel,
   submittingLabel,
@@ -123,136 +119,112 @@ export function PatrimonioForm({
   };
 
   return (
-    <div className="p-6 max-w-[600px] mx-auto w-full">
-      <Link
-        href={backHref}
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Voltar para patrimônio
-      </Link>
+    <FormShell
+      variant={variant}
+      title={title}
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitting={submitting}
+      submitLabel={submitLabel}
+      submittingLabel={submittingLabel}
+      backHref={backHref}
+      backLabel="Voltar para patrimônio"
+      onCancel={onCancel}
+      width="max-w-[600px]"
+    >
+      <FormField
+        control={form.control}
+        name="nome"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: Projetor Epson" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <Card>
-        <CardHeader className="border-b pb-6">
-          <CardTitle className="text-xl">{title}</CardTitle>
-        </CardHeader>
+      <FormField
+        control={form.control}
+        name="tipo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo *</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: Projetor, Ar Condicionado" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6 pt-6">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Projetor Epson" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <FormField
+        control={form.control}
+        name="numeroPatrimonio"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Número de Patrimônio</FormLabel>
+            <FormControl>
+              <Input placeholder="Opcional" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-              <FormField
-                control={form.control}
-                name="tipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Projetor, Ar Condicionado"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <FormField
+        control={form.control}
+        name="ambienteId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Ambiente *</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              disabled={isLoadingAmbientes}
+            >
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o ambiente" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {ambientes.map((amb) => (
+                  <SelectItem key={amb.id} value={amb.id}>
+                    {amb.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-              <FormField
-                control={form.control}
-                name="numeroPatrimonio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de Patrimônio</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Opcional" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="ambienteId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ambiente *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={isLoadingAmbientes}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o ambiente" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ambientes.map((amb) => (
-                          <SelectItem key={amb.id} value={amb.id}>
-                            {amb.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="estado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="funcionando">Funcionando</SelectItem>
-                        <SelectItem value="com_defeito">Com defeito</SelectItem>
-                        <SelectItem value="em_manutencao">
-                          Em manutenção
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="border-t bg-surface-3 py-6 flex justify-end gap-3 rounded-b-xl">
-              <Link href={backHref}>
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? submittingLabel : submitLabel}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+      <FormField
+        control={form.control}
+        name="estado"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Estado *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="funcionando">Funcionando</SelectItem>
+                <SelectItem value="com_defeito">Com defeito</SelectItem>
+                <SelectItem value="em_manutencao">Em manutenção</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormShell>
   );
 }
